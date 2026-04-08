@@ -1,0 +1,32 @@
+# Secrets
+.streamlit/secrets.toml
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+ENV/
+
+# Feedback database (local dev)
+agiritechat_feedback.db
+*.db-wal
+*.db-shm
+
+# Model cache
+.cache/
+*.pt
+*.bin
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Chroma local persistence (we use in-memory, but just in case)
+chroma/
