@@ -1,93 +1,64 @@
 """
-llm.py — Gemini wrapper using the new google-genai SDK.
+llm.py — Groq wrapper for both text and vision.
 
-Centralizes all LLM calls. Uses the google-genai package (NOT the
-deprecated google-generativeai).
+Why Groq:
+- Truly free tier with generous rate limits (no billing/credit card required)
+- Very fast inference (LPU-based)
+- OpenAI-compatible API, clean Python SDK
+- Good quality Llama 3.3 70B for text, Llama 4 Scout 17B for vision
+
+Models used:
+- Text: llama-3.3-70b-versatile (strong reasoning, good for structured JSON output)
+- Vision: meta-llama/llama-4-scout-17b-16e-instruct (Llama 3.2 Vision Preview is
+  deprecated; Llama 4 Scout is the current vision model on Groq)
 """
 
 import os
 import json
 import time
+import base64
 import logging
 from typing import Optional
 
-from google import genai
-from google.genai import types
+from groq import Groq
 
 logger = logging.getLogger(__name__)
 
-# Gemini 2.0 Flash: free tier, fast, supports vision and JSON mode.
-TEXT_MODEL = "gemini-2.0-flash"
-VISION_MODEL = "gemini-2.0-flash"
+TEXT_MODEL = "llama-3.3-70b-versatile"
+VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-_client: Optional[genai.Client] = None
+_client: Optional[Groq] = None
 
 
-def _get_client() -> Optional[genai.Client]:
-    """Lazy-init a Gemini client from env var or Streamlit secrets."""
+def _get_client() -> Optional[Groq]:
+    """Lazy-init a Groq client from env var or Streamlit secrets."""
     global _client
     if _client is not None:
         return _client
 
-    key = os.getenv("GEMINI_API_KEY")
+    key = os.getenv("GROQ_API_KEY")
     if not key:
+        # Streamlit secrets fallback
         try:
             import streamlit as st
-            key = st.secrets.get("GEMINI_API_KEY")
+            key = st.secrets.get("GROQ_API_KEY")
         except Exception:
             pass
 
     if not key:
-        logger.warning("GEMINI_API_KEY not found; LLM calls will fail.")
+        logger.warning("GROQ_API_KEY not found; LLM calls will fail.")
         return None
 
     try:
-        _client = genai.Client(api_key=key)
+        _client = Groq(api_key=key)
         return _client
     except Exception as e:
-        logger.error("Failed to create Gemini client: %s", e)
+        logger.error("Failed to create Groq client: %s", e)
         return None
 
 
 def is_available() -> bool:
     return _get_client() is not None
-
-
-def _extract_text(resp) -> str:
-    """
-    Defensively extract text from a Gemini response.
-    The .text property can return None or raise if the response was
-    blocked by safety filters or has an unusual structure. This helper
-    walks candidates and parts manually to get whatever text exists.
-    """
-    if resp is None:
-        return ""
-
-    # Try the easy path first
-    try:
-        t = resp.text
-        if t:
-            return t
-    except Exception:
-        pass
-
-    # Walk candidates and parts manually
-    try:
-        candidates = getattr(resp, "candidates", None) or []
-        pieces = []
-        for cand in candidates:
-            content = getattr(cand, "content", None)
-            if content is None:
-                continue
-            parts = getattr(content, "parts", None) or []
-            for p in parts:
-                text = getattr(p, "text", None)
-                if text:
-                    pieces.append(text)
-        return "".join(pieces)
-    except Exception as e:
-        logger.warning("Could not extract text from Gemini response: %s", e)
-        return ""
 
 
 def generate_text(
@@ -97,30 +68,30 @@ def generate_text(
     temperature: float = 0.2,
     max_retries: int = 2,
 ) -> Optional[str]:
-    """Call Gemini text model. Returns None on hard failure."""
+    """Call Groq text model. Returns None on hard failure."""
     client = _get_client()
     if client is None:
         return None
 
-    config = types.GenerateContentConfig(
-        temperature=temperature,
-        max_output_tokens=1024,
-        system_instruction=system,
-    )
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
 
     for attempt in range(max_retries + 1):
         try:
-            resp = client.models.generate_content(
+            resp = client.chat.completions.create(
                 model=TEXT_MODEL,
-                contents=prompt,
-                config=config,
+                messages=messages,
+                temperature=temperature,
+                max_completion_tokens=1024,
             )
-            text = _extract_text(resp).strip()
+            text = (resp.choices[0].message.content or "").strip()
             if text:
                 return text
-            logger.warning("Gemini text returned empty response (attempt %d)", attempt + 1)
+            logger.warning("Groq text returned empty response (attempt %d)", attempt + 1)
         except Exception as e:
-            logger.warning("Gemini text call failed (attempt %d): %s", attempt + 1, e)
+            logger.warning("Groq text call failed (attempt %d): %s", attempt + 1, e)
         if attempt < max_retries:
             time.sleep(1.5 * (attempt + 1))
     return None
@@ -132,34 +103,37 @@ def generate_json(
     system: Optional[str] = None,
     temperature: float = 0.1,
 ) -> Optional[dict]:
-    """Call Gemini asking for JSON and parse it. Returns None on failure."""
+    """Call Groq asking for JSON and parse it. Returns None on failure."""
     client = _get_client()
     if client is None:
         return None
 
-    config = types.GenerateContentConfig(
-        temperature=temperature,
-        max_output_tokens=1024,
-        system_instruction=system,
-        response_mime_type="application/json",
-    )
+    messages = []
+    if system:
+        # Groq needs "JSON" mentioned in the prompt when using response_format json_object
+        messages.append({"role": "system", "content": system + " Respond only with valid JSON."})
+    else:
+        messages.append({"role": "system", "content": "Respond only with valid JSON."})
+    messages.append({"role": "user", "content": prompt})
 
     try:
-        resp = client.models.generate_content(
+        resp = client.chat.completions.create(
             model=TEXT_MODEL,
-            contents=prompt,
-            config=config,
+            messages=messages,
+            temperature=temperature,
+            max_completion_tokens=1024,
+            response_format={"type": "json_object"},
         )
-        raw = _extract_text(resp).strip()
+        raw = (resp.choices[0].message.content or "").strip()
         if not raw:
-            logger.warning("Gemini JSON returned empty response")
+            logger.warning("Groq JSON returned empty response")
             return None
         return json.loads(raw)
     except json.JSONDecodeError as e:
-        logger.warning("Gemini returned invalid JSON: %s", e)
+        logger.warning("Groq returned invalid JSON: %s", e)
         return None
     except Exception as e:
-        logger.warning("Gemini JSON call failed: %s", e)
+        logger.warning("Groq JSON call failed: %s", e)
         return None
 
 
@@ -167,61 +141,64 @@ def _detect_mime_type(image_bytes: bytes) -> str:
     """Detect image mime type from magic bytes. Falls back to JPEG."""
     if not image_bytes or len(image_bytes) < 8:
         return "image/jpeg"
-    # PNG: 89 50 4E 47 0D 0A 1A 0A
     if image_bytes[:8] == b"\x89PNG\r\n\x1a\n":
         return "image/png"
-    # JPEG: FF D8 FF
     if image_bytes[:3] == b"\xff\xd8\xff":
         return "image/jpeg"
-    # GIF: 47 49 46 38
     if image_bytes[:4] in (b"GIF8",):
         return "image/gif"
-    # WebP: 52 49 46 46 ... 57 45 42 50
     if image_bytes[:4] == b"RIFF" and image_bytes[8:12] == b"WEBP":
         return "image/webp"
-    # Default: let Gemini try to figure it out as JPEG
     return "image/jpeg"
 
 
 def analyze_image(image_bytes: bytes, prompt: str) -> Optional[str]:
-    """Send an image to Gemini Vision. Returns a plain-text description."""
+    """
+    Send an image to Groq Vision. Returns a plain-text description.
+
+    Groq's vision API is OpenAI-compatible: the image goes in as a
+    base64-encoded data URL inside the message content.
+    """
     client = _get_client()
     if client is None:
-        logger.warning("Gemini vision called but client unavailable")
+        logger.warning("Groq vision called but client unavailable")
         return None
 
     if not image_bytes:
-        logger.warning("Gemini vision called with empty image bytes")
+        logger.warning("Groq vision called with empty image bytes")
         return None
 
     mime_type = _detect_mime_type(image_bytes)
-    logger.info("Gemini vision: %d bytes, mime=%s", len(image_bytes), mime_type)
+    logger.info("Groq vision: %d bytes, mime=%s", len(image_bytes), mime_type)
 
     try:
-        image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
-        resp = client.models.generate_content(
+        # Encode image as base64 data URL
+        b64 = base64.b64encode(image_bytes).decode("utf-8")
+        data_url = f"data:{mime_type};base64,{b64}"
+
+        resp = client.chat.completions.create(
             model=VISION_MODEL,
-            contents=[prompt, image_part],
-            config=types.GenerateContentConfig(
-                temperature=0.2,
-                max_output_tokens=512,
-            ),
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": data_url},
+                        },
+                    ],
+                }
+            ],
+            temperature=0.2,
+            max_completion_tokens=512,
         )
-        text = _extract_text(resp).strip()
+        text = (resp.choices[0].message.content or "").strip()
         if not text:
-            # Log the finish reason for debugging
-            try:
-                candidates = getattr(resp, "candidates", None) or []
-                if candidates:
-                    reason = getattr(candidates[0], "finish_reason", "unknown")
-                    logger.warning("Gemini vision returned empty; finish_reason=%s", reason)
-                    safety = getattr(candidates[0], "safety_ratings", None)
-                    if safety:
-                        logger.warning("Gemini vision safety ratings: %s", safety)
-            except Exception:
-                pass
+            logger.warning("Groq vision returned empty; finish_reason=%s",
+                           resp.choices[0].finish_reason if resp.choices else "unknown")
             return None
         return text
     except Exception as e:
-        logger.warning("Gemini vision call failed: %s", e)
+        logger.warning("Groq vision call failed: %s", e)
         return None
