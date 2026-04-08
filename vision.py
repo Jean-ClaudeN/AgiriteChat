@@ -217,4 +217,60 @@ Farmer's description: {farmer_description or "not provided"}
 Your task: DESCRIBE what you see. Do NOT diagnose any disease.
 
 List visible observations. Focus on:
-- Leaf color (yellow
+- Leaf color (yellowing, browning, purpling, paleness, interveinal patterns)
+- Spots, lesions, or holes (size, color, pattern, distribution)
+- Wilting, curling, or leaf rolling
+- Growth issues (stunting, uneven growth)
+- Visible pests (insects, larvae, webbing, frass)
+- If the photo is a WIDE shot of a whole field with no clear close-up, say so
+
+Return ONLY valid JSON, no markdown, no prose:
+{{
+  "symptoms": ["observation 1", "observation 2"],
+  "crop_visible": "maize" | "soybean" | "other" | "unknown",
+  "image_clear_enough": true,
+  "notes": "one sentence of helpful context"
+}}
+
+If the image is too wide-angle to see plant details, set image_clear_enough to false and explain in notes."""
+
+    raw = gemini_vision(image_bytes, vision_prompt)
+
+    if not raw:
+        result["quality_reason"] = (
+            "The AI vision service did not return a response. "
+            "This can happen with very large images or temporary service issues. "
+            "Please try a smaller, close-up photo of the affected leaf, "
+            "or describe the issue in the Ask tab."
+        )
+        return result
+
+    # Try to parse JSON; if parsing fails, still return the raw text as a symptom
+    parsed = _extract_json_loosely(raw)
+
+    if parsed:
+        result["ok"] = True
+        result["source"] = "gemini"
+        symptoms = parsed.get("symptoms", [])
+        if isinstance(symptoms, list):
+            result["symptoms"] = [str(s) for s in symptoms if s]
+        result["raw_description"] = parsed.get("notes", "") or raw[:300]
+
+        # If Gemini says the image isn't clear enough, pass that to the farmer
+        if parsed.get("image_clear_enough") is False:
+            note = parsed.get("notes", "")
+            result["quality_reason"] = (
+                f"The photo is not clear enough for detailed analysis. {note} "
+                "Please upload a close-up of an affected leaf."
+            )
+            # Still return ok=True so the agent can try to help with what it saw
+    else:
+        # JSON parse failed — use the raw text as best we can
+        result["ok"] = True
+        result["source"] = "gemini"
+        result["raw_description"] = raw[:500]
+        # Treat the whole response as one big symptom blob
+        result["symptoms"] = [raw[:200]]
+        logger.warning("Gemini vision returned non-JSON, using raw text")
+
+    return result
