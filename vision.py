@@ -2,17 +2,21 @@
 vision.py — Image analysis pipeline.
 
 Flow:
-1. Quality check (blur + brightness). Reject bad images early with
-   actionable feedback. This prevents garbage-in-garbage-out.
-2. For maize: try the local PlantVillage model first (free, fast, offline).
-3. If the local model is uncertain OR the crop is soybean, fall back to
-   Gemini Vision with a structured "describe, don't diagnose" prompt.
-4. Always return a list of described symptoms, never a final diagnosis.
-   Diagnosis happens in the agent after retrieval — this keeps vision and
-   knowledge grounded separately and auditable.
+1. Quality check (blur + brightness). Reject bad images early.
+2. Try Gemini Vision first (it's always available on Streamlit Cloud and
+   handles both maize and soybean). Ask it to DESCRIBE, not diagnose.
+3. The local PlantVillage model is DISABLED by default on Streamlit Cloud
+   because transformers downloads often fail in sandboxed environments
+   and push memory over the free-tier limit. To enable locally, set the
+   env var ENABLE_LOCAL_VISION_MODEL=1.
+4. Always return described symptoms, never a final diagnosis. Diagnosis
+   happens in the agent after retrieval — this keeps vision and knowledge
+   grounded separately and auditable.
 """
 
 import io
+import os
+import json
 import logging
 from typing import Optional, List, Dict
 
@@ -24,19 +28,23 @@ from llm import analyze_image as gemini_vision
 
 logger = logging.getLogger(__name__)
 
-# Quality thresholds tuned for field photos from phones. Adjust after testing.
-BLUR_THRESHOLD = 80.0      # Laplacian variance; below this = too blurry
-DARKNESS_THRESHOLD = 40    # Mean brightness 0-255; below this = too dark
-BRIGHTNESS_THRESHOLD = 220 # Above this = overexposed
+# Quality thresholds tuned for field photos from phones.
+BLUR_THRESHOLD = 60.0      # Lowered from 80 — less aggressive rejection
+DARKNESS_THRESHOLD = 30    # Lowered from 40
+BRIGHTNESS_THRESHOLD = 230 # Raised from 220
 
-# Local model loaded lazily on first use. This avoids paying the startup
-# cost if the user never uploads an image.
+# Local model disabled by default. Set ENABLE_LOCAL_VISION_MODEL=1 to enable.
+LOCAL_MODEL_ENABLED = os.getenv("ENABLE_LOCAL_VISION_MODEL", "0") == "1"
+
 _local_model = None
 _local_processor = None
 
 
-def _load_local_model():
+def _load_local_model() -> bool:
+    """Lazy-load the PlantVillage model. Returns False if unavailable."""
     global _local_model, _local_processor
+    if not LOCAL_MODEL_ENABLED:
+        return False
     if _local_model is not None:
         return True
     try:
@@ -53,10 +61,7 @@ def _load_local_model():
 
 
 def check_image_quality(image_bytes: bytes) -> Dict:
-    """
-    Returns {"ok": bool, "reason": str, "metrics": {...}}.
-    If ok is False, reason is a farmer-friendly message.
-    """
+    """Returns {'ok': bool, 'reason': str, 'metrics': {...}}."""
     try:
         arr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
@@ -72,13 +77,13 @@ def check_image_quality(image_bytes: bytes) -> Dict:
         if blur_score < BLUR_THRESHOLD:
             return {
                 "ok": False,
-                "reason": "The photo is too blurry. Please hold the phone steady and retake, focusing on the affected leaf.",
+                "reason": "The photo appears blurry. Please retake with a steady hand, focused on the affected leaf.",
                 "metrics": metrics,
             }
         if brightness < DARKNESS_THRESHOLD:
             return {
                 "ok": False,
-                "reason": "The photo is too dark. Please retake in daylight or better lighting.",
+                "reason": "The photo is very dark. Please retake in daylight or better lighting.",
                 "metrics": metrics,
             }
         if brightness > BRIGHTNESS_THRESHOLD:
@@ -90,7 +95,7 @@ def check_image_quality(image_bytes: bytes) -> Dict:
         return {"ok": True, "reason": "", "metrics": metrics}
     except Exception as e:
         logger.error("Image quality check failed: %s", e)
-        return {"ok": False, "reason": "Could not process the image.", "metrics": {}}
+        return {"ok": False, "reason": f"Could not process the image: {e}", "metrics": {}}
 
 
 def _run_local_model(image_bytes: bytes) -> Optional[Dict]:
@@ -117,10 +122,7 @@ def _run_local_model(image_bytes: bytes) -> Optional[Dict]:
 
 
 def _parse_plantvillage_label(label: str) -> Dict:
-    """
-    PlantVillage labels look like 'Corn_(maize)___Northern_Leaf_Blight' or
-    'Corn_(maize)___healthy'. Parse into {crop, condition}.
-    """
+    """PlantVillage labels look like 'Corn_(maize)___Northern_Leaf_Blight'."""
     parts = label.split("___")
     if len(parts) != 2:
         return {"crop": "unknown", "condition": label}
@@ -128,6 +130,37 @@ def _parse_plantvillage_label(label: str) -> Dict:
     crop = "maize" if "maize" in crop_raw.lower() or "corn" in crop_raw.lower() else crop_raw.lower()
     condition = condition_raw.replace("_", " ").lower()
     return {"crop": crop, "condition": condition}
+
+
+def _extract_json_loosely(raw: str) -> Optional[dict]:
+    """Try hard to extract JSON from an LLM response that may have fences or prose."""
+    if not raw:
+        return None
+    text = raw.strip()
+    # Strip markdown fences
+    if text.startswith("```"):
+        # Remove opening fence (with or without language tag)
+        text = text.split("```", 1)[1]
+        if text.lower().startswith("json"):
+            text = text[4:]
+        # Remove closing fence
+        if "```" in text:
+            text = text.split("```", 1)[0]
+        text = text.strip()
+
+    # First try direct parse
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Fallback: find first { and last } and try that slice
+    try:
+        start = text.index("{")
+        end = text.rindex("}") + 1
+        return json.loads(text[start:end])
+    except (ValueError, json.JSONDecodeError):
+        return None
 
 
 def analyze_field_image(
@@ -139,11 +172,11 @@ def analyze_field_image(
     Main entry point. Returns:
     {
         "ok": bool,
-        "quality_reason": str,    # populated if ok=False
-        "symptoms": [str],        # described visible symptoms
+        "quality_reason": str,
+        "symptoms": [str],
         "candidate_conditions": [{"condition": str, "confidence": float}],
-        "source": str,            # "plantvillage_local" | "gemini" | "none"
-        "raw_description": str,   # freeform text for logging
+        "source": str,
+        "raw_description": str,
     }
     """
     result = {
@@ -155,16 +188,14 @@ def analyze_field_image(
         "raw_description": "",
     }
 
+    # Step 1: Quality check
     quality = check_image_quality(image_bytes)
     if not quality["ok"]:
         result["quality_reason"] = quality["reason"]
         return result
 
-    # Route: try local model for maize, go straight to Gemini for soybean
-    # since the local model doesn't cover soybean diseases well.
-    use_local = crop_hint in (None, "maize") or not crop_hint
-
-    if use_local:
+    # Step 2: Try local model if enabled (default: disabled on Streamlit Cloud)
+    if LOCAL_MODEL_ENABLED and crop_hint in (None, "maize", "general"):
         local = _run_local_model(image_bytes)
         if local and local["confidence"] >= 0.60:
             parsed = _parse_plantvillage_label(local["label"])
@@ -178,57 +209,70 @@ def analyze_field_image(
                 result["symptoms"] = [parsed["condition"]]
                 result["raw_description"] = f"Local model: {parsed['condition']} ({local['confidence']:.2f})"
                 return result
-            # Local model returned a non-maize prediction; fall through to Gemini.
 
-    # Gemini Vision fallback. Critical: ask it to DESCRIBE, not diagnose.
-    vision_prompt = f"""You are analyzing a field photograph of a crop for an agricultural advisory system.
+    # Step 3: Gemini Vision (primary path in production)
+    vision_prompt = f"""You are analyzing a field photograph for an agricultural advisory system for maize and soybean farmers.
 
 Crop context: {crop_hint or "unknown, possibly maize or soybean"}
 Farmer's description: {farmer_description or "not provided"}
 
-Your task: DESCRIBE what you see. Do NOT diagnose.
+Your task: DESCRIBE what you see. Do NOT diagnose any disease.
 
-List visible symptoms only. Focus on:
-- Leaf color (yellowing, browning, purpling, paleness)
+List visible observations. Focus on:
+- Leaf color (yellowing, browning, purpling, paleness, interveinal patterns)
 - Spots, lesions, or holes (size, color, pattern, distribution)
-- Wilting or leaf rolling
+- Wilting, curling, or leaf rolling
 - Growth issues (stunting, uneven growth)
-- Pests visible (insects, larvae, webbing)
+- Visible pests (insects, larvae, webbing, frass)
+- If the photo is a WIDE shot of a whole field with no clear close-up, say so
 
-Return valid JSON only, no markdown:
+Return ONLY valid JSON, no markdown, no prose:
 {{
-  "symptoms": ["symptom 1", "symptom 2", ...],
+  "symptoms": ["observation 1", "observation 2"],
   "crop_visible": "maize" | "soybean" | "other" | "unknown",
-  "image_clear_enough": true | false,
-  "notes": "one sentence of context, or empty string"
-}}"""
+  "image_clear_enough": true,
+  "notes": "one sentence of helpful context"
+}}
+
+If the image is too wide-angle to see plant details, set image_clear_enough to false and explain in notes."""
 
     raw = gemini_vision(image_bytes, vision_prompt)
+
     if not raw:
-        result["quality_reason"] = "Image analysis service is unavailable. Please try again or describe the issue in text."
+        result["quality_reason"] = (
+            "The AI vision service did not return a response. "
+            "This can happen with very large images or temporary service issues. "
+            "Please try a smaller, close-up photo of the affected leaf, "
+            "or describe the issue in the Ask tab."
+        )
         return result
 
-    # Strip any accidental markdown fences
-    cleaned = raw.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.split("```")[1]
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:]
-        cleaned = cleaned.strip()
+    # Try to parse JSON; if parsing fails, still return the raw text as a symptom
+    parsed = _extract_json_loosely(raw)
 
-    try:
-        import json
-        parsed = json.loads(cleaned)
+    if parsed:
         result["ok"] = True
         result["source"] = "gemini"
-        result["symptoms"] = parsed.get("symptoms", [])
-        result["raw_description"] = parsed.get("notes", "") or raw
-        # Gemini describes, doesn't classify, so candidate_conditions stays empty.
-    except Exception as e:
-        logger.warning("Could not parse Gemini vision JSON: %s", e)
+        symptoms = parsed.get("symptoms", [])
+        if isinstance(symptoms, list):
+            result["symptoms"] = [str(s) for s in symptoms if s]
+        result["raw_description"] = parsed.get("notes", "") or raw[:300]
+
+        # If Gemini says the image isn't clear enough, pass that to the farmer
+        if parsed.get("image_clear_enough") is False:
+            note = parsed.get("notes", "")
+            result["quality_reason"] = (
+                f"The photo is not clear enough for detailed analysis. {note} "
+                "Please upload a close-up of an affected leaf."
+            )
+            # Still return ok=True so the agent can try to help with what it saw
+    else:
+        # JSON parse failed — use the raw text as best we can
         result["ok"] = True
         result["source"] = "gemini"
-        result["raw_description"] = raw
-        result["symptoms"] = [raw[:200]]  # fallback: treat whole response as one symptom blob
+        result["raw_description"] = raw[:500]
+        # Treat the whole response as one big symptom blob
+        result["symptoms"] = [raw[:200]]
+        logger.warning("Gemini vision returned non-JSON, using raw text")
 
     return result
