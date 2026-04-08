@@ -1,12 +1,14 @@
 """
-app.py — AgiriteChat Streamlit UI (styled version).
+app.py — AgiriteChat v3.1 (Warm Editorial Aesthetic)
 
-This preserves the original visual design (hero, metric cards, topbar, CSS)
-and swaps the broken OpenAI + keyword-matching backend for the new
-LangGraph agent + semantic retrieval + image analysis pipeline.
+Changes from v3.0:
+- Hero pills replaced with functional category filter buttons (Pests / Diseases / Soil & nutrients)
+- Filter state persists across tabs and filters both presets and the knowledge library
+- Agent trace hidden by default; shown only when "Developer view" toggle is on in sidebar
+- Session ID hidden when developer view is off
 
-All business logic lives in: agent.py, retrieval.py, vision.py, llm.py, feedback.py
-This file is UI only.
+Design direction: agricultural editorial. Warm cream + forest green + terracotta.
+Fraunces display + DM Sans body.
 """
 
 import uuid
@@ -14,24 +16,24 @@ from html import escape
 
 import streamlit as st
 
-from agent import run as run_agent, get_retriever
+from agent import run as run_agent, get_retriever, LANGUAGES
 from vision import analyze_field_image
 from llm import is_available as llm_available
 from feedback import log_interaction, record_feedback, recent_stats, init_db
 
 # ---------------- Page config ----------------
 st.set_page_config(
-    page_title="AgiriteChat",
+    page_title="AgiriteChat — Crop Advisory",
     layout="wide",
     page_icon="🌾",
+    initial_sidebar_state="expanded",
 )
 
 # ---------------- One-time warm-up ----------------
 @st.cache_resource
 def _warm_up():
-    """Load heavy dependencies once per session (embeddings model, DB)."""
     init_db()
-    get_retriever()  # loads sentence-transformers + builds Chroma index
+    get_retriever()
     return True
 
 _warm_up()
@@ -39,223 +41,797 @@ _warm_up()
 # ---------------- Session state ----------------
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())[:8]
+if "language" not in st.session_state:
+    st.session_state.language = "en"
+if "farmer_profile" not in st.session_state:
+    st.session_state.farmer_profile = {
+        "name": "", "region": "", "farm_size": "", "crops": "", "planting_date": "",
+    }
+if "profile_saved" not in st.session_state:
+    st.session_state.profile_saved = False
 if "messages" not in st.session_state:
-    st.session_state.messages = [{
-        "role": "assistant",
-        "content": "Hello! I can help with maize and soybean questions on pests, diseases, soil fertility, and fertilizer. What are you seeing in your field?",
-        "structured": None,
-        "top_score": 0.0,
-        "needs_escalation": False,
-        "interaction_id": None,
-    }]
+    st.session_state.messages = []
+if "category_filter" not in st.session_state:
+    st.session_state.category_filter = None  # None | "pest" | "disease" | "soil"
+if "developer_view" not in st.session_state:
+    st.session_state.developer_view = False
 
-# ---------------- Original CSS (preserved from your app) ----------------
+# ---------------- i18n strings ----------------
+UI = {
+    "en": {
+        "brand_tag": "Crop advisory for smallholder farmers",
+        "hero_title": "Practical crop advice,\nrooted in your field.",
+        "hero_sub": "AgiriteChat helps maize and soybean farmers identify problems, understand causes, and take action — grounded in agronomic knowledge, personalised to your farm.",
+        "filter_pests": "Pests",
+        "filter_diseases": "Diseases",
+        "filter_soil": "Soil & nutrients",
+        "filter_active": "Filtering by",
+        "filter_clear": "Clear filter",
+        "sidebar_profile": "Your farm profile",
+        "sidebar_language": "Language",
+        "sidebar_status": "System status",
+        "sidebar_dev": "Developer view",
+        "sidebar_dev_help": "Show agent reasoning trace (for demos)",
+        "name": "Your name",
+        "region": "Region / District",
+        "farm_size": "Farm size",
+        "crops": "Crops you grow",
+        "planting_date": "Planting date",
+        "save_profile": "Save profile",
+        "profile_saved": "Profile saved for this session",
+        "profile_note": "Stored only for this session. No account required.",
+        "tab_ask": "Ask a question",
+        "tab_photo": "Photo review",
+        "tab_browse": "Knowledge library",
+        "quick_starts": "Quick starts",
+        "welcome_default": "Welcome. Ask a question about your maize or soybean field.",
+        "welcome_maize": "Welcome, maize farmer. What are you seeing in your field today?",
+        "welcome_soybean": "Welcome, soybean farmer. What are you seeing in your field today?",
+        "welcome_named": "Welcome, {name}. What are you seeing in your field today?",
+        "input_placeholder": "Describe what you see in your field…",
+        "analyze_photo": "Analyze photo",
+        "photo_upload": "Upload a close-up photo of the affected leaf or plant",
+        "photo_desc": "Add a short description (optional)",
+        "photo_desc_ph": "e.g. brown lesions on lower leaves, plant is at knee height",
+        "symptoms_detected": "What the AI sees in the photo",
+        "sources_used": "Sources used",
+        "agent_trace": "How the agent answered",
+        "confidence_high": "High confidence",
+        "confidence_medium": "Medium confidence",
+        "confidence_low": "Low confidence",
+        "escalation": "This answer has limited confidence. Please confirm with your local extension officer before acting.",
+        "helpful": "Helpful",
+        "not_helpful": "Not helpful",
+        "thanks_feedback": "Thanks for the feedback!",
+        "feedback_stats": "Session stats",
+        "responsible_use": "Responsible use",
+        "responsible_text": "AgiriteChat is a support tool for early interpretation only. Serious disease, pest, or fertility problems should always be confirmed with a local agronomist or extension officer.",
+        "library_search": "Search knowledge library",
+        "library_search_ph": "yellow lower leaves on maize…",
+    },
+    "sw": {
+        "brand_tag": "Ushauri wa kilimo kwa wakulima wadogo",
+        "hero_title": "Ushauri wa vitendo wa mazao,\nuliojikita katika shamba lako.",
+        "hero_sub": "AgiriteChat inasaidia wakulima wa mahindi na soya kutambua matatizo, kuelewa sababu, na kuchukua hatua — ikizingatia maarifa ya kilimo, iliyobinafsishwa kwa shamba lako.",
+        "filter_pests": "Wadudu",
+        "filter_diseases": "Magonjwa",
+        "filter_soil": "Udongo na virutubisho",
+        "filter_active": "Inachuja kwa",
+        "filter_clear": "Ondoa kichujio",
+        "sidebar_profile": "Wasifu wa shamba lako",
+        "sidebar_language": "Lugha",
+        "sidebar_status": "Hali ya mfumo",
+        "sidebar_dev": "Hali ya msanidi",
+        "sidebar_dev_help": "Onyesha maelezo ya wakala (kwa maonyesho)",
+        "name": "Jina lako",
+        "region": "Mkoa / Wilaya",
+        "farm_size": "Ukubwa wa shamba",
+        "crops": "Mazao unayolima",
+        "planting_date": "Tarehe ya kupanda",
+        "save_profile": "Hifadhi wasifu",
+        "profile_saved": "Wasifu umehifadhiwa kwa kipindi hiki",
+        "profile_note": "Imehifadhiwa kwa kipindi hiki tu. Hakuna akaunti inayohitajika.",
+        "tab_ask": "Uliza swali",
+        "tab_photo": "Kagua picha",
+        "tab_browse": "Maktaba ya maarifa",
+        "quick_starts": "Maswali ya haraka",
+        "welcome_default": "Karibu. Uliza swali kuhusu shamba lako la mahindi au soya.",
+        "welcome_maize": "Karibu, mkulima wa mahindi. Unaona nini shambani mwako leo?",
+        "welcome_soybean": "Karibu, mkulima wa soya. Unaona nini shambani mwako leo?",
+        "welcome_named": "Karibu, {name}. Unaona nini shambani mwako leo?",
+        "input_placeholder": "Eleza unachoona shambani mwako…",
+        "analyze_photo": "Chambua picha",
+        "photo_upload": "Pakia picha ya karibu ya jani au mmea ulioathirika",
+        "photo_desc": "Ongeza maelezo mafupi (hiari)",
+        "photo_desc_ph": "mfano: madoa ya kahawia kwenye majani ya chini",
+        "symptoms_detected": "Kile AI inachokiona kwenye picha",
+        "sources_used": "Vyanzo vilivyotumika",
+        "agent_trace": "Jinsi wakala alivyojibu",
+        "confidence_high": "Uhakika wa juu",
+        "confidence_medium": "Uhakika wa wastani",
+        "confidence_low": "Uhakika wa chini",
+        "escalation": "Jibu hili lina uhakika mdogo. Tafadhali thibitisha na afisa wa ugani kabla ya kuchukua hatua.",
+        "helpful": "Lilikuwa la msaada",
+        "not_helpful": "Halikuwa la msaada",
+        "thanks_feedback": "Asante kwa maoni!",
+        "feedback_stats": "Takwimu za kipindi",
+        "responsible_use": "Matumizi yenye uwajibikaji",
+        "responsible_text": "AgiriteChat ni chombo cha msaada cha tafsiri ya mapema tu. Matatizo makubwa ya magonjwa, wadudu, au rutuba yanapaswa kuthibitishwa na mtaalam wa kilimo wa ndani.",
+        "library_search": "Tafuta katika maktaba",
+        "library_search_ph": "majani ya njano ya chini ya mahindi…",
+    },
+    "fr": {
+        "brand_tag": "Conseil agricole pour petits exploitants",
+        "hero_title": "Des conseils pratiques,\nenracinés dans votre champ.",
+        "hero_sub": "AgiriteChat aide les cultivateurs de maïs et de soja à identifier les problèmes, comprendre les causes et agir — avec un savoir agronomique ancré, personnalisé pour votre exploitation.",
+        "filter_pests": "Ravageurs",
+        "filter_diseases": "Maladies",
+        "filter_soil": "Sol et nutriments",
+        "filter_active": "Filtré par",
+        "filter_clear": "Effacer le filtre",
+        "sidebar_profile": "Votre profil agricole",
+        "sidebar_language": "Langue",
+        "sidebar_status": "État du système",
+        "sidebar_dev": "Vue développeur",
+        "sidebar_dev_help": "Afficher le raisonnement de l'agent (pour les démos)",
+        "name": "Votre nom",
+        "region": "Région / District",
+        "farm_size": "Taille de l'exploitation",
+        "crops": "Cultures pratiquées",
+        "planting_date": "Date de semis",
+        "save_profile": "Enregistrer le profil",
+        "profile_saved": "Profil enregistré pour cette session",
+        "profile_note": "Conservé uniquement pour cette session. Pas de compte requis.",
+        "tab_ask": "Poser une question",
+        "tab_photo": "Analyse de photo",
+        "tab_browse": "Bibliothèque",
+        "quick_starts": "Démarrage rapide",
+        "welcome_default": "Bienvenue. Posez une question sur votre champ de maïs ou de soja.",
+        "welcome_maize": "Bienvenue, cultivateur de maïs. Que voyez-vous dans votre champ aujourd'hui ?",
+        "welcome_soybean": "Bienvenue, cultivateur de soja. Que voyez-vous dans votre champ aujourd'hui ?",
+        "welcome_named": "Bienvenue, {name}. Que voyez-vous dans votre champ aujourd'hui ?",
+        "input_placeholder": "Décrivez ce que vous voyez dans votre champ…",
+        "analyze_photo": "Analyser la photo",
+        "photo_upload": "Téléchargez une photo en gros plan de la feuille ou de la plante affectée",
+        "photo_desc": "Ajoutez une courte description (optionnel)",
+        "photo_desc_ph": "ex. lésions brunes sur les feuilles basses",
+        "symptoms_detected": "Ce que l'IA voit sur la photo",
+        "sources_used": "Sources utilisées",
+        "agent_trace": "Comment l'agent a répondu",
+        "confidence_high": "Confiance élevée",
+        "confidence_medium": "Confiance moyenne",
+        "confidence_low": "Confiance faible",
+        "escalation": "Cette réponse a une confiance limitée. Veuillez confirmer avec votre agent de vulgarisation avant d'agir.",
+        "helpful": "Utile",
+        "not_helpful": "Peu utile",
+        "thanks_feedback": "Merci pour votre retour !",
+        "feedback_stats": "Statistiques de session",
+        "responsible_use": "Utilisation responsable",
+        "responsible_text": "AgiriteChat est un outil d'aide à l'interprétation précoce. Les problèmes graves de maladies, ravageurs ou fertilité doivent toujours être confirmés par un agronome local.",
+        "library_search": "Rechercher dans la bibliothèque",
+        "library_search_ph": "feuilles basses jaunes de maïs…",
+    },
+    "rw": {
+        "brand_tag": "Inama z'ubuhinzi ku bahinzi bato",
+        "hero_title": "Inama z'ubuhinzi zifatika,\nzishingiye ku murima wawe.",
+        "hero_sub": "AgiriteChat ifasha abahinzi b'ibigori n'ibishyimbo kumenya ibibazo, gusobanukirwa impamvu, no gufata ibyemezo — ishingiye ku bumenyi bw'ubuhinzi, ihariwe umurima wawe.",
+        "filter_pests": "Udukoko",
+        "filter_diseases": "Indwara",
+        "filter_soil": "Ubutaka n'intungamubiri",
+        "filter_active": "Biyungurura ku",
+        "filter_clear": "Siba iyungurura",
+        "sidebar_profile": "Umwirondoro w'umurima wawe",
+        "sidebar_language": "Ururimi",
+        "sidebar_status": "Imimerere ya sisitemu",
+        "sidebar_dev": "Uburyo bw'umukoraporogaramu",
+        "sidebar_dev_help": "Erekana uburyo agent ikora (ku magaragaza)",
+        "name": "Izina ryawe",
+        "region": "Intara / Akarere",
+        "farm_size": "Ingano y'umurima",
+        "crops": "Ibihingwa uhinga",
+        "planting_date": "Itariki yo gutera",
+        "save_profile": "Bika umwirondoro",
+        "profile_saved": "Umwirondoro wabitswe muri iki gihe",
+        "profile_note": "Bibitswe muri iki gihe gusa. Nta konti ikenewe.",
+        "tab_ask": "Baza ikibazo",
+        "tab_photo": "Isesengura ry'ifoto",
+        "tab_browse": "Ububiko bw'ubumenyi",
+        "quick_starts": "Gutangira vuba",
+        "welcome_default": "Murakaza neza. Baza ikibazo ku murima wawe w'ibigori cyangwa ibishyimbo.",
+        "welcome_maize": "Murakaza neza, umuhinzi w'ibigori. Uravye iki mu murima wawe uyu munsi?",
+        "welcome_soybean": "Murakaza neza, umuhinzi w'ibishyimbo. Uravye iki mu murima wawe uyu munsi?",
+        "welcome_named": "Murakaza neza, {name}. Uravye iki mu murima wawe uyu munsi?",
+        "input_placeholder": "Sobanura ibyo urabona mu murima wawe…",
+        "analyze_photo": "Sesengura ifoto",
+        "photo_upload": "Shyiraho ifoto y'ibabi cyangwa igihingwa cyanduye",
+        "photo_desc": "Ongeraho ibisobanuro bigufi (bishoboka)",
+        "photo_desc_ph": "urugero: utuntu two mu ibara ry'umukara",
+        "symptoms_detected": "Ibyo AI ireba kuri iyi foto",
+        "sources_used": "Inkomoko zakoreshejwe",
+        "agent_trace": "Uburyo agent yasubije",
+        "confidence_high": "Ikizere gikomeye",
+        "confidence_medium": "Ikizere rwagati",
+        "confidence_low": "Ikizere gike",
+        "escalation": "Iyi nyishyu ifite ikizere gike. Nyamuneka bimenyeshe umukozi w'ubuhinzi mbere yo gufata icyemezo.",
+        "helpful": "Byanyunguye",
+        "not_helpful": "Ntibyanyunguye",
+        "thanks_feedback": "Murakoze ku gitekerezo!",
+        "feedback_stats": "Imibare y'iki gihe",
+        "responsible_use": "Imikoreshereze y'inshingano",
+        "responsible_text": "AgiriteChat ni igikoresho cy'ubufasha gusa. Ibibazo bikomeye by'indwara, udukoko, cyangwa umwanda bigomba kwemezwa n'umuhanga mu buhinzi wa hafi.",
+        "library_search": "Shakisha mu bubiko",
+        "library_search_ph": "amababi y'umuhondo y'ibigori…",
+    },
+}
+
+
+def t(key: str) -> str:
+    lang = st.session_state.get("language", "en")
+    return UI.get(lang, UI["en"]).get(key, UI["en"].get(key, key))
+
+
+# ---------------- Category mapping ----------------
+# Maps filter button names to KB category tags
+CATEGORY_MAP = {
+    "pest": ["pest"],
+    "disease": ["disease"],
+    "soil": ["soil", "nutrient_deficiency", "fertilizer"],
+}
+
+
+# ---------------- Crop-specific preset questions ----------------
+# Each preset has: (label, question, category) — category enables filtering
+PRESETS = {
+    "maize": {
+        "en": [
+            ("🟡 Yellow lower leaves", "Why are the lower leaves on my maize turning yellow?", "soil"),
+            ("🟣 Purple leaves", "My maize leaves are turning purple. What is wrong?", "soil"),
+            ("🐛 Fall armyworm", "How do I control fall armyworm in maize?", "pest"),
+            ("🍃 Leaf blight", "What are the signs of maize leaf blight?", "disease"),
+        ],
+        "sw": [
+            ("🟡 Majani ya chini ya njano", "Kwa nini majani ya chini ya mahindi yanageuka njano?", "soil"),
+            ("🟣 Majani ya zambarau", "Majani ya mahindi yangu yanageuka zambarau. Kuna shida gani?", "soil"),
+            ("🐛 Viwavi wa majani", "Nidhibiti vipi viwavi wa majani katika mahindi?", "pest"),
+            ("🍃 Ugonjwa wa majani", "Dalili za ugonjwa wa majani ya mahindi ni zipi?", "disease"),
+        ],
+        "fr": [
+            ("🟡 Feuilles basses jaunes", "Pourquoi les feuilles basses de mon maïs jaunissent-elles ?", "soil"),
+            ("🟣 Feuilles violettes", "Les feuilles de mon maïs deviennent violettes. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🐛 Chenille légionnaire", "Comment lutter contre la chenille légionnaire d'automne sur le maïs ?", "pest"),
+            ("🍃 Brûlure des feuilles", "Quels sont les signes de la brûlure des feuilles du maïs ?", "disease"),
+        ],
+        "rw": [
+            ("🟡 Amababi yo hasi y'umuhondo", "Kubera iki amababi yo hasi y'ibigori byanjye ahinduka umuhondo?", "soil"),
+            ("🟣 Amababi y'umutuku", "Amababi y'ibigori byanjye ahinduka umutuku. Iki kibazo ni iki?", "soil"),
+            ("🐛 Udukoko tw'amababi", "Nigute nakurikirana udukoko tw'amababi mu bigori?", "pest"),
+            ("🍃 Indwara y'amababi", "Ni ibihe bimenyetso by'indwara y'amababi y'ibigori?", "disease"),
+        ],
+    },
+    "soybean": {
+        "en": [
+            ("💧 Not fixing nitrogen", "My soybeans are weak and not fixing nitrogen well. What could be wrong?", "soil"),
+            ("🌱 Poor nodulation", "How can I improve soybean nodulation?", "soil"),
+            ("🦠 Root rot", "What causes root rot in soybean?", "disease"),
+            ("🟡 Yellow leaves", "Why are my soybean leaves turning yellow?", "soil"),
+        ],
+        "sw": [
+            ("💧 Hazifungi naitrojeni", "Soya zangu ni dhaifu na hazifungi naitrojeni vizuri. Kuna shida gani?", "soil"),
+            ("🌱 Unodushaji mbaya", "Ninawezaje kuboresha unodushaji wa soya?", "soil"),
+            ("🦠 Uozo wa mizizi", "Ni nini husababisha uozo wa mizizi katika soya?", "disease"),
+            ("🟡 Majani ya njano", "Kwa nini majani ya soya yangu yanageuka njano?", "soil"),
+        ],
+        "fr": [
+            ("💧 Pas de fixation d'azote", "Mes sojas sont faibles et ne fixent pas bien l'azote. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🌱 Mauvaise nodulation", "Comment améliorer la nodulation du soja ?", "soil"),
+            ("🦠 Pourriture racinaire", "Qu'est-ce qui cause la pourriture racinaire chez le soja ?", "disease"),
+            ("🟡 Feuilles jaunes", "Pourquoi mes feuilles de soja deviennent-elles jaunes ?", "soil"),
+        ],
+        "rw": [
+            ("💧 Ntizikora azote", "Ibishyimbo byanjye birananiwe ntibikora azote neza. Ni ikihe kibazo?", "soil"),
+            ("🌱 Noduli nke", "Nigute nahindura noduli z'ibishyimbo?", "soil"),
+            ("🦠 Kubora kw'imizi", "Ni iki gitera kubora kw'imizi y'ibishyimbo?", "disease"),
+            ("🟡 Amababi y'umuhondo", "Kubera iki amababi y'ibishyimbo byanjye ahinduka umuhondo?", "soil"),
+        ],
+    },
+    "general": {
+        "en": [
+            ("🌽 Maize leaf blight", "How do I manage maize leaf blight?", "disease"),
+            ("🟣 Purple maize leaves", "My maize leaves are turning purple. What could be wrong?", "soil"),
+            ("🫘 Soybean nitrogen", "My soybeans are weak and not fixing nitrogen. What could be wrong?", "soil"),
+            ("🦠 Soybean root rot", "What causes root rot in soybean?", "disease"),
+            ("🐛 Fall armyworm", "How do I control fall armyworm in maize?", "pest"),
+            ("🌾 Soybean pod borer", "How do I manage soybean pod borers?", "pest"),
+        ],
+        "sw": [
+            ("🌽 Ugonjwa wa majani", "Ninawezaje kudhibiti ugonjwa wa majani ya mahindi?", "disease"),
+            ("🟣 Majani ya zambarau", "Majani ya mahindi yangu yanageuka zambarau. Kuna shida gani?", "soil"),
+            ("🫘 Naitrojeni ya soya", "Soya zangu ni dhaifu na hazifungi naitrojeni. Kuna shida gani?", "soil"),
+            ("🦠 Uozo wa mizizi", "Ni nini husababisha uozo wa mizizi katika soya?", "disease"),
+            ("🐛 Viwavi wa majani", "Nidhibiti vipi viwavi wa majani katika mahindi?", "pest"),
+            ("🌾 Wadudu wa maganda", "Nidhibiti vipi wadudu wa maganda ya soya?", "pest"),
+        ],
+        "fr": [
+            ("🌽 Brûlure du maïs", "Comment gérer la brûlure des feuilles du maïs ?", "disease"),
+            ("🟣 Maïs violet", "Mes feuilles de maïs deviennent violettes. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🫘 Azote du soja", "Mes sojas sont faibles et ne fixent pas l'azote. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🦠 Pourriture du soja", "Qu'est-ce qui cause la pourriture racinaire du soja ?", "disease"),
+            ("🐛 Chenille légionnaire", "Comment lutter contre la chenille légionnaire sur le maïs ?", "pest"),
+            ("🌾 Borer du soja", "Comment gérer les borers de gousses de soja ?", "pest"),
+        ],
+        "rw": [
+            ("🌽 Indwara y'ibigori", "Nigute nakurikirana indwara y'amababi y'ibigori?", "disease"),
+            ("🟣 Amababi y'umutuku", "Amababi y'ibigori byanjye ahinduka umutuku. Ni iki kibazo?", "soil"),
+            ("🫘 Azote y'ibishyimbo", "Ibishyimbo byanjye birananiwe ntibikora azote. Ni iki kibazo?", "soil"),
+            ("🦠 Kubora kw'imizi", "Ni iki gitera kubora kw'imizi y'ibishyimbo?", "disease"),
+            ("🐛 Udukoko tw'amababi", "Nigute nakurikirana udukoko tw'amababi mu bigori?", "pest"),
+            ("🌾 Udukoko tw'ibiryo", "Nigute nakurikirana udukoko tw'ibiryo by'ibishyimbo?", "pest"),
+        ],
+    },
+}
+
+
+# ---------------- CSS ----------------
 st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
-    --green-900: #1f4d2e;
-    --green-800: #2f6b3d;
-    --green-700: #3d7a49;
-    --green-100: #eef6ef;
-    --green-050: #f7fbf7;
-    --text-main: #1f2937;
-    --text-soft: #5b6470;
-    --border-soft: #dfe7df;
-    --card-bg: #ffffff;
-    --shadow-soft: 0 10px 30px rgba(18, 38, 24, 0.08);
+    --cream: #faf6ee;
+    --cream-dark: #f2ecdd;
+    --ink: #1a1d14;
+    --ink-soft: #5a5d50;
+    --ink-mute: #8a8d7e;
+    --forest-900: #1f3a26;
+    --forest-700: #2d5234;
+    --forest-500: #4a7c52;
+    --forest-100: #e6efe4;
+    --terracotta: #c65a3a;
+    --terracotta-dark: #9a3f23;
+    --terracotta-light: #f4dfd4;
+    --gold: #c8984a;
+    --border: #e4ddc9;
+    --shadow-warm: 0 2px 12px rgba(90, 70, 30, 0.08), 0 1px 3px rgba(90, 70, 30, 0.05);
+    --shadow-lifted: 0 12px 40px rgba(90, 70, 30, 0.12), 0 2px 8px rgba(90, 70, 30, 0.06);
 }
+
 html, body, [class*="css"] {
-    font-family: "Segoe UI", Arial, sans-serif;
-    color: var(--text-main);
+    font-family: 'DM Sans', -apple-system, sans-serif !important;
+    color: var(--ink) !important;
+    background: var(--cream) !important;
 }
-.block-container {
-    padding-top: 1.1rem;
-    padding-bottom: 2rem;
-    max-width: 1240px;
+
+.main .block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1180px !important;
 }
+
+section[data-testid="stSidebar"] {
+    background: var(--cream-dark) !important;
+    border-right: 1px solid var(--border) !important;
+}
+section[data-testid="stSidebar"] * {
+    color: var(--ink) !important;
+}
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stTextInput label,
+section[data-testid="stSidebar"] .stDateInput label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: var(--forest-700) !important;
+}
+
 .topbar {
-    background: #ffffff;
-    border: 1px solid #edf1ed;
-    border-radius: 18px;
-    padding: 0.95rem 1.2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 1rem;
+    padding: 0.8rem 0 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
 }
-.brand {
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: var(--green-800);
-    letter-spacing: 0.2px;
-}
-.nav-links {
+.brand-group { display: flex; align-items: center; gap: 0.8rem; }
+.brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--forest-700);
     display: flex;
-    gap: 1.4rem;
-    color: var(--text-soft);
-    font-size: 0.98rem;
+    align-items: center;
+    justify-content: center;
+    color: var(--cream);
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+.brand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--forest-900);
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+.brand-tag {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
+}
+.topbar-session {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     font-weight: 600;
 }
+
+/* Hero */
 .hero {
+    background: linear-gradient(135deg, var(--forest-900) 0%, var(--forest-700) 55%, #3d6540 100%);
+    border-radius: 20px;
+    padding: 2.5rem 2.8rem 2.2rem 2.8rem;
+    margin-bottom: 1.4rem;
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
-    min-height: 360px;
-    padding: 2.2rem 2.3rem;
-    background:
-        linear-gradient(90deg, rgba(28,59,36,0.88) 0%, rgba(41,82,49,0.78) 40%, rgba(68,106,72,0.42) 100%),
-        url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80");
-    background-size: cover;
-    background-position: center;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 1.2rem;
+    box-shadow: var(--shadow-lifted);
 }
-.hero-content {
-    max-width: 700px;
-    color: #ffffff;
-    padding-top: 1.2rem;
+.hero::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(200, 152, 74, 0.25) 0%, transparent 65%);
+    pointer-events: none;
 }
-.hero-kicker {
+.hero::after {
+    content: "";
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(198, 90, 58, 0.18) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-label {
     display: inline-block;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    margin-bottom: 1rem;
+    background: rgba(250, 246, 238, 0.15);
+    color: var(--cream);
+    border: 1px solid rgba(250, 246, 238, 0.25);
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    position: relative;
+    z-index: 1;
 }
 .hero-title {
-    font-size: 3.1rem;
-    line-height: 1.02;
-    font-weight: 750;
-    margin-bottom: 0.9rem;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+    white-space: pre-line;
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
 }
-.hero-subtitle {
-    font-size: 1.12rem;
-    line-height: 1.55;
-    color: rgba(255,255,255,0.92);
-    margin-bottom: 1.25rem;
+.hero-sub {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(250, 246, 238, 0.88);
+    max-width: 620px;
+    position: relative;
+    z-index: 1;
 }
-.cta-row {
+
+/* Category filter bar — below hero, above tabs */
+.category-bar {
     display: flex;
-    gap: 0.9rem;
+    gap: 0.7rem;
+    align-items: center;
+    margin-bottom: 1.2rem;
     flex-wrap: wrap;
 }
-.cta-note {
-    margin-top: 0.8rem;
-    color: rgba(255,255,255,0.85);
-    font-size: 0.92rem;
+.category-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 0.3rem;
 }
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.9rem;
-    margin: 1.1rem 0 1.4rem 0;
-}
-.metric-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-soft);
-    border-radius: 18px;
-    padding: 1rem 1.05rem;
-    box-shadow: var(--shadow-soft);
-}
-.metric-label {
-    color: var(--text-soft);
-    font-size: 0.85rem;
-    margin-bottom: 0.25rem;
-}
-.metric-value {
-    font-size: 1.22rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-.section-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-soft);
-    border-radius: 22px;
-    padding: 1.2rem 1.25rem;
-    box-shadow: var(--shadow-soft);
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--terracotta-light);
+    border: 1px solid var(--terracotta);
+    color: var(--terracotta-dark);
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
     margin-bottom: 1rem;
 }
-.section-title {
-    font-size: 1.28rem;
+
+/* Welcome card */
+.welcome-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--terracotta);
+    border-radius: 12px;
+    padding: 1rem 1.3rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-warm);
+}
+.welcome-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--terracotta-light);
+    color: var(--terracotta-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
+    flex-shrink: 0;
 }
-.section-subtitle {
-    color: var(--text-soft);
-    margin-bottom: 0.9rem;
+.welcome-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--forest-900);
+    line-height: 1.3;
 }
-.answer-card {
-    background: var(--green-050);
-    border: 1px solid #d8e6d7;
-    border-radius: 18px;
-    padding: 1rem 1.1rem;
-    margin-top: 0.6rem;
-    margin-bottom: 0.7rem;
-}
-.answer-label {
-    font-weight: 700;
-    color: var(--green-900);
-    margin-bottom: 0.15rem;
-}
-.answer-block {
-    margin-bottom: 0.85rem;
-    line-height: 1.55;
-}
-.status-pill {
-    display: inline-block;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
-    background: #edf6ed;
-    color: var(--green-900);
-    border: 1px solid #d9e9d8;
+.welcome-meta {
+    font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
-    font-weight: 700;
-    margin-right: 0.45rem;
-    margin-bottom: 0.45rem;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 2px;
 }
-.confidence-badge {
-    display: inline-block;
-    padding: 0.25rem 0.65rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
+
+.section-header {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
     font-weight: 700;
-    margin-left: 0.4rem;
-    vertical-align: middle;
+    color: var(--forest-900);
+    margin: 0.3rem 0 0.2rem 0;
+    letter-spacing: -0.01em;
 }
-.conf-high { background: #dcf1dc; color: #1f5d2e; border: 1px solid #b8dcb8; }
-.conf-med  { background: #fff4d6; color: #7a5a00; border: 1px solid #ecd98f; }
-.conf-low  { background: #fddede; color: #8a1f1f; border: 1px solid #f3b8b8; }
-.escalate-box {
-    background: #fff8e6;
-    border-left: 4px solid #d9a41a;
-    padding: 0.75rem 0.95rem;
-    border-radius: 10px;
-    margin-top: 0.8rem;
+.section-sub {
     font-size: 0.92rem;
-    color: #5c4200;
+    color: var(--ink-soft);
+    margin-bottom: 1.2rem;
 }
-.footer-box {
-    background: #fafcf9;
-    border: 1px solid #e4ece4;
+
+/* Streamlit buttons (default styling for presets and filters) */
+div.stButton > button {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 0.7rem 1rem !important;
+    color: var(--ink) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 2px rgba(90, 70, 30, 0.04) !important;
+    height: auto !important;
+    min-height: 48px !important;
+}
+div.stButton > button:hover {
+    border-color: var(--forest-500) !important;
+    background: var(--forest-100) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-warm) !important;
+}
+div.stButton > button:active, div.stButton > button:focus {
+    border-color: var(--forest-700) !important;
+}
+div.stButton > button[kind="primary"] {
+    background: var(--terracotta) !important;
+    border-color: var(--terracotta-dark) !important;
+    color: var(--cream) !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+div.stButton > button[kind="primary"]:hover {
+    background: var(--terracotta-dark) !important;
+}
+
+/* Answer card */
+.answer-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
     border-radius: 18px;
-    padding: 1rem 1.1rem;
-    margin-top: 1rem;
-    color: var(--text-soft);
-    font-size: 0.92rem;
+    padding: 1.6rem 1.8rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow-warm);
+    position: relative;
 }
-@media (max-width: 900px) {
-    .metrics-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .hero-title {
-        font-size: 2.2rem;
-    }
-    .nav-links {
-        display: none;
-    }
+.answer-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 1.8rem;
+    right: 1.8rem;
+    height: 3px;
+    background: linear-gradient(90deg, var(--forest-700), var(--terracotta), var(--gold));
+    border-radius: 0 0 3px 3px;
+}
+.answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+.answer-kicker {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+.conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.conf-high { background: var(--forest-100); color: var(--forest-900); border: 1px solid #c3dac2; }
+.conf-medium { background: #fdf4e1; color: #7a5a00; border: 1px solid #ead9a7; }
+.conf-low { background: var(--terracotta-light); color: var(--terracotta-dark); border: 1px solid #eac5b5; }
+
+.answer-issue {
+    font-family: 'Fraunces', serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--forest-900);
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.01em;
+}
+.answer-section { margin-bottom: 1.1rem; }
+.answer-section:last-child { margin-bottom: 0; }
+.answer-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.35rem;
+}
+.answer-body {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--ink);
+}
+
+.escalate-box {
+    background: #fff5e8;
+    border: 1px solid #ead9a7;
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6b4a10;
+}
+
+.symptoms-box {
+    background: var(--forest-100);
+    border: 1px solid #c8dcc6;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+}
+.symptoms-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--forest-700);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
+
+.footer-card {
+    background: var(--cream-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-top: 2rem;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+}
+.footer-card strong {
+    font-family: 'Fraunces', serif;
+    font-size: 1.0rem;
+    color: var(--forest-900);
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+/* Streamlit tab styling */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.4rem;
+    background: transparent !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border: none !important;
+    color: var(--ink-soft) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 0.7rem 1.2rem !important;
+}
+.stTabs [aria-selected="true"] {
+    color: var(--forest-900) !important;
+    border-bottom: 2px solid var(--terracotta) !important;
+}
+
+.stChatInput textarea, .stChatInput input {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.98rem !important;
+    padding: 0.8rem 1rem !important;
+}
+
+details[data-testid="stExpander"] {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    margin: 0.5rem 0 !important;
+}
+details[data-testid="stExpander"] summary {
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--forest-900) !important;
+    padding: 0.8rem 1rem !important;
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 1.8rem 1.5rem 1.5rem 1.5rem; }
+    .hero-title { font-size: 1.9rem; }
+    .answer-card { padding: 1.2rem 1.3rem; }
+    .answer-issue { font-size: 1.3rem; }
+    .brand-name { font-size: 1.4rem; }
+    .topbar-session { display: none; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -263,41 +839,41 @@ html, body, [class*="css"] {
 
 # ---------------- Rendering helpers ----------------
 def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation: bool = False):
-    """Render the 5-section structured response with confidence badge."""
     if top_score >= 0.55:
-        badge_class, badge_text = "conf-high", f"High confidence · {top_score:.2f}"
+        badge_class = "conf-high"
+        badge_text = f"● {t('confidence_high')} · {top_score:.2f}"
     elif top_score >= 0.35:
-        badge_class, badge_text = "conf-med", f"Medium confidence · {top_score:.2f}"
+        badge_class = "conf-medium"
+        badge_text = f"● {t('confidence_medium')} · {top_score:.2f}"
     else:
-        badge_class, badge_text = "conf-low", f"Low confidence · {top_score:.2f}"
+        badge_class = "conf-low"
+        badge_text = f"● {t('confidence_low')} · {top_score:.2f}"
 
     def safe(key):
-        return escape(response.get(key, "") or "Not available")
+        return escape(response.get(key, "") or "—")
 
     html = f"""
     <div class="answer-card">
-        <div style="margin-bottom:0.5rem;">
-            <span class="confidence-badge {badge_class}">{badge_text}</span>
+        <div class="answer-header">
+            <div class="answer-kicker">AgiriteChat · Advisory</div>
+            <div class="conf-badge {badge_class}">{badge_text}</div>
         </div>
-        <div class="answer-block">
-            <div class="answer-label">Likely issue</div>
-            <div>{safe("Likely issue")}</div>
-        </div>
-        <div class="answer-block">
+        <div class="answer-issue">{safe("Likely issue")}</div>
+        <div class="answer-section">
             <div class="answer-label">Why this may be happening</div>
-            <div>{safe("Why this may be happening")}</div>
+            <div class="answer-body">{safe("Why this may be happening")}</div>
         </div>
-        <div class="answer-block">
+        <div class="answer-section">
             <div class="answer-label">What to check next</div>
-            <div>{safe("What to check next")}</div>
+            <div class="answer-body">{safe("What to check next")}</div>
         </div>
-        <div class="answer-block">
+        <div class="answer-section">
             <div class="answer-label">Suggested action</div>
-            <div>{safe("Suggested action")}</div>
+            <div class="answer-body">{safe("Suggested action")}</div>
         </div>
-        <div class="answer-block" style="margin-bottom:0;">
+        <div class="answer-section">
             <div class="answer-label">When to seek local support</div>
-            <div>{safe("When to seek local support")}</div>
+            <div class="answer-body">{safe("When to seek local support")}</div>
         </div>
     </div>
     """
@@ -305,22 +881,22 @@ def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation:
 
     if needs_escalation:
         st.markdown(
-            '<div class="escalate-box">⚠️ <strong>Limited confidence in this answer.</strong> '
-            'Please confirm with your local extension officer before taking action.</div>',
+            f'<div class="escalate-box">⚠ {t("escalation")}</div>',
             unsafe_allow_html=True,
         )
 
 
-def process_question(user_question: str, crop_hint: str, category_hint: str,
+def process_question(user_question, crop_hint, category_hint="general",
                      image_symptoms=None, image_source="none"):
-    """Run the agent, render the result, log interaction, show feedback buttons."""
-    with st.spinner("Thinking..."):
+    with st.spinner("…"):
         state = run_agent(
             user_question=user_question,
             crop_hint=crop_hint,
             category_hint=category_hint,
             image_symptoms=image_symptoms or [],
             image_source=image_source,
+            language=st.session_state.language,
+            farmer_profile=st.session_state.farmer_profile,
         )
 
     interaction_id = log_interaction(st.session_state.session_id, state)
@@ -331,326 +907,362 @@ def process_question(user_question: str, crop_hint: str, category_hint: str,
         state.get("needs_escalation", False),
     )
 
-    # Feedback
-    fb1, fb2, _ = st.columns([1, 1, 10])
-    if fb1.button("👍 Helpful", key=f"up_{interaction_id}"):
+    fb1, fb2, _ = st.columns([1, 1, 8])
+    if fb1.button("👍 " + t("helpful"), key=f"up_{interaction_id}"):
         record_feedback(interaction_id, 1)
-        st.toast("Thanks for the feedback!")
-    if fb2.button("👎 Not helpful", key=f"down_{interaction_id}"):
+        st.toast(t("thanks_feedback"))
+    if fb2.button("👎 " + t("not_helpful"), key=f"down_{interaction_id}"):
         record_feedback(interaction_id, -1)
-        st.toast("Thanks — this helps us improve.")
+        st.toast(t("thanks_feedback"))
 
-    # Sources used
     matches = state.get("matches", [])
     if matches:
-        with st.expander(f"Sources used ({len(matches)})"):
+        with st.expander(f"📚 {t('sources_used')} ({len(matches)})"):
             for m in matches:
-                st.markdown(
-                    f"**{m['question']}**  \n"
-                    f"*{m['crop']} · {m['category']} · match score {m['score']:.2f}*"
-                )
+                st.markdown(f"**{m['question']}**  \n*{m['crop']} · {m['category']} · {m['score']:.2f}*")
                 st.write(m["answer"])
                 st.write("---")
 
-    # Debug trace
-    with st.expander("Agent trace (debug)"):
-        st.write("**Path:**", " → ".join(state.get("trace", [])))
-        st.write("**Classified crop:**", state.get("classified_crop", "unknown"))
-        st.write("**Classified category:**", state.get("classified_category", "general"))
-        st.write("**Top retrieval score:**", round(state.get("top_score", 0.0), 3))
-        if state.get("image_source") and state.get("image_source") != "none":
-            st.write("**Image analysis source:**", state.get("image_source"))
+    # Agent trace only shown in developer view
+    if st.session_state.developer_view:
+        with st.expander(f"⚙ {t('agent_trace')}"):
+            st.write("**Path:**", " → ".join(state.get("trace", [])))
+            st.write("**Language:**", LANGUAGES[state.get("language", "en")]["name"])
+            st.write("**Classified crop:**", state.get("classified_crop", "unknown"))
+            st.write("**Top retrieval score:**", round(state.get("top_score", 0.0), 3))
+            if state.get("image_source") and state.get("image_source") != "none":
+                st.write("**Image analysis source:**", state.get("image_source"))
 
-    # Persist in chat history
     st.session_state.messages.append({
         "role": "assistant",
-        "content": state.get("response", {}).get("Likely issue", ""),
-        "structured": state.get("response"),
+        "response": state.get("response"),
         "top_score": state.get("top_score", 0.0),
         "needs_escalation": state.get("needs_escalation", False),
         "interaction_id": interaction_id,
     })
 
 
-# ---------------- Topbar ----------------
-st.markdown("""
+# ---------------- Sidebar ----------------
+with st.sidebar:
+    # Language selector
+    lang_names = [LANGUAGES[code]["name"] for code in ["en", "sw", "fr", "rw"]]
+    lang_codes = ["en", "sw", "fr", "rw"]
+    current_idx = lang_codes.index(st.session_state.language)
+    st.markdown(f"**🌐 {t('sidebar_language')}**")
+    selected_lang = st.selectbox(
+        "language_selector",
+        options=lang_names,
+        index=current_idx,
+        label_visibility="collapsed",
+    )
+    new_lang = lang_codes[lang_names.index(selected_lang)]
+    if new_lang != st.session_state.language:
+        st.session_state.language = new_lang
+        st.rerun()
+
+    st.markdown("---")
+
+    # Farmer profile
+    st.markdown(f"### {t('sidebar_profile')}")
+
+    name = st.text_input(t("name"), value=st.session_state.farmer_profile.get("name", ""), key="f_name")
+    region = st.text_input(t("region"), value=st.session_state.farmer_profile.get("region", ""), key="f_region", placeholder="e.g. Musanze, Kigali…")
+    farm_size = st.text_input(t("farm_size"), value=st.session_state.farmer_profile.get("farm_size", ""), key="f_size", placeholder="e.g. 0.5 ha")
+    crops_grown = st.text_input(t("crops"), value=st.session_state.farmer_profile.get("crops", ""), key="f_crops", placeholder="e.g. Maize, Soybean")
+    planting_date = st.text_input(t("planting_date"), value=st.session_state.farmer_profile.get("planting_date", ""), key="f_planting", placeholder="e.g. March 2026")
+
+    if st.button(t("save_profile"), use_container_width=True):
+        st.session_state.farmer_profile = {
+            "name": name.strip(),
+            "region": region.strip(),
+            "farm_size": farm_size.strip(),
+            "crops": crops_grown.strip(),
+            "planting_date": planting_date.strip(),
+        }
+        st.session_state.profile_saved = True
+        st.toast(t("profile_saved"))
+
+    st.caption(t("profile_note"))
+
+    st.markdown("---")
+
+    # Crop & topic focus
+    st.markdown("**🌾 Crop focus**")
+    selected_crop = st.selectbox(
+        "crop_focus",
+        ["General", "Maize", "Soybean"],
+        index=0,
+        label_visibility="collapsed",
+    )
+
+    st.markdown("---")
+
+    # Developer view toggle (new)
+    dev_view = st.checkbox(
+        f"🛠 {t('sidebar_dev')}",
+        value=st.session_state.developer_view,
+        help=t("sidebar_dev_help"),
+    )
+    if dev_view != st.session_state.developer_view:
+        st.session_state.developer_view = dev_view
+        st.rerun()
+
+    # Status — only visible in developer view
+    if st.session_state.developer_view:
+        st.markdown("---")
+        st.markdown(f"**{t('sidebar_status')}**")
+        if llm_available():
+            st.write("🟢 AI reasoning: active")
+        else:
+            st.write("🟡 AI reasoning: offline")
+        st.write("🟢 Semantic retrieval")
+        st.write("🟢 Image analysis")
+        st.write("🟢 Feedback logging")
+
+        with st.expander(f"📊 {t('feedback_stats')}"):
+            stats = recent_stats()
+            st.write(f"Total interactions: **{stats['total']}**")
+            st.write(f"👍 {stats['thumbs_up']}   👎 {stats['thumbs_down']}")
+            st.write(f"Escalations: **{stats['escalations']}**")
+
+
+# ---------------- Top bar ----------------
+session_badge = (
+    f'<div class="topbar-session">Session · {st.session_state.session_id}</div>'
+    if st.session_state.developer_view else ""
+)
+st.markdown(f"""
 <div class="topbar">
-    <div class="brand">AgiriteChat</div>
-    <div class="nav-links">
-        <span>Who We Are</span>
-        <span>How It Works</span>
-        <span>Impact</span>
-        <span>Knowledge Hub</span>
-        <span>Field Support</span>
+    <div class="brand-group">
+        <div class="brand-mark">A</div>
+        <div>
+            <div class="brand-name">AgiriteChat</div>
+            <div class="brand-tag">{t('brand_tag')}</div>
+        </div>
     </div>
+    {session_badge}
 </div>
 """, unsafe_allow_html=True)
 
 # ---------------- Hero ----------------
-st.markdown("""
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-kicker">AI assistant for agriculture</div>
-        <div class="hero-title">Localized crop support for maize and soybean farmers</div>
-        <div class="hero-subtitle">
-            Helping farmers access timely, practical, and context-aware support for pests,
-            diseases, soil fertility, fertilizer, and field decisions.
-        </div>
-        <div class="cta-row">
-            <span class="status-pill">Localized support</span>
-            <span class="status-pill">Crop-aware retrieval</span>
-            <span class="status-pill">Structured guidance</span>
-        </div>
-        <div class="cta-note">
-            Designed to support scalable farmer guidance beyond traditional one-to-one extension workflows.
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------------- Sidebar ----------------
-with st.sidebar:
-    st.title("AgiriteChat")
-    st.caption("Farmer support system for maize and soybean production")
-
-    selected_crop = st.selectbox("Crop", ["General", "Maize", "Soybean"], index=0)
-    selected_topic = st.selectbox(
-        "Problem area",
-        ["General", "Pest", "Disease", "Nutrient_deficiency", "Soil", "Weeds", "Drought", "Fertilizer"],
-        index=0,
-    )
-
-    st.markdown("### System status")
-    if llm_available():
-        st.write("✅ AI reasoning: Active (Gemini)")
-    else:
-        st.write("⚠️ AI reasoning: Offline — set `GEMINI_API_KEY`")
-    st.write("🔎 Semantic retrieval: Active")
-    st.write("📸 Image analysis: Local + Gemini fallback")
-    st.write("💾 Feedback logging: Active")
-
-    with st.expander("Feedback stats"):
-        stats = recent_stats()
-        st.write(f"Total interactions: **{stats['total']}**")
-        st.write(f"👍 {stats['thumbs_up']}   👎 {stats['thumbs_down']}")
-        st.write(f"Escalations flagged: **{stats['escalations']}**")
-
-    with st.expander("About AgiriteChat"):
-        st.write(
-            "AgiriteChat is an agent-based AI assistant for maize and soybean farmers. "
-            "It uses a LangGraph state machine to classify questions, retrieve grounded "
-            "knowledge with semantic search, check confidence, and ask clarifying "
-            "questions when needed."
-        )
-        st.write(
-            "Image analysis runs a local PlantVillage model for maize diseases and "
-            "falls back to Gemini Vision for soybean and edge cases."
-        )
-
-# ---------------- Metric cards ----------------
-ai_status_label = "AI + Knowledge Base" if llm_available() else "Knowledge Base Only"
 st.markdown(f"""
-<div class="metrics-grid">
-    <div class="metric-card">
-        <div class="metric-label">Supported crops</div>
-        <div class="metric-value">Maize and Soybean</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">System mode</div>
-        <div class="metric-value">{ai_status_label}</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Current focus</div>
-        <div class="metric-value">{escape(selected_topic)}</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-label">Consultation type</div>
-        <div class="metric-value">Text and Photo Support</div>
-    </div>
+<div class="hero">
+    <div class="hero-label">AgiriteChat · v3</div>
+    <div class="hero-title">{t('hero_title')}</div>
+    <div class="hero-sub">{t('hero_sub')}</div>
 </div>
 """, unsafe_allow_html=True)
+
+# ---------------- Category filter buttons (real working filters) ----------------
+st.markdown(f'<div class="category-label">QUICK FILTERS</div>', unsafe_allow_html=True)
+
+fcol1, fcol2, fcol3, fcol4 = st.columns([1, 1, 1.3, 5])
+if fcol1.button(f"🐛 {t('filter_pests')}",
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "pest" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "pest" else "pest"
+    st.rerun()
+if fcol2.button(f"🍃 {t('filter_diseases')}",
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "disease" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "disease" else "disease"
+    st.rerun()
+if fcol3.button(f"🌱 {t('filter_soil')}",
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "soil" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "soil" else "soil"
+    st.rerun()
+
+# Active filter badge
+if st.session_state.category_filter:
+    filter_label_key = f"filter_{st.session_state.category_filter}s" if st.session_state.category_filter != "soil" else "filter_soil"
+    filter_display = t(filter_label_key)
+    bc1, bc2 = st.columns([3, 9])
+    with bc1:
+        st.markdown(
+            f'<div class="active-filter-badge">● {t("filter_active")}: {filter_display}</div>',
+            unsafe_allow_html=True,
+        )
+    with bc2:
+        if st.button(f"✕ {t('filter_clear')}", key="clear_filter"):
+            st.session_state.category_filter = None
+            st.rerun()
+
+# ---------------- Welcome card ----------------
+profile = st.session_state.farmer_profile
+has_profile = st.session_state.profile_saved and profile.get("name")
+
+if has_profile:
+    avatar = profile["name"][0].upper() if profile["name"] else "F"
+    welcome = t("welcome_named").format(name=profile["name"])
+    meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
+    meta = " · ".join(meta_parts) if meta_parts else ""
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar">{escape(avatar)}</div>
+        <div>
+            <div class="welcome-text">{escape(welcome)}</div>
+            {f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ''}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+elif selected_crop == "Maize":
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar">🌽</div>
+        <div><div class="welcome-text">{escape(t("welcome_maize"))}</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+elif selected_crop == "Soybean":
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar">🫘</div>
+        <div><div class="welcome-text">{escape(t("welcome_soybean"))}</div></div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ---------------- Tabs ----------------
-tab1, tab2, tab3 = st.tabs(["Ask AgiriteChat", "Photo Review", "Knowledge Hub"])
+tab1, tab2, tab3 = st.tabs([t("tab_ask"), t("tab_photo"), t("tab_browse")])
 
-# ---- Tab 1: Ask ----
+# ---- Ask tab ----
 with tab1:
-    st.markdown("""
-    <div class="section-card">
-        <div class="section-title">Ask AgiriteChat</div>
-        <div class="section-subtitle">
-            Enter a crop question and receive structured support grounded in maize and soybean knowledge.
-        </div>
-    """, unsafe_allow_html=True)
+    # Get presets for current crop + language
+    crop_key = selected_crop.lower() if selected_crop != "General" else "general"
+    lang_key = st.session_state.language
+    preset_list = PRESETS.get(crop_key, PRESETS["general"]).get(lang_key, PRESETS[crop_key]["en"])
 
-    q1, q2, q3, q4 = st.columns(4)
-    if q1.button("Soybeans not fixing nitrogen"):
-        st.session_state["preset_question"] = "My soybeans are weak and not fixing nitrogen well. What could be wrong?"
-    if q2.button("Purple maize leaves"):
-        st.session_state["preset_question"] = "My maize leaves are turning purple. What could be wrong?"
-    if q3.button("Maize leaf blight"):
-        st.session_state["preset_question"] = "How do I manage maize leaf blight?"
-    if q4.button("Soybean root rot"):
-        st.session_state["preset_question"] = "What causes root rot in soybean?"
+    # Apply category filter if active
+    if st.session_state.category_filter:
+        preset_list = [p for p in preset_list if p[2] == st.session_state.category_filter]
 
-    # Render chat history (structured rendering for past answers)
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            if message.get("structured"):
-                render_answer_card(
-                    message["structured"],
-                    message.get("top_score", 0.0),
-                    message.get("needs_escalation", False),
-                )
-            else:
-                st.write(message["content"])
+    if preset_list:
+        st.markdown(f'<div class="section-header">{t("quick_starts")}</div>', unsafe_allow_html=True)
+        num_cols = min(len(preset_list), 4)
+        cols = st.columns(num_cols)
+        for i, (label, question, _cat) in enumerate(preset_list):
+            if cols[i % num_cols].button(label, key=f"preset_{i}_{lang_key}_{crop_key}", use_container_width=True):
+                st.session_state["preset_q"] = question
 
-    # Handle preset click
-    preset_question = st.session_state.pop("preset_question", None)
-    if preset_question:
-        st.session_state.messages.append({
-            "role": "user",
-            "content": preset_question,
-            "structured": None,
-        })
+    # Message history
+    for msg in st.session_state.messages:
+        if msg.get("response"):
+            render_answer_card(
+                msg["response"],
+                msg.get("top_score", 0.0),
+                msg.get("needs_escalation", False),
+            )
+
+    preset_q = st.session_state.pop("preset_q", None)
+    if preset_q:
         with st.chat_message("user"):
-            st.write(preset_question)
+            st.write(preset_q)
         with st.chat_message("assistant"):
-            process_question(preset_question, selected_crop, selected_topic)
+            process_question(preset_q, selected_crop)
 
-    # Handle typed input
-    user_question = st.chat_input("Type your farming question here")
-    if user_question:
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_question,
-            "structured": None,
-        })
+    user_q = st.chat_input(t("input_placeholder"))
+    if user_q:
         with st.chat_message("user"):
-            st.write(user_question)
+            st.write(user_q)
         with st.chat_message("assistant"):
-            process_question(user_question, selected_crop, selected_topic)
+            process_question(user_q, selected_crop)
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ---- Tab 2: Photo Review ----
+# ---- Photo tab ----
 with tab2:
-    st.markdown("""
-    <div class="section-card">
-        <div class="section-title">Photo Review</div>
-        <div class="section-subtitle">
-            Upload a field photo. The system will check image quality, analyze symptoms visually,
-            and combine the findings with the knowledge base for structured guidance.
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t("tab_photo")}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-sub">{t("photo_upload")}</div>', unsafe_allow_html=True)
 
-    photo = st.file_uploader("Upload a field photo", type=["png", "jpg", "jpeg"])
-    photo_description = st.text_input(
-        "Optional description",
-        placeholder="e.g. yellow patches on lower leaves, V6 stage"
-    )
+    photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
+    photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"))
 
     if photo is not None:
         st.image(photo, use_container_width=True)
 
-    if st.button("Analyze photo", type="primary"):
+    if st.button(t("analyze_photo"), type="primary"):
         if photo is None:
-            st.warning("Please upload a photo first.")
+            st.warning(t("photo_upload"))
         else:
             image_bytes = photo.getvalue()
             crop_hint_lower = selected_crop.lower() if selected_crop != "General" else None
 
-            with st.spinner("Checking image quality and analyzing..."):
+            with st.spinner("…"):
                 vision_result = analyze_field_image(
                     image_bytes,
-                    farmer_description=photo_description or "",
+                    farmer_description=photo_desc or "",
                     crop_hint=crop_hint_lower,
                 )
 
             if not vision_result["ok"]:
                 st.error(vision_result["quality_reason"] or "Could not analyze the image.")
             else:
-                source_label = {
-                    "plantvillage_local": "Local PlantVillage model",
-                    "gemini": "Gemini Vision",
-                }.get(vision_result["source"], vision_result["source"])
-                st.success(f"Image analyzed via: **{source_label}**")
-
                 if vision_result["symptoms"]:
-                    st.markdown("**Symptoms detected:**")
+                    symptoms_html = '<ul style="margin:0; padding-left:1.2rem;">'
                     for s in vision_result["symptoms"]:
-                        st.write(f"• {s}")
+                        symptoms_html += f"<li>{escape(s)}</li>"
+                    symptoms_html += "</ul>"
+                    st.markdown(f"""
+                    <div class="symptoms-box">
+                        <div class="symptoms-label">{t("symptoms_detected")}</div>
+                        {symptoms_html}
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                st.markdown("### Photo-based support")
-                combined_q = photo_description or "Please help me diagnose this crop issue based on the photo."
+                combined_q = photo_desc or "Please help me diagnose this crop issue based on the photo."
                 process_question(
                     user_question=combined_q,
                     crop_hint=selected_crop,
-                    category_hint=selected_topic,
                     image_symptoms=vision_result["symptoms"],
                     image_source=vision_result["source"],
                 )
 
-                st.caption(
-                    "Confidence note: this is advisory support based on visual description "
-                    "and available knowledge, not a final diagnosis."
-                )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ---- Tab 3: Knowledge Hub ----
+# ---- Knowledge library ----
 with tab3:
-    st.markdown("""
-    <div class="section-card">
-        <div class="section-title">Knowledge Hub</div>
-        <div class="section-subtitle">
-            Search the agronomic issues currently supported by the system, using semantic search.
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<div class="section-header">{t("tab_browse")}</div>', unsafe_allow_html=True)
 
-    search_term = st.text_input(
-        "Search knowledge",
-        placeholder="Search by crop, issue, deficiency, disease, pest, or fertilizer"
-    )
-    crop_filter = st.selectbox("Filter by crop", ["All", "Maize", "Soybean"], key="kh_crop_filter")
+    search_term = st.text_input(t("library_search"), placeholder=t("library_search_ph"), label_visibility="collapsed")
+    crop_filter = st.selectbox("Crop", ["All", "Maize", "Soybean"], key="kh_filter")
 
+    # Load KB
+    import json
+    try:
+        with open("knowledge_base.json", "r", encoding="utf-8") as f:
+            all_entries = json.load(f)
+    except FileNotFoundError:
+        all_entries = []
+
+    # Apply crop filter
+    if crop_filter != "All":
+        all_entries = [e for e in all_entries if e.get("crop") in (crop_filter.lower(), "both")]
+
+    # Apply category filter (from hero buttons)
+    if st.session_state.category_filter:
+        target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
+        all_entries = [e for e in all_entries if e.get("category") in target_cats]
+
+    # Apply text search
     if search_term:
         retriever = get_retriever()
         crop_arg = crop_filter.lower() if crop_filter != "All" else None
         hits = retriever.search(search_term, crop=crop_arg, top_k=10)
-        st.write(f"**Results: {len(hits)}**")
+        # Also apply category filter to search results
+        if st.session_state.category_filter:
+            target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
+            hits = [h for h in hits if h.get("category") in target_cats]
+        st.write(f"**{len(hits)} results**")
         for h in hits:
-            with st.expander(f"{h['question']}  ·  {h['crop']}/{h['category']}  ·  score {h['score']:.2f}"):
+            with st.expander(f"{h['question']}  ·  {h['crop']}/{h['category']}  ·  {h['score']:.2f}"):
                 st.write(h["answer"])
     else:
-        # Browse mode (no search term)
-        import json
-        try:
-            with open("knowledge_base.json", "r", encoding="utf-8") as f:
-                entries = json.load(f)
-        except FileNotFoundError:
-            entries = []
-
-        if crop_filter != "All":
-            entries = [e for e in entries if e.get("crop") in (crop_filter.lower(), "both")]
-
-        st.write(f"**Results: {len(entries)}**")
-        for e in entries:
+        st.write(f"**{len(all_entries)} entries**")
+        for e in all_entries:
             with st.expander(f"{e['question']}  ·  {e.get('crop','?')}/{e.get('category','?')}"):
                 st.write(e["answer"])
                 if e.get("symptoms"):
                     st.caption("Symptoms: " + ", ".join(e["symptoms"]))
 
-    st.markdown("</div>", unsafe_allow_html=True)
-
 # ---------------- Footer ----------------
-st.markdown("""
-<div class="footer-box">
-    <strong>AgiriteChat</strong><br>
-    Version: 2.0 (agent-based)<br>
-    Built as a crop-support system for maize and soybean production using LangGraph agent reasoning,
-    semantic retrieval, image analysis, and feedback logging.<br><br>
-    <strong>Responsible use:</strong> This tool is for support and early interpretation only.
-    Serious disease, pest, and fertility issues should always be confirmed through local agronomic expertise.
+st.markdown(f"""
+<div class="footer-card">
+    <strong>{t('responsible_use')}</strong>
+    {t('responsible_text')}
 </div>
 """, unsafe_allow_html=True)
