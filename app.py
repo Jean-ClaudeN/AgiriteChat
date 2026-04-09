@@ -475,7 +475,11 @@ section[data-testid="stSidebar"] .stDateInput label {
 
 /* Hero */
 .hero {
-    background: linear-gradient(135deg, var(--forest-900) 0%, var(--forest-700) 55%, #3d6540 100%);
+    background:
+        linear-gradient(135deg, rgba(31, 58, 38, 0.88) 0%, rgba(45, 82, 52, 0.78) 55%, rgba(61, 101, 64, 0.7) 100%),
+        url('https://images.pexels.com/photos/13525130/pexels-photo-13525130.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat,
+        linear-gradient(135deg, var(--forest-900) 0%, var(--forest-700) 55%, #3d6540 100%);
+    background-blend-mode: normal;
     border-radius: 20px;
     padding: 2.5rem 2.8rem 2.2rem 2.8rem;
     margin-bottom: 1.4rem;
@@ -1109,14 +1113,14 @@ if has_profile:
 elif selected_crop == "Maize":
     st.markdown(f"""
     <div class="welcome-card">
-        <div class="welcome-avatar">🌽</div>
+        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
         <div><div class="welcome-text">{escape(t("welcome_maize"))}</div></div>
     </div>
     """, unsafe_allow_html=True)
 elif selected_crop == "Soybean":
     st.markdown(f"""
     <div class="welcome-card">
-        <div class="welcome-avatar">🫘</div>
+        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
         <div><div class="welcome-text">{escape(t("welcome_soybean"))}</div></div>
     </div>
     """, unsafe_allow_html=True)
@@ -1171,8 +1175,47 @@ with tab2:
     st.markdown(f'<div class="section-header">{t("tab_photo")}</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="section-sub">{t("photo_upload")}</div>', unsafe_allow_html=True)
 
+    # Empty-state illustration: shown above the uploader when no photo is uploaded
     photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
     photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"))
+
+    if photo is None:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, var(--forest-100) 0%, var(--cream) 100%);
+            border: 1px dashed #c8dcc6;
+            border-radius: 16px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        ">
+            <div style="
+                width: 110px;
+                height: 110px;
+                margin: 0 auto 1rem auto;
+                border-radius: 50%;
+                background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
+                background-size: cover;
+                background-position: center;
+                border: 3px solid var(--cream);
+                box-shadow: var(--shadow-warm);
+            "></div>
+            <div style="
+                font-family: 'Fraunces', serif;
+                font-size: 1.15rem;
+                font-weight: 600;
+                color: var(--forest-900);
+                margin-bottom: 0.4rem;
+            ">No photo uploaded yet</div>
+            <div style="
+                font-size: 0.9rem;
+                color: var(--ink-soft);
+                max-width: 360px;
+                margin: 0 auto;
+                line-height: 1.5;
+            ">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     if photo is not None:
         st.image(photo, use_container_width=True)
