@@ -108,6 +108,26 @@ UI = {
         "responsible_text": "AgiriteChat is a support tool for early interpretation only. Serious disease, pest, or fertility problems should always be confirmed with a local agronomist or extension officer.",
         "library_search": "Search knowledge library",
         "library_search_ph": "yellow lower leaves on maize…",
+        # Landing page sections
+        "how_kicker": "How it works",
+        "how_title": "Three steps from worry to action.",
+        "how_step1_title": "Ask",
+        "how_step1_desc": "Describe what you see in your field, or upload a photo of the affected plant.",
+        "how_step2_title": "Diagnose",
+        "how_step2_desc": "AgiriteChat analyzes your input against an agronomic knowledge base.",
+        "how_step3_title": "Act",
+        "how_step3_desc": "Get clear, practical next steps in your language — and know when to call extension.",
+        "impact_kicker": "Real impact",
+        "impact_title": "Built for your field, measured by your feedback.",
+        "impact_questions": "Questions answered",
+        "impact_confident": "Confident answers",
+        "impact_languages": "Languages supported",
+        "featured_kicker": "Featured topics",
+        "featured_title": "What farmers are asking right now.",
+        "featured_card_open": "Open this question",
+        "languages_kicker": "For every farmer",
+        "languages_title": "Available in your language.",
+        "languages_sub": "AgiriteChat speaks the languages farmers actually use across East and Central Africa.",
     },
     "sw": {
         "brand_tag": "Ushauri wa kilimo kwa wakulima wadogo",
@@ -159,6 +179,25 @@ UI = {
         "responsible_text": "AgiriteChat ni chombo cha msaada cha tafsiri ya mapema tu. Matatizo makubwa ya magonjwa, wadudu, au rutuba yanapaswa kuthibitishwa na mtaalam wa kilimo wa ndani.",
         "library_search": "Tafuta katika maktaba",
         "library_search_ph": "majani ya njano ya chini ya mahindi…",
+        "how_kicker": "Jinsi inavyofanya kazi",
+        "how_title": "Hatua tatu kutoka wasiwasi hadi hatua.",
+        "how_step1_title": "Uliza",
+        "how_step1_desc": "Eleza unachoona shambani, au pakia picha ya mmea ulioathirika.",
+        "how_step2_title": "Tambua",
+        "how_step2_desc": "AgiriteChat inachambua mchango wako dhidi ya hifadhi ya maarifa ya kilimo.",
+        "how_step3_title": "Tenda",
+        "how_step3_desc": "Pata hatua wazi za vitendo katika lugha yako — na ujue wakati wa kupiga simu kwa ugani.",
+        "impact_kicker": "Athari halisi",
+        "impact_title": "Imejengwa kwa shamba lako, imepimwa kwa maoni yako.",
+        "impact_questions": "Maswali yaliyojibiwa",
+        "impact_confident": "Majibu ya uhakika",
+        "impact_languages": "Lugha zinazoungwa mkono",
+        "featured_kicker": "Mada zinazoangaziwa",
+        "featured_title": "Kile wakulima wanachouliza sasa hivi.",
+        "featured_card_open": "Fungua swali hili",
+        "languages_kicker": "Kwa kila mkulima",
+        "languages_title": "Inapatikana katika lugha yako.",
+        "languages_sub": "AgiriteChat inazungumza lugha ambazo wakulima wanazitumia Afrika Mashariki na Kati.",
     },
     "fr": {
         "brand_tag": "Conseil agricole pour petits exploitants",
@@ -210,6 +249,25 @@ UI = {
         "responsible_text": "AgiriteChat est un outil d'aide à l'interprétation précoce. Les problèmes graves de maladies, ravageurs ou fertilité doivent toujours être confirmés par un agronome local.",
         "library_search": "Rechercher dans la bibliothèque",
         "library_search_ph": "feuilles basses jaunes de maïs…",
+        "how_kicker": "Comment ça marche",
+        "how_title": "Trois étapes du souci à l'action.",
+        "how_step1_title": "Demander",
+        "how_step1_desc": "Décrivez ce que vous voyez dans votre champ, ou téléchargez une photo de la plante affectée.",
+        "how_step2_title": "Diagnostiquer",
+        "how_step2_desc": "AgiriteChat analyse votre demande dans une base de connaissances agronomiques.",
+        "how_step3_title": "Agir",
+        "how_step3_desc": "Recevez des étapes claires et pratiques dans votre langue — et sachez quand contacter la vulgarisation.",
+        "impact_kicker": "Impact réel",
+        "impact_title": "Conçu pour votre champ, mesuré par vos retours.",
+        "impact_questions": "Questions répondues",
+        "impact_confident": "Réponses confiantes",
+        "impact_languages": "Langues prises en charge",
+        "featured_kicker": "Sujets en vedette",
+        "featured_title": "Ce que les agriculteurs demandent en ce moment.",
+        "featured_card_open": "Ouvrir cette question",
+        "languages_kicker": "Pour chaque agriculteur",
+        "languages_title": "Disponible dans votre langue.",
+        "languages_sub": "AgiriteChat parle les langues que les agriculteurs utilisent réellement en Afrique de l'Est et centrale.",
     },
     "rw": {
         "brand_tag": "Inama z'ubuhinzi ku bahinzi bato",
@@ -261,6 +319,25 @@ UI = {
         "responsible_text": "AgiriteChat ni igikoresho cy'ubufasha gusa. Ibibazo bikomeye by'indwara, udukoko, cyangwa umwanda bigomba kwemezwa n'umuhanga mu buhinzi wa hafi.",
         "library_search": "Shakisha mu bubiko",
         "library_search_ph": "amababi y'umuhondo y'ibigori…",
+        "how_kicker": "Uko bikora",
+        "how_title": "Intambwe eshatu uva ku guhangayika ujya ku gukora.",
+        "how_step1_title": "Baza",
+        "how_step1_desc": "Sobanura ibyo urabona mu murima wawe, cyangwa shyiraho ifoto y'igihingwa cyanduye.",
+        "how_step2_title": "Suzuma",
+        "how_step2_desc": "AgiriteChat isuzuma ibyo wavuze ihereye ku bumenyi bw'ubuhinzi.",
+        "how_step3_title": "Korera",
+        "how_step3_desc": "Bonera intambwe zigaragara mu rurimi rwawe — kandi umenye igihe cyo guhamagara umufasha.",
+        "impact_kicker": "Ingaruka nyazo",
+        "impact_title": "Yakozwe ku murima wawe, ipimwe n'ibitekerezo byawe.",
+        "impact_questions": "Ibibazo byashubijwe",
+        "impact_confident": "Ibisubizo by'ikizere",
+        "impact_languages": "Indimi zifashishwa",
+        "featured_kicker": "Ingingo zihariwe",
+        "featured_title": "Ibyo abahinzi babaza ubu.",
+        "featured_card_open": "Fungura iki kibazo",
+        "languages_kicker": "Ku muhinzi wese",
+        "languages_title": "Iraboneka mu rurimi rwawe.",
+        "languages_sub": "AgiriteChat ivuga indimi abahinzi bakoresha mu Afurika y'Iburasirazuba no Hagati.",
     },
 }
 
@@ -829,6 +906,328 @@ details[data-testid="stExpander"] summary {
     padding: 0.8rem 1rem !important;
 }
 
+/* ============================================================ */
+/*  LANDING PAGE SECTIONS (v3.3)                                  */
+/* ============================================================ */
+
+/* Section spacing — used by all landing sections */
+.land-section {
+    margin: 2.5rem 0 2rem 0;
+}
+.land-kicker {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.4rem;
+}
+.land-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700;
+    color: var(--forest-900);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 640px;
+}
+.land-sub {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 600px;
+    margin-top: -0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+/* "How it works" — three step cards */
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.how-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.4rem 1.4rem 1.5rem 1.4rem;
+    box-shadow: var(--shadow-warm);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.how-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.how-card-image {
+    width: 100%;
+    height: 140px;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.how-card-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, transparent 50%, rgba(31, 58, 38, 0.35) 100%);
+}
+.how-step-number {
+    font-family: 'Fraunces', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+}
+.how-step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+}
+.how-step-desc {
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+}
+
+/* "Real impact" — three big numbers */
+.impact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.impact-card {
+    background: linear-gradient(160deg, var(--forest-700) 0%, var(--forest-900) 100%);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem 1.6rem 1.6rem;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-warm);
+}
+.impact-card.terracotta {
+    background: linear-gradient(160deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+}
+.impact-card.gold {
+    background: linear-gradient(160deg, var(--gold) 0%, #a17a36 100%);
+}
+.impact-card::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(250, 246, 238, 0.15) 0%, transparent 65%);
+}
+.impact-number {
+    font-family: 'Fraunces', serif;
+    font-size: 3.2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    position: relative;
+    z-index: 1;
+}
+.impact-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.7rem;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
+}
+
+/* "Featured topics" — three real KB cards */
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.featured-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-warm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+.featured-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.featured-image {
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.featured-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(31, 58, 38, 0.5) 100%);
+}
+.featured-tag {
+    position: absolute;
+    top: 0.8rem;
+    left: 0.8rem;
+    background: rgba(250, 246, 238, 0.92);
+    color: var(--forest-900);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.65rem;
+    border-radius: 100px;
+    z-index: 1;
+}
+.featured-body {
+    padding: 1.2rem 1.3rem 1.4rem 1.3rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.featured-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+}
+.featured-summary {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    flex: 1;
+}
+.featured-cta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* "Languages" strip */
+.lang-section {
+    background: linear-gradient(180deg, var(--cream-dark) 0%, var(--cream) 100%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 2rem 2.2rem;
+    margin: 2.5rem 0 2rem 0;
+}
+.lang-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    margin-top: 1.4rem;
+}
+.lang-pill {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.lang-pill:hover {
+    border-color: var(--forest-500);
+    transform: translateY(-1px);
+}
+.lang-pill-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    margin-bottom: 0.2rem;
+}
+.lang-pill-native {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.lang-pill.beta::after {
+    content: "BETA";
+    display: inline-block;
+    margin-left: 0.4rem;
+    background: var(--gold);
+    color: var(--cream);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 100px;
+    vertical-align: middle;
+    letter-spacing: 0.08em;
+}
+
+/* SVG icon system — replaces emojis */
+.svg-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+    opacity: 0.9;
+}
+
+/* Inline SVG icons used in filter buttons via background-image */
+.icon-bug, .icon-leaf, .icon-sprout, .icon-globe, .icon-wheat, .icon-arrow {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    vertical-align: -3px;
+    margin-right: 0.45rem;
+}
+.icon-bug {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 2l1.88 1.88'/><path d='M14.12 3.88L16 2'/><path d='M9 7.13v-1a3.003 3.003 0 116 0v1'/><path d='M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4'/></svg>");
+}
+.icon-leaf {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96a1 1 0 0 1 1.8.5c0 8.42-3.42 14.66-9.4 16.4Z'/><path d='M2 21c0-3 1.85-5.36 5.08-6'/></svg>");
+}
+.icon-sprout {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 20h10'/><path d='M10 20c5.5-2.5.8-6.4 3-10'/><path d='M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z'/><path d='M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z'/></svg>");
+}
+.icon-globe {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d5234' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><line x1='2' y1='12' x2='22' y2='12'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/></svg>");
+}
+.icon-wheat {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d5234' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 22 16 8'/><path d='M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z'/><path d='M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/><path d='M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/><path d='M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/></svg>");
+}
+.icon-arrow {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><line x1='5' y1='12' x2='19' y2='12'/><polyline points='12 5 19 12 12 19'/></svg>");
+    width: 14px;
+    height: 14px;
+}
+
 @media (max-width: 768px) {
     .hero { padding: 1.8rem 1.5rem 1.5rem 1.5rem; }
     .hero-title { font-size: 1.9rem; }
@@ -836,6 +1235,9 @@ details[data-testid="stExpander"] summary {
     .answer-issue { font-size: 1.3rem; }
     .brand-name { font-size: 1.4rem; }
     .topbar-session { display: none; }
+    .how-grid, .impact-grid, .featured-grid { grid-template-columns: 1fr; }
+    .lang-grid { grid-template-columns: repeat(2, 1fr); }
+    .impact-number { font-size: 2.5rem; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -952,7 +1354,7 @@ with st.sidebar:
     lang_names = [LANGUAGES[code]["name"] for code in ["en", "sw", "fr", "rw"]]
     lang_codes = ["en", "sw", "fr", "rw"]
     current_idx = lang_codes.index(st.session_state.language)
-    st.markdown(f"**🌐 {t('sidebar_language')}**")
+    st.markdown(f'<div style="font-family: \'DM Sans\', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--forest-700); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem;"><span class="icon-globe"></span>{t("sidebar_language")}</div>', unsafe_allow_html=True)
     selected_lang = st.selectbox(
         "language_selector",
         options=lang_names,
@@ -991,7 +1393,7 @@ with st.sidebar:
     st.markdown("---")
 
     # Crop & topic focus
-    st.markdown("**🌾 Crop focus**")
+    st.markdown('<div style="font-family: \'DM Sans\', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--forest-700); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem;"><span class="icon-wheat"></span>Crop focus</div>', unsafe_allow_html=True)
     selected_crop = st.selectbox(
         "crop_focus",
         ["General", "Maize", "Soybean"],
@@ -1003,7 +1405,7 @@ with st.sidebar:
 
     # Developer view toggle (new)
     dev_view = st.checkbox(
-        f"🛠 {t('sidebar_dev')}",
+        t('sidebar_dev'),
         value=st.session_state.developer_view,
         help=t("sidebar_dev_help"),
     )
@@ -1061,17 +1463,17 @@ st.markdown(f"""
 st.markdown(f'<div class="category-label">QUICK FILTERS</div>', unsafe_allow_html=True)
 
 fcol1, fcol2, fcol3, fcol4 = st.columns([1, 1, 1.3, 5])
-if fcol1.button(f"🐛 {t('filter_pests')}",
+if fcol1.button(t("filter_pests"),
                 use_container_width=True,
                 type="primary" if st.session_state.category_filter == "pest" else "secondary"):
     st.session_state.category_filter = None if st.session_state.category_filter == "pest" else "pest"
     st.rerun()
-if fcol2.button(f"🍃 {t('filter_diseases')}",
+if fcol2.button(t("filter_diseases"),
                 use_container_width=True,
                 type="primary" if st.session_state.category_filter == "disease" else "secondary"):
     st.session_state.category_filter = None if st.session_state.category_filter == "disease" else "disease"
     st.rerun()
-if fcol3.button(f"🌱 {t('filter_soil')}",
+if fcol3.button(t("filter_soil"),
                 use_container_width=True,
                 type="primary" if st.session_state.category_filter == "soil" else "secondary"):
     st.session_state.category_filter = None if st.session_state.category_filter == "soil" else "soil"
@@ -1091,6 +1493,167 @@ if st.session_state.category_filter:
         if st.button(f"✕ {t('filter_clear')}", key="clear_filter"):
             st.session_state.category_filter = None
             st.rerun()
+
+# ============================================================
+# LANDING SECTIONS (v3.3)
+# ============================================================
+
+# ---- Section 1: How it works ----
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('how_kicker')}</div>
+    <div class="land-title">{t('how_title')}</div>
+    <div class="how-grid">
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 01</div>
+            <div class="how-step-title">{t('how_step1_title')}</div>
+            <div class="how-step-desc">{t('how_step1_desc')}</div>
+        </div>
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 02</div>
+            <div class="how-step-title">{t('how_step2_title')}</div>
+            <div class="how-step-desc">{t('how_step2_desc')}</div>
+        </div>
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 03</div>
+            <div class="how-step-title">{t('how_step3_title')}</div>
+            <div class="how-step-desc">{t('how_step3_desc')}</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---- Section 2: Real impact (live stats from feedback DB) ----
+try:
+    _stats = recent_stats()
+    _total = _stats.get('total', 0)
+    _escalations = _stats.get('escalations', 0)
+    _confident = max(0, _total - _escalations)
+except Exception:
+    _total = 0
+    _confident = 0
+
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('impact_kicker')}</div>
+    <div class="land-title">{t('impact_title')}</div>
+    <div class="impact-grid">
+        <div class="impact-card">
+            <div class="impact-number">{_total}</div>
+            <div class="impact-label">{t('impact_questions')}</div>
+        </div>
+        <div class="impact-card terracotta">
+            <div class="impact-number">{_confident}</div>
+            <div class="impact-label">{t('impact_confident')}</div>
+        </div>
+        <div class="impact-card gold">
+            <div class="impact-number">4</div>
+            <div class="impact-label">{t('impact_languages')}</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---- Section 3: Featured topics (real KB cards, clickable) ----
+# Pull three real entries from the knowledge base
+import json as _json
+try:
+    with open("knowledge_base.json", "r", encoding="utf-8") as _f:
+        _kb_all = _json.load(_f)
+except Exception:
+    _kb_all = []
+
+def _find_kb(question_substring, fallback_question):
+    """Find a KB entry whose question contains the substring; fallback to a literal Q."""
+    for e in _kb_all:
+        if question_substring.lower() in e.get("question", "").lower():
+            return e
+    return {"question": fallback_question, "answer": "", "crop": "general", "category": "general"}
+
+_featured = [
+    {
+        "entry": _find_kb("fall armyworm", "How do I control fall armyworm in maize?"),
+        "tag": "Maize · Pest",
+        "image": "https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+    {
+        "entry": _find_kb("purple", "My maize leaves are turning purple. What is wrong?"),
+        "tag": "Maize · Soil",
+        "image": "https://images.pexels.com/photos/13525130/pexels-photo-13525130.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+    {
+        "entry": _find_kb("nodulation", "How can I improve soybean nodulation?"),
+        "tag": "Soybean · Soil",
+        "image": "https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+]
+
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('featured_kicker')}</div>
+    <div class="land-title">{t('featured_title')}</div>
+    <div class="featured-grid">
+""", unsafe_allow_html=True)
+
+# Render the cards as HTML
+_cards_html = ""
+for i, _f in enumerate(_featured):
+    _e = _f["entry"]
+    _summary = (_e.get("answer") or "")[:140]
+    if len(_e.get("answer", "")) > 140:
+        _summary += "…"
+    _cards_html += f"""
+    <div class="featured-card">
+        <div class="featured-image" style="background-image: url('{_f['image']}');">
+            <div class="featured-tag">{escape(_f['tag'])}</div>
+        </div>
+        <div class="featured-body">
+            <div class="featured-title">{escape(_e['question'])}</div>
+            <div class="featured-summary">{escape(_summary)}</div>
+            <div class="featured-cta">{t('featured_card_open')} <span class="icon-arrow"></span></div>
+        </div>
+    </div>
+    """
+
+st.markdown(_cards_html + "</div></div>", unsafe_allow_html=True)
+
+# Wire up the cards: real Streamlit buttons sit just below as click triggers
+_btn_cols = st.columns(3)
+for i, _f in enumerate(_featured):
+    with _btn_cols[i]:
+        if st.button(t('featured_card_open'), key=f"featured_btn_{i}", use_container_width=True):
+            st.session_state["preset_q"] = _f["entry"]["question"]
+            st.rerun()
+
+# ---- Section 4: Languages strip ----
+st.markdown(f"""
+<div class="lang-section">
+    <div class="land-kicker">{t('languages_kicker')}</div>
+    <div class="land-title" style="margin-bottom: 0.4rem;">{t('languages_title')}</div>
+    <div style="font-size: 0.95rem; color: var(--ink-soft); max-width: 580px; line-height: 1.55;">{t('languages_sub')}</div>
+    <div class="lang-grid">
+        <div class="lang-pill">
+            <div class="lang-pill-name">English</div>
+            <div class="lang-pill-native">EN</div>
+        </div>
+        <div class="lang-pill">
+            <div class="lang-pill-name">Kiswahili</div>
+            <div class="lang-pill-native">SW</div>
+        </div>
+        <div class="lang-pill">
+            <div class="lang-pill-name">Français</div>
+            <div class="lang-pill-native">FR</div>
+        </div>
+        <div class="lang-pill beta">
+            <div class="lang-pill-name">Kinyarwanda</div>
+            <div class="lang-pill-native">RW</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------- Welcome card ----------------
 profile = st.session_state.farmer_profile
