@@ -1591,37 +1591,45 @@ _featured = [
     },
 ]
 
-# Build all card HTML first
-_cards_html = ""
+# Build all card HTML first, then render as one block.
+# Avoid html.escape on card content because it was causing double-escaping issues
+# that made Streamlit render raw HTML tags as text.
+_cards_html_parts = []
 for i, _f in enumerate(_featured):
     _e = _f["entry"]
-    _summary = (_e.get("answer") or "")[:140]
-    if len(_e.get("answer", "")) > 140:
+    _q = (_e.get("question") or "").replace("<", "&lt;").replace(">", "&gt;")
+    _raw_answer = (_e.get("answer") or "")
+    _summary = _raw_answer[:140].replace("<", "&lt;").replace(">", "&gt;")
+    if len(_raw_answer) > 140:
         _summary += "…"
-    _cards_html += f"""
-    <div class="featured-card">
-        <div class="featured-image" style="background-image: url('{_f['image']}');">
-            <div class="featured-tag">{escape(_f['tag'])}</div>
-        </div>
-        <div class="featured-body">
-            <div class="featured-title">{escape(_e['question'])}</div>
-            <div class="featured-summary">{escape(_summary)}</div>
-            <div class="featured-cta">{t('featured_card_open')} <span class="icon-arrow"></span></div>
-        </div>
-    </div>
-    """
+    _tag = _f["tag"].replace("<", "&lt;").replace(">", "&gt;")
+    _img = _f["image"]
+    _cta = t('featured_card_open')
+    _cards_html_parts.append(
+        '<div class="featured-card">'
+        f'<div class="featured-image" style="background-image: url(\'{_img}\');">'
+        f'<div class="featured-tag">{_tag}</div>'
+        '</div>'
+        '<div class="featured-body">'
+        f'<div class="featured-title">{_q}</div>'
+        f'<div class="featured-summary">{_summary}</div>'
+        f'<div class="featured-cta">{_cta} <span class="icon-arrow"></span></div>'
+        '</div>'
+        '</div>'
+    )
 
-# Render the whole featured section in ONE st.markdown call so the grid wrapper
-# actually contains the card divs in the same DOM container.
-st.markdown(f"""
-<div class="land-section">
-    <div class="land-kicker">{t('featured_kicker')}</div>
-    <div class="land-title">{t('featured_title')}</div>
-    <div class="featured-grid">
-        {_cards_html}
-    </div>
-</div>
-""", unsafe_allow_html=True)
+_all_cards = "".join(_cards_html_parts)
+_kicker = t('featured_kicker')
+_title = t('featured_title')
+
+st.markdown(
+    f'<div class="land-section">'
+    f'<div class="land-kicker">{_kicker}</div>'
+    f'<div class="land-title">{_title}</div>'
+    f'<div class="featured-grid">{_all_cards}</div>'
+    f'</div>',
+    unsafe_allow_html=True,
+)
 
 # Wire up the cards: real Streamlit buttons sit just below as click triggers
 _btn_cols = st.columns(3)
