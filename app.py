@@ -1591,14 +1591,7 @@ _featured = [
     },
 ]
 
-st.markdown(f"""
-<div class="land-section">
-    <div class="land-kicker">{t('featured_kicker')}</div>
-    <div class="land-title">{t('featured_title')}</div>
-    <div class="featured-grid">
-""", unsafe_allow_html=True)
-
-# Render the cards as HTML
+# Build all card HTML first
 _cards_html = ""
 for i, _f in enumerate(_featured):
     _e = _f["entry"]
@@ -1618,7 +1611,17 @@ for i, _f in enumerate(_featured):
     </div>
     """
 
-st.markdown(_cards_html + "</div></div>", unsafe_allow_html=True)
+# Render the whole featured section in ONE st.markdown call so the grid wrapper
+# actually contains the card divs in the same DOM container.
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('featured_kicker')}</div>
+    <div class="land-title">{t('featured_title')}</div>
+    <div class="featured-grid">
+        {_cards_html}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Wire up the cards: real Streamlit buttons sit just below as click triggers
 _btn_cols = st.columns(3)
