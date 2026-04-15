@@ -1645,82 +1645,40 @@ if st.session_state.category_filter:
             st.rerun()
 
 # ============================================================
-# BIG ACTION CARDS — Ask a question / Upload a photo
-# ============================================================
-st.markdown(f"""
-<div class="action-grid">
-    <div class="action-card" onclick="document.querySelector('[data-baseweb=\\'tab\\']:nth-child(1)').click()">
-        <div class="action-icon">💬</div>
-        <div class="action-title">{t('action_ask_title')}</div>
-        <div class="action-desc">{t('action_ask_desc')}</div>
-    </div>
-    <div class="action-card terra" onclick="document.querySelector('[data-baseweb=\\'tab\\']:nth-child(2)').click()">
-        <div class="action-icon">📷</div>
-        <div class="action-title">{t('action_photo_title')}</div>
-        <div class="action-desc">{t('action_photo_desc')}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# Streamlit buttons below the HTML cards as functional triggers
-_ac1, _ac2 = st.columns(2)
-with _ac1:
-    if st.button(t('action_ask_title'), key="action_ask_btn", use_container_width=True):
-        st.session_state["scroll_to_ask"] = True
-        st.rerun()
-with _ac2:
-    if st.button(t('action_photo_title'), key="action_photo_btn", use_container_width=True):
-        st.session_state["scroll_to_photo"] = True
-        st.rerun()
-
-# ============================================================
-# WELCOME CARD + TABS (primary farmer interaction — AT THE TOP)
+# MAIN INTERACTION AREA — Ask / Photo / Library
+# Farmers need these immediately. Big tabs, no decoration.
 # ============================================================
 
-# ---------------- Welcome card ----------------
-profile = st.session_state.farmer_profile
-has_profile = st.session_state.profile_saved and profile.get("name")
+tab1, tab2, tab3 = st.tabs([
+    f"💬  {t('action_ask_title')}",
+    f"📷  {t('action_photo_title')}",
+    f"📚  {t('tab_browse')}",
+])
 
-if has_profile:
-    avatar = profile["name"][0].upper() if profile["name"] else "F"
-    welcome = t("welcome_named").format(name=profile["name"])
-    meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
-    meta = " · ".join(meta_parts) if meta_parts else ""
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar">{escape(avatar)}</div>
-        <div>
-            <div class="welcome-text">{escape(welcome)}</div>
-            {f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ''}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-elif selected_crop == "Maize":
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
-        <div><div class="welcome-text">{escape(t("welcome_maize"))}</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-elif selected_crop == "Soybean":
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
-        <div><div class="welcome-text">{escape(t("welcome_soybean"))}</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ---------------- Tabs ----------------
-tab1, tab2, tab3 = st.tabs([t("tab_ask"), t("tab_photo"), t("tab_browse")])
-
-# ---- Ask tab ----
+# ---- ASK A QUESTION ----
 with tab1:
-    # Get presets for current crop + language
+    # Welcome card
+    profile = st.session_state.farmer_profile
+    has_profile = st.session_state.profile_saved and profile.get("name")
+    if has_profile:
+        avatar = profile["name"][0].upper() if profile["name"] else "F"
+        welcome = t("welcome_named").format(name=profile["name"])
+        meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
+        meta = " · ".join(meta_parts) if meta_parts else ""
+        meta_html = f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ""
+        st.markdown(
+            f'<div class="welcome-card">'
+            f'<div class="welcome-avatar">{escape(avatar)}</div>'
+            f'<div><div class="welcome-text">{escape(welcome)}</div>{meta_html}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    # Quick starts
     crop_key = selected_crop.lower() if selected_crop != "General" else "general"
     lang_key = st.session_state.language
     preset_list = PRESETS.get(crop_key, PRESETS["general"]).get(lang_key, PRESETS[crop_key]["en"])
 
-    # Apply category filter if active
     if st.session_state.category_filter:
         preset_list = [p for p in preset_list if p[2] == st.session_state.category_filter]
 
@@ -1735,11 +1693,7 @@ with tab1:
     # Message history
     for msg in st.session_state.messages:
         if msg.get("response"):
-            render_answer_card(
-                msg["response"],
-                msg.get("top_score", 0.0),
-                msg.get("needs_escalation", False),
-            )
+            render_answer_card(msg["response"], msg.get("top_score", 0.0), msg.get("needs_escalation", False))
 
     preset_q = st.session_state.pop("preset_q", None)
     if preset_q:
@@ -1755,10 +1709,9 @@ with tab1:
         with st.chat_message("assistant"):
             process_question(user_q, selected_crop)
 
-# ---- Photo tab ----
+# ---- UPLOAD A PHOTO ----
 with tab2:
-    st.markdown(f'<div class="section-header">{t("tab_photo")}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="section-sub">{t("photo_upload")}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-sub" style="margin-bottom: 0.8rem;">{t("photo_upload")}</div>', unsafe_allow_html=True)
 
     photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed", key="photo_uploader_main")
     photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"), key="photo_desc_main")
@@ -1767,29 +1720,19 @@ with tab2:
         st.markdown("""
         <div style="
             background: linear-gradient(180deg, var(--forest-100) 0%, var(--cream) 100%);
-            border: 1px dashed #c8dcc6;
-            border-radius: 16px;
-            padding: 2.5rem 1.5rem;
-            text-align: center;
-            margin: 1rem 0;
+            border: 1px dashed #c8dcc6; border-radius: 16px;
+            padding: 2.5rem 1.5rem; text-align: center; margin: 1rem 0;
         ">
-            <div style="
-                width: 110px; height: 110px;
-                margin: 0 auto 1rem auto;
-                border-radius: 50%;
-                background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
-                background-size: cover; background-position: center;
-                border: 3px solid var(--cream);
-                box-shadow: var(--shadow-warm);
-            "></div>
-            <div style="font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--forest-900); margin-bottom: 0.4rem;">No photo uploaded yet</div>
-            <div style="font-size: 0.9rem; color: var(--ink-soft); max-width: 360px; margin: 0 auto; line-height: 1.5;">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
+            <div style="width:110px;height:110px;margin:0 auto 1rem;border-radius:50%;
+                background-image:url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
+                background-size:cover;background-position:center;border:3px solid var(--cream);box-shadow:var(--shadow-warm);"></div>
+            <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--forest-900);margin-bottom:0.4rem;">No photo uploaded yet</div>
+            <div style="font-size:0.9rem;color:var(--ink-soft);max-width:360px;margin:0 auto;line-height:1.5;">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
         </div>
         """, unsafe_allow_html=True)
 
     if photo is not None:
         st.image(photo, use_container_width=True)
-
         if st.button(t("analyze_photo"), type="primary", use_container_width=True, key="analyze_btn_main"):
             from vision import analyze_photo
             image_bytes = photo.getvalue()
@@ -1800,18 +1743,13 @@ with tab2:
                 for sym in vision_result["symptoms"]:
                     st.write(f"• {sym}")
                 question = photo_desc if photo_desc else "What is wrong with this crop?"
-                process_question(
-                    question,
-                    selected_crop,
-                    image_symptoms=vision_result["symptoms"],
-                    image_source=vision_result.get("source", "groq_vision"),
-                )
+                process_question(question, selected_crop, image_symptoms=vision_result["symptoms"], image_source=vision_result.get("source", "groq_vision"))
             elif vision_result and vision_result.get("error"):
                 st.warning(vision_result["error"])
             else:
                 st.warning("Could not analyze the photo. Please try a clearer image.")
 
-# ---- Knowledge library tab ----
+# ---- KNOWLEDGE LIBRARY ----
 with tab3:
     search_term = st.text_input(t("library_search"), placeholder=t("library_search_ph"), label_visibility="collapsed", key="lib_search_main")
     retriever = get_retriever()
