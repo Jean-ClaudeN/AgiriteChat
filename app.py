@@ -128,6 +128,15 @@ UI = {
         "languages_kicker": "For every farmer",
         "languages_title": "Available in your language.",
         "languages_sub": "AgiriteChat speaks the languages farmers actually use across East and Central Africa.",
+        # Action cards
+        "action_ask_title": "Ask a question",
+        "action_ask_desc": "Describe what you see in your field and get expert guidance.",
+        "action_photo_title": "Upload a photo",
+        "action_photo_desc": "Take a photo of the problem and get a diagnosis.",
+        # Source labels
+        "source_kb": "From knowledge base",
+        "source_ai": "Additional AI guidance",
+        "source_tag": "Verified source",
     },
     "sw": {
         "brand_tag": "Ushauri wa kilimo kwa wakulima wadogo",
@@ -198,6 +207,13 @@ UI = {
         "languages_kicker": "Kwa kila mkulima",
         "languages_title": "Inapatikana katika lugha yako.",
         "languages_sub": "AgiriteChat inazungumza lugha ambazo wakulima wanazitumia Afrika Mashariki na Kati.",
+        "action_ask_title": "Uliza swali",
+        "action_ask_desc": "Eleza unachoona shambani na upate ushauri wa kitaalamu.",
+        "action_photo_title": "Pakia picha",
+        "action_photo_desc": "Piga picha ya tatizo na upate uchunguzi.",
+        "source_kb": "Kutoka kwa msingi wa maarifa",
+        "source_ai": "Mwongozo wa ziada wa AI",
+        "source_tag": "Chanzo kilichothibitishwa",
     },
     "fr": {
         "brand_tag": "Conseil agricole pour petits exploitants",
@@ -268,6 +284,13 @@ UI = {
         "languages_kicker": "Pour chaque agriculteur",
         "languages_title": "Disponible dans votre langue.",
         "languages_sub": "AgiriteChat parle les langues que les agriculteurs utilisent réellement en Afrique de l'Est et centrale.",
+        "action_ask_title": "Poser une question",
+        "action_ask_desc": "Décrivez ce que vous voyez et recevez des conseils d'expert.",
+        "action_photo_title": "Envoyer une photo",
+        "action_photo_desc": "Prenez une photo du problème et obtenez un diagnostic.",
+        "source_kb": "De la base de connaissances",
+        "source_ai": "Conseils AI supplémentaires",
+        "source_tag": "Source vérifiée",
     },
     "rw": {
         "brand_tag": "Inama z'ubuhinzi ku bahinzi bato",
@@ -338,6 +361,13 @@ UI = {
         "languages_kicker": "Ku muhinzi wese",
         "languages_title": "Iraboneka mu rurimi rwawe.",
         "languages_sub": "AgiriteChat ivuga indimi abahinzi bakoresha mu Afurika y'Iburasirazuba no Hagati.",
+        "action_ask_title": "Baza ikibazo",
+        "action_ask_desc": "Sobanura ibyo ubona mu murima wawe ubonere inama z'inzobere.",
+        "action_photo_title": "Shyiraho ifoto",
+        "action_photo_desc": "Fata ifoto y'ikibazo ubonere isuzuma.",
+        "source_kb": "Biturutse ku bumenyi bwujujwe",
+        "source_ai": "Inama z'inyongera za AI",
+        "source_tag": "Isoko ryemejwe",
     },
 }
 
@@ -1196,6 +1226,95 @@ details[data-testid="stExpander"] summary {
     opacity: 0.9;
 }
 
+/* ── BIG ACTION CARDS (Ask / Upload) ── */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0 1rem 0;
+}
+.action-card {
+    background: var(--forest-900);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-warm);
+}
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.action-card.terra {
+    background: linear-gradient(160deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+}
+.action-card::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(250,246,238,0.12) 0%, transparent 65%);
+}
+.action-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+}
+.action-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+}
+.action-desc {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* ── SOURCE SEPARATION in answers ── */
+.source-badge {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    margin-bottom: 0.6rem;
+}
+.source-badge.kb {
+    background: var(--forest-100);
+    color: var(--forest-700);
+    border: 1px solid #c8dcc6;
+}
+.source-badge.ai {
+    background: #fff5e8;
+    color: #6b4a10;
+    border: 1px solid #ead9a7;
+}
+.ai-context-section {
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--border);
+}
+.conversational-msg {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1.6rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    box-shadow: var(--shadow-warm);
+}
+
 /* Inline SVG icons used in filter buttons via background-image */
 .icon-bug, .icon-leaf, .icon-sprout, .icon-globe, .icon-wheat, .icon-arrow {
     display: inline-block;
@@ -1238,6 +1357,8 @@ details[data-testid="stExpander"] summary {
     .how-grid, .impact-grid, .featured-grid { grid-template-columns: 1fr; }
     .lang-grid { grid-template-columns: repeat(2, 1fr); }
     .impact-number { font-size: 2.5rem; }
+    .action-grid { grid-template-columns: 1fr; }
+    .action-title { font-size: 1.3rem; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1245,6 +1366,13 @@ details[data-testid="stExpander"] summary {
 
 # ---------------- Rendering helpers ----------------
 def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation: bool = False):
+    # Handle conversational responses (greetings, off-topic)
+    if response.get("type") == "conversational":
+        message = escape(response.get("message", ""))
+        st.markdown(f'<div class="conversational-msg">{message}</div>', unsafe_allow_html=True)
+        return
+
+    # Advisory response with source separation
     if top_score >= 0.55:
         badge_class = "conf-high"
         badge_text = f"● {t('confidence_high')} · {top_score:.2f}"
@@ -1258,12 +1386,14 @@ def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation:
     def safe(key):
         return escape(response.get(key, "") or "—")
 
+    # Build the KB-sourced sections
     html = f"""
     <div class="answer-card">
         <div class="answer-header">
             <div class="answer-kicker">AgiriteChat · Advisory</div>
             <div class="conf-badge {badge_class}">{badge_text}</div>
         </div>
+        <div class="source-badge kb">{t('source_kb')}</div>
         <div class="answer-issue">{safe("Likely issue")}</div>
         <div class="answer-section">
             <div class="answer-label">Why this may be happening</div>
@@ -1281,8 +1411,19 @@ def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation:
             <div class="answer-label">When to seek local support</div>
             <div class="answer-body">{safe("When to seek local support")}</div>
         </div>
-    </div>
     """
+
+    # Add AI additional context section if present and non-trivial
+    ai_context = response.get("AI additional context", "")
+    if ai_context and ai_context.lower() not in ("", "—", "no additional context needed.", "no additional context needed"):
+        html += f"""
+        <div class="ai-context-section">
+            <div class="source-badge ai">{t('source_ai')}</div>
+            <div class="answer-body">{escape(ai_context)}</div>
+        </div>
+        """
+
+    html += "</div>"
     st.markdown(html, unsafe_allow_html=True)
 
     if needs_escalation:
@@ -1313,20 +1454,28 @@ def process_question(user_question, crop_hint, category_hint="general",
         state.get("needs_escalation", False),
     )
 
-    fb1, fb2, _ = st.columns([1, 1, 8])
-    if fb1.button("👍 " + t("helpful"), key=f"up_{interaction_id}"):
-        record_feedback(interaction_id, 1)
-        st.toast(t("thanks_feedback"))
-    if fb2.button("👎 " + t("not_helpful"), key=f"down_{interaction_id}"):
-        record_feedback(interaction_id, -1)
-        st.toast(t("thanks_feedback"))
+    # Only show feedback buttons for advisory responses
+    response_type = (state.get("response") or {}).get("type", "advisory")
+    if response_type == "advisory":
+        fb1, fb2, _ = st.columns([1, 1, 8])
+        if fb1.button("👍 " + t("helpful"), key=f"up_{interaction_id}"):
+            record_feedback(interaction_id, 1)
+            st.toast(t("thanks_feedback"))
+        if fb2.button("👎 " + t("not_helpful"), key=f"down_{interaction_id}"):
+            record_feedback(interaction_id, -1)
+            st.toast(t("thanks_feedback"))
 
+    # Show KB sources with attribution
+    kb_sources = state.get("kb_sources", [])
     matches = state.get("matches", [])
-    if matches:
-        with st.expander(f"📚 {t('sources_used')} ({len(matches)})"):
-            for m in matches:
-                st.markdown(f"**{m['question']}**  \n*{m['crop']} · {m['category']} · {m['score']:.2f}*")
-                st.write(m["answer"])
+    sources_to_show = kb_sources if kb_sources else matches
+    if sources_to_show:
+        with st.expander(f"📚 {t('sources_used')} ({len(sources_to_show)})"):
+            for m in sources_to_show:
+                source_name = m.get("source", "Knowledge Base")
+                st.markdown(f'<div class="source-badge kb" style="margin-bottom: 0.3rem;">{escape(source_name)}</div>', unsafe_allow_html=True)
+                st.markdown(f"**{m['question']}**  \n*{m.get('crop', '')} · {m.get('category', '')} · {m.get('score', 0):.2f}*")
+                st.write(m.get("answer", ""))
                 st.write("---")
 
     # Agent trace only shown in developer view
@@ -1335,6 +1484,7 @@ def process_question(user_question, crop_hint, category_hint="general",
             st.write("**Path:**", " → ".join(state.get("trace", [])))
             st.write("**Language:**", LANGUAGES[state.get("language", "en")]["name"])
             st.write("**Classified crop:**", state.get("classified_crop", "unknown"))
+            st.write("**Is agricultural:**", state.get("is_agricultural", True))
             st.write("**Top retrieval score:**", round(state.get("top_score", 0.0), 3))
             if state.get("image_source") and state.get("image_source") != "none":
                 st.write("**Image analysis source:**", state.get("image_source"))
@@ -1493,6 +1643,35 @@ if st.session_state.category_filter:
         if st.button(f"✕ {t('filter_clear')}", key="clear_filter"):
             st.session_state.category_filter = None
             st.rerun()
+
+# ============================================================
+# BIG ACTION CARDS — Ask a question / Upload a photo
+# ============================================================
+st.markdown(f"""
+<div class="action-grid">
+    <div class="action-card" onclick="document.querySelector('[data-baseweb=\\'tab\\']:nth-child(1)').click()">
+        <div class="action-icon">💬</div>
+        <div class="action-title">{t('action_ask_title')}</div>
+        <div class="action-desc">{t('action_ask_desc')}</div>
+    </div>
+    <div class="action-card terra" onclick="document.querySelector('[data-baseweb=\\'tab\\']:nth-child(2)').click()">
+        <div class="action-icon">📷</div>
+        <div class="action-title">{t('action_photo_title')}</div>
+        <div class="action-desc">{t('action_photo_desc')}</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Streamlit buttons below the HTML cards as functional triggers
+_ac1, _ac2 = st.columns(2)
+with _ac1:
+    if st.button(t('action_ask_title'), key="action_ask_btn", use_container_width=True):
+        st.session_state["scroll_to_ask"] = True
+        st.rerun()
+with _ac2:
+    if st.button(t('action_photo_title'), key="action_photo_btn", use_container_width=True):
+        st.session_state["scroll_to_photo"] = True
+        st.rerun()
 
 # ============================================================
 # LANDING SECTIONS (v3.3)
