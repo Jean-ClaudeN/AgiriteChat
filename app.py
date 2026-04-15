@@ -1674,7 +1674,161 @@ with _ac2:
         st.rerun()
 
 # ============================================================
-# LANDING SECTIONS (v3.3)
+# WELCOME CARD + TABS (primary farmer interaction — AT THE TOP)
+# ============================================================
+
+# ---------------- Welcome card ----------------
+profile = st.session_state.farmer_profile
+has_profile = st.session_state.profile_saved and profile.get("name")
+
+if has_profile:
+    avatar = profile["name"][0].upper() if profile["name"] else "F"
+    welcome = t("welcome_named").format(name=profile["name"])
+    meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
+    meta = " · ".join(meta_parts) if meta_parts else ""
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar">{escape(avatar)}</div>
+        <div>
+            <div class="welcome-text">{escape(welcome)}</div>
+            {f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ''}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+elif selected_crop == "Maize":
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
+        <div><div class="welcome-text">{escape(t("welcome_maize"))}</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+elif selected_crop == "Soybean":
+    st.markdown(f"""
+    <div class="welcome-card">
+        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
+        <div><div class="welcome-text">{escape(t("welcome_soybean"))}</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ---------------- Tabs ----------------
+tab1, tab2, tab3 = st.tabs([t("tab_ask"), t("tab_photo"), t("tab_browse")])
+
+# ---- Ask tab ----
+with tab1:
+    # Get presets for current crop + language
+    crop_key = selected_crop.lower() if selected_crop != "General" else "general"
+    lang_key = st.session_state.language
+    preset_list = PRESETS.get(crop_key, PRESETS["general"]).get(lang_key, PRESETS[crop_key]["en"])
+
+    # Apply category filter if active
+    if st.session_state.category_filter:
+        preset_list = [p for p in preset_list if p[2] == st.session_state.category_filter]
+
+    if preset_list:
+        st.markdown(f'<div class="section-header">{t("quick_starts")}</div>', unsafe_allow_html=True)
+        num_cols = min(len(preset_list), 4)
+        cols = st.columns(num_cols)
+        for i, (label, question, _cat) in enumerate(preset_list):
+            if cols[i % num_cols].button(label, key=f"preset_{i}_{lang_key}_{crop_key}", use_container_width=True):
+                st.session_state["preset_q"] = question
+
+    # Message history
+    for msg in st.session_state.messages:
+        if msg.get("response"):
+            render_answer_card(
+                msg["response"],
+                msg.get("top_score", 0.0),
+                msg.get("needs_escalation", False),
+            )
+
+    preset_q = st.session_state.pop("preset_q", None)
+    if preset_q:
+        with st.chat_message("user"):
+            st.write(preset_q)
+        with st.chat_message("assistant"):
+            process_question(preset_q, selected_crop)
+
+    user_q = st.chat_input(t("input_placeholder"))
+    if user_q:
+        with st.chat_message("user"):
+            st.write(user_q)
+        with st.chat_message("assistant"):
+            process_question(user_q, selected_crop)
+
+# ---- Photo tab ----
+with tab2:
+    st.markdown(f'<div class="section-header">{t("tab_photo")}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-sub">{t("photo_upload")}</div>', unsafe_allow_html=True)
+
+    photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed", key="photo_uploader_main")
+    photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"), key="photo_desc_main")
+
+    if photo is None:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, var(--forest-100) 0%, var(--cream) 100%);
+            border: 1px dashed #c8dcc6;
+            border-radius: 16px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        ">
+            <div style="
+                width: 110px; height: 110px;
+                margin: 0 auto 1rem auto;
+                border-radius: 50%;
+                background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
+                background-size: cover; background-position: center;
+                border: 3px solid var(--cream);
+                box-shadow: var(--shadow-warm);
+            "></div>
+            <div style="font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 600; color: var(--forest-900); margin-bottom: 0.4rem;">No photo uploaded yet</div>
+            <div style="font-size: 0.9rem; color: var(--ink-soft); max-width: 360px; margin: 0 auto; line-height: 1.5;">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if photo is not None:
+        st.image(photo, use_container_width=True)
+
+        if st.button(t("analyze_photo"), type="primary", use_container_width=True, key="analyze_btn_main"):
+            from vision import analyze_photo
+            image_bytes = photo.getvalue()
+            with st.spinner("Analyzing photo…"):
+                vision_result = analyze_photo(image_bytes)
+            if vision_result and vision_result.get("symptoms"):
+                st.markdown(f'<div class="section-header">{t("symptoms_detected")}</div>', unsafe_allow_html=True)
+                for sym in vision_result["symptoms"]:
+                    st.write(f"• {sym}")
+                question = photo_desc if photo_desc else "What is wrong with this crop?"
+                process_question(
+                    question,
+                    selected_crop,
+                    image_symptoms=vision_result["symptoms"],
+                    image_source=vision_result.get("source", "groq_vision"),
+                )
+            elif vision_result and vision_result.get("error"):
+                st.warning(vision_result["error"])
+            else:
+                st.warning("Could not analyze the photo. Please try a clearer image.")
+
+# ---- Knowledge library tab ----
+with tab3:
+    search_term = st.text_input(t("library_search"), placeholder=t("library_search_ph"), label_visibility="collapsed", key="lib_search_main")
+    retriever = get_retriever()
+    if search_term:
+        hits = retriever.search(query=search_term, top_k=8)
+        if st.session_state.category_filter:
+            target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
+            hits = [h for h in hits if h.get("category") in target_cats]
+        for h in hits:
+            with st.expander(h["question"]):
+                st.write(h["answer"])
+                st.caption(f"{h.get('crop', '')} · {h.get('category', '')} · Source: {h.get('source', 'Knowledge Base')}")
+    else:
+        st.info("Search the knowledge base by typing symptoms or topics above.")
+
+# ============================================================
+# LANDING SECTIONS — below the interaction area
 # ============================================================
 
 # ---- Section 1: How it works ----
@@ -1844,216 +1998,6 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-# ---------------- Welcome card ----------------
-profile = st.session_state.farmer_profile
-has_profile = st.session_state.profile_saved and profile.get("name")
-
-if has_profile:
-    avatar = profile["name"][0].upper() if profile["name"] else "F"
-    welcome = t("welcome_named").format(name=profile["name"])
-    meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
-    meta = " · ".join(meta_parts) if meta_parts else ""
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar">{escape(avatar)}</div>
-        <div>
-            <div class="welcome-text">{escape(welcome)}</div>
-            {f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ''}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-elif selected_crop == "Maize":
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
-        <div><div class="welcome-text">{escape(t("welcome_maize"))}</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-elif selected_crop == "Soybean":
-    st.markdown(f"""
-    <div class="welcome-card">
-        <div class="welcome-avatar" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop'); background-size: cover; background-position: center;"></div>
-        <div><div class="welcome-text">{escape(t("welcome_soybean"))}</div></div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# ---------------- Tabs ----------------
-tab1, tab2, tab3 = st.tabs([t("tab_ask"), t("tab_photo"), t("tab_browse")])
-
-# ---- Ask tab ----
-with tab1:
-    # Get presets for current crop + language
-    crop_key = selected_crop.lower() if selected_crop != "General" else "general"
-    lang_key = st.session_state.language
-    preset_list = PRESETS.get(crop_key, PRESETS["general"]).get(lang_key, PRESETS[crop_key]["en"])
-
-    # Apply category filter if active
-    if st.session_state.category_filter:
-        preset_list = [p for p in preset_list if p[2] == st.session_state.category_filter]
-
-    if preset_list:
-        st.markdown(f'<div class="section-header">{t("quick_starts")}</div>', unsafe_allow_html=True)
-        num_cols = min(len(preset_list), 4)
-        cols = st.columns(num_cols)
-        for i, (label, question, _cat) in enumerate(preset_list):
-            if cols[i % num_cols].button(label, key=f"preset_{i}_{lang_key}_{crop_key}", use_container_width=True):
-                st.session_state["preset_q"] = question
-
-    # Message history
-    for msg in st.session_state.messages:
-        if msg.get("response"):
-            render_answer_card(
-                msg["response"],
-                msg.get("top_score", 0.0),
-                msg.get("needs_escalation", False),
-            )
-
-    preset_q = st.session_state.pop("preset_q", None)
-    if preset_q:
-        with st.chat_message("user"):
-            st.write(preset_q)
-        with st.chat_message("assistant"):
-            process_question(preset_q, selected_crop)
-
-    user_q = st.chat_input(t("input_placeholder"))
-    if user_q:
-        with st.chat_message("user"):
-            st.write(user_q)
-        with st.chat_message("assistant"):
-            process_question(user_q, selected_crop)
-
-# ---- Photo tab ----
-with tab2:
-    st.markdown(f'<div class="section-header">{t("tab_photo")}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="section-sub">{t("photo_upload")}</div>', unsafe_allow_html=True)
-
-    # Empty-state illustration: shown above the uploader when no photo is uploaded
-    photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed")
-    photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"))
-
-    if photo is None:
-        st.markdown("""
-        <div style="
-            background: linear-gradient(180deg, var(--forest-100) 0%, var(--cream) 100%);
-            border: 1px dashed #c8dcc6;
-            border-radius: 16px;
-            padding: 2.5rem 1.5rem;
-            text-align: center;
-            margin: 1rem 0;
-        ">
-            <div style="
-                width: 110px;
-                height: 110px;
-                margin: 0 auto 1rem auto;
-                border-radius: 50%;
-                background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
-                background-size: cover;
-                background-position: center;
-                border: 3px solid var(--cream);
-                box-shadow: var(--shadow-warm);
-            "></div>
-            <div style="
-                font-family: 'Fraunces', serif;
-                font-size: 1.15rem;
-                font-weight: 600;
-                color: var(--forest-900);
-                margin-bottom: 0.4rem;
-            ">No photo uploaded yet</div>
-            <div style="
-                font-size: 0.9rem;
-                color: var(--ink-soft);
-                max-width: 360px;
-                margin: 0 auto;
-                line-height: 1.5;
-            ">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    if photo is not None:
-        st.image(photo, use_container_width=True)
-
-    if st.button(t("analyze_photo"), type="primary"):
-        if photo is None:
-            st.warning(t("photo_upload"))
-        else:
-            image_bytes = photo.getvalue()
-            crop_hint_lower = selected_crop.lower() if selected_crop != "General" else None
-
-            with st.spinner("…"):
-                vision_result = analyze_field_image(
-                    image_bytes,
-                    farmer_description=photo_desc or "",
-                    crop_hint=crop_hint_lower,
-                )
-
-            if not vision_result["ok"]:
-                st.error(vision_result["quality_reason"] or "Could not analyze the image.")
-            else:
-                if vision_result["symptoms"]:
-                    symptoms_html = '<ul style="margin:0; padding-left:1.2rem;">'
-                    for s in vision_result["symptoms"]:
-                        symptoms_html += f"<li>{escape(s)}</li>"
-                    symptoms_html += "</ul>"
-                    st.markdown(f"""
-                    <div class="symptoms-box">
-                        <div class="symptoms-label">{t("symptoms_detected")}</div>
-                        {symptoms_html}
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                combined_q = photo_desc or "Please help me diagnose this crop issue based on the photo."
-                process_question(
-                    user_question=combined_q,
-                    crop_hint=selected_crop,
-                    image_symptoms=vision_result["symptoms"],
-                    image_source=vision_result["source"],
-                )
-
-# ---- Knowledge library ----
-with tab3:
-    st.markdown(f'<div class="section-header">{t("tab_browse")}</div>', unsafe_allow_html=True)
-
-    search_term = st.text_input(t("library_search"), placeholder=t("library_search_ph"), label_visibility="collapsed")
-    crop_filter = st.selectbox("Crop", ["All", "Maize", "Soybean"], key="kh_filter")
-
-    # Load KB
-    import json
-    try:
-        with open("knowledge_base.json", "r", encoding="utf-8") as f:
-            all_entries = json.load(f)
-    except FileNotFoundError:
-        all_entries = []
-
-    # Apply crop filter
-    if crop_filter != "All":
-        all_entries = [e for e in all_entries if e.get("crop") in (crop_filter.lower(), "both")]
-
-    # Apply category filter (from hero buttons)
-    if st.session_state.category_filter:
-        target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
-        all_entries = [e for e in all_entries if e.get("category") in target_cats]
-
-    # Apply text search
-    if search_term:
-        retriever = get_retriever()
-        crop_arg = crop_filter.lower() if crop_filter != "All" else None
-        hits = retriever.search(search_term, crop=crop_arg, top_k=10)
-        # Also apply category filter to search results
-        if st.session_state.category_filter:
-            target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
-            hits = [h for h in hits if h.get("category") in target_cats]
-        st.write(f"**{len(hits)} results**")
-        for h in hits:
-            with st.expander(f"{h['question']}  ·  {h['crop']}/{h['category']}  ·  {h['score']:.2f}"):
-                st.write(h["answer"])
-    else:
-        st.write(f"**{len(all_entries)} entries**")
-        for e in all_entries:
-            with st.expander(f"{e['question']}  ·  {e.get('crop','?')}/{e.get('category','?')}"):
-                st.write(e["answer"])
-                if e.get("symptoms"):
-                    st.caption("Symptoms: " + ", ".join(e["symptoms"]))
 
 # ---------------- Footer ----------------
 st.markdown(f"""
