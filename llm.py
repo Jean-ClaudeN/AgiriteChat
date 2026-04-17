@@ -202,3 +202,53 @@ def analyze_image(image_bytes: bytes, prompt: str) -> Optional[str]:
     except Exception as e:
         logger.warning("Groq vision call failed: %s", e)
         return None
+
+
+WHISPER_MODEL = "whisper-large-v3-turbo"
+
+
+def transcribe_audio(audio_bytes: bytes, language: str = "en") -> Optional[str]:
+    """
+    Transcribe audio using Groq's Whisper API.
+    Returns the transcribed text, or None on failure.
+    
+    Supported languages: en, sw (Swahili), fr (French), rw (Kinyarwanda).
+    Groq Whisper is free-tier and very fast.
+    """
+    client = _get_client()
+    if client is None:
+        logger.warning("Groq whisper called but client unavailable")
+        return None
+
+    if not audio_bytes or len(audio_bytes) < 100:
+        logger.warning("Audio too short to transcribe")
+        return None
+
+    # Map our language codes to Whisper language codes
+    whisper_lang_map = {
+        "en": "en",
+        "sw": "sw",
+        "fr": "fr",
+        "rw": "rw",
+    }
+    whisper_lang = whisper_lang_map.get(language, "en")
+
+    try:
+        import io
+        audio_file = io.BytesIO(audio_bytes)
+        audio_file.name = "recording.wav"
+
+        resp = client.audio.transcriptions.create(
+            model=WHISPER_MODEL,
+            file=audio_file,
+            language=whisper_lang,
+        )
+        text = (resp.text or "").strip()
+        if text:
+            logger.info("Whisper transcribed %d bytes -> %d chars", len(audio_bytes), len(text))
+            return text
+        logger.warning("Whisper returned empty transcription")
+        return None
+    except Exception as e:
+        logger.warning("Groq whisper call failed: %s", e)
+        return None
