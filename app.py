@@ -1717,17 +1717,13 @@ with tab1:
 
     preset_q = st.session_state.pop("preset_q", None)
     if preset_q:
-        with st.chat_message("user"):
-            st.write(preset_q)
-        with st.chat_message("assistant"):
-            process_question(preset_q, selected_crop)
+        st.chat_message("user").write(preset_q)
+        process_question(preset_q, selected_crop)
 
     user_q = st.chat_input(t("input_placeholder"))
     if user_q:
-        with st.chat_message("user"):
-            st.write(user_q)
-        with st.chat_message("assistant"):
-            process_question(user_q, selected_crop)
+        st.chat_message("user").write(user_q)
+        process_question(user_q, selected_crop)
 
 # ---- UPLOAD A PHOTO ----
 with tab2:
