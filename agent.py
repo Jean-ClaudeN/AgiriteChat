@@ -208,6 +208,21 @@ def node_classify(state: AgentState) -> AgentState:
     state["is_agricultural"] = True
     state["greeting_type"] = ""
 
+    # Step 1: Check if input is too short or just a crop name with no problem
+    # "maize", "soybean", "corn", "my maize", "soya" — these aren't questions
+    q_stripped = question.strip().lower()
+    q_words = q_stripped.split()
+    just_crop_words = {"maize", "corn", "soybean", "soya", "soy", "beans", "crop", "crops", "plant", "plants", "field", "farm", "my"}
+
+    if len(q_words) <= 3 and all(w.strip(".,!?") in just_crop_words for w in q_words):
+        # It's just a crop name, not a question
+        state["is_agricultural"] = True
+        state["classified_crop"] = "maize" if any(w in q_stripped for w in ["maize", "corn"]) else "soybean" if any(w in q_stripped for w in ["soybean", "soya", "soy"]) else "unknown"
+        state["classified_category"] = "general"
+        state["is_clear"] = False
+        state["clarification_needed"] = "What problem are you seeing with your crop? Describe the symptoms — for example, yellow leaves, holes, wilting, or spots."
+        return state
+
     image_symptoms = state.get("image_symptoms", [])
     if image_symptoms:
         question = f"{question}\n\nVisible symptoms from photo: {', '.join(image_symptoms)}"
@@ -331,16 +346,18 @@ def node_check_confidence(state: AgentState) -> AgentState:
     state.setdefault("trace", []).append("check_confidence")
 
     top = state.get("top_score", 0.0)
+    is_clear = state.get("is_clear", True)
+    has_clarification = bool(state.get("clarification_needed"))
 
-    # If we have a good KB match, always synthesize — even if the LLM
-    # thought the question was vague. The KB match is more trustworthy.
-    if top >= LOW_CONFIDENCE:
-        state["route"] = "synthesize"
+    # If the question was explicitly marked as unclear (e.g. just a crop name
+    # with no symptoms), ALWAYS clarify — the KB match is noise, not signal.
+    if not is_clear and has_clarification:
+        state["route"] = "clarify"
         return state
 
-    # Low retrieval score AND unclear question → clarify
-    if not state.get("is_clear", True) and state.get("clarification_needed"):
-        state["route"] = "clarify"
+    # Clear question with a good KB match → synthesize
+    if top >= LOW_CONFIDENCE:
+        state["route"] = "synthesize"
         return state
 
     # Low retrieval score, clear question → refuse honestly
