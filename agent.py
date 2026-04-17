@@ -1,615 +1,2009 @@
 """
-agent.py — LangGraph state machine for AgiriteChat.
+app.py — AgiriteChat v3.1 (Warm Editorial Aesthetic)
 
-Flow:
-    classify -> route_or_retrieve -> (greet | retrieve -> check_confidence -> clarify | refuse | synthesize) -> END
+Changes from v3.0:
+- Hero pills replaced with functional category filter buttons (Pests / Diseases / Soil & nutrients)
+- Filter state persists across tabs and filters both presets and the knowledge library
+- Agent trace hidden by default; shown only when "Developer view" toggle is on in sidebar
+- Session ID hidden when developer view is off
 
-v4 changes:
-- Greeting/off-topic detection: "Hi", "thanks", non-agricultural questions get a
-  conversational response instead of a fake advisory
-- Source-separated answers: response now includes "kb_answer" (direct from knowledge base)
-  and "ai_guidance" (LLM-generated additional context), clearly separated
-- Language parameter: agent responds in English, Swahili, French, or Kinyarwanda
-- Farmer profile context: region, farm size, crops, planting date
+Design direction: agricultural editorial. Warm cream + forest green + terracotta.
+Fraunces display + DM Sans body.
 """
 
-import logging
-import re
-from typing import TypedDict, List, Optional, Dict, Any, Literal
+import uuid
+from html import escape
 
-from langgraph.graph import StateGraph, END
+import streamlit as st
 
-from llm import generate_json, generate_text, is_available as llm_available
-from retrieval import Retriever
+from agent import run as run_agent, get_retriever, LANGUAGES
+from vision import analyze_field_image
+from llm import is_available as llm_available
+from feedback import log_interaction, record_feedback, recent_stats, init_db
 
-logger = logging.getLogger(__name__)
+# ---------------- Page config ----------------
+st.set_page_config(
+    page_title="AgiriteChat — Crop Advisory",
+    layout="wide",
+    page_icon="🌾",
+    initial_sidebar_state="expanded",
+)
 
-# Confidence thresholds on retrieval similarity (0-1, higher = better match)
-HIGH_CONFIDENCE = 0.55
-LOW_CONFIDENCE = 0.35
+# ---------------- One-time warm-up ----------------
+@st.cache_resource
+def _warm_up():
+    init_db()
+    get_retriever()
+    return True
 
-# Keywords that always trigger explicit escalation
-ESCALATION_KEYWORDS = [
-    "pesticide dose", "herbicide dose", "fertilizer rate",
-    "dying", "whole field", "spreading fast", "entire crop",
-    "dose", "dosage", "how much to spray",
-]
+_warm_up()
 
-# Patterns that indicate NON-agricultural input
-GREETING_PATTERNS = [
-    r"^\s*(hi|hello|hey|good\s*(morning|afternoon|evening)|howdy|yo|sup)\s*[!.,?]*\s*$",
-    r"^\s*(thanks?|thank\s*you|thx|merci|asante|murakoze)\s*[!.,?]*\s*$",
-    r"^\s*(bye|goodbye|see\s*you|take\s*care)\s*[!.,?]*\s*$",
-    r"^\s*(ok|okay|yes|no|sure|cool|great|nice|wow)\s*[!.,?]*\s*$",
-    r"^\s*(test|testing|123|abc)\s*[!.,?]*\s*$",
-    r"^\s*(who\s*are\s*you|what\s*are\s*you|what\s*can\s*you\s*do)\s*[!.,?]*\s*$",
-    r"^\s*(how\s*are\s*you|what'?s\s*up)\s*[!.,?]*\s*$",
-]
+# ---------------- Session state ----------------
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:8]
+if "language" not in st.session_state:
+    st.session_state.language = "en"
+if "farmer_profile" not in st.session_state:
+    st.session_state.farmer_profile = {
+        "name": "", "region": "", "farm_size": "", "crops": "", "planting_date": "",
+    }
+if "profile_saved" not in st.session_state:
+    st.session_state.profile_saved = False
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "category_filter" not in st.session_state:
+    st.session_state.category_filter = None  # None | "pest" | "disease" | "soil"
+if "developer_view" not in st.session_state:
+    st.session_state.developer_view = False
 
-# Conversational responses for different greeting types
-GREETING_RESPONSES = {
+# ---------------- i18n strings ----------------
+UI = {
     "en": {
-        "greeting": "Hello! I'm AgiriteChat, your crop advisory assistant for maize and soybean farming. How can I help you today? You can ask me about pests, diseases, soil problems, or upload a photo of your crop.",
-        "thanks": "You're welcome! If you have more questions about your crops, I'm here to help.",
-        "farewell": "Goodbye! Remember, for serious crop problems, always confirm with your local extension officer. Good luck with your farming!",
-        "who": "I'm AgiriteChat, an AI crop advisor for smallholder maize and soybean farmers. I can help you identify crop problems, suggest actions, and point you to local support when needed. Try asking me about a specific issue you're seeing in your field.",
-        "other": "I'm designed to help with maize and soybean farming questions. Could you describe a crop problem you're experiencing? For example: 'My maize leaves are turning yellow' or 'I see holes in my soybean pods'.",
+        "brand_tag": "Crop advisory for smallholder farmers",
+        "hero_title": "Practical crop advice,\nrooted in your field.",
+        "hero_sub": "AgiriteChat helps maize and soybean farmers identify problems, understand causes, and take action — grounded in agronomic knowledge, personalised to your farm.",
+        "filter_pests": "Pests",
+        "filter_diseases": "Diseases",
+        "filter_soil": "Soil & nutrients",
+        "filter_active": "Filtering by",
+        "filter_clear": "Clear filter",
+        "sidebar_profile": "Your farm profile",
+        "sidebar_language": "Language",
+        "sidebar_status": "System status",
+        "sidebar_dev": "Developer view",
+        "sidebar_dev_help": "Show agent reasoning trace (for demos)",
+        "name": "Your name",
+        "region": "Region / District",
+        "farm_size": "Farm size",
+        "crops": "Crops you grow",
+        "planting_date": "Planting date",
+        "save_profile": "Save profile",
+        "profile_saved": "Profile saved for this session",
+        "profile_note": "Stored only for this session. No account required.",
+        "tab_ask": "Ask a question",
+        "tab_photo": "Photo review",
+        "tab_browse": "Knowledge library",
+        "quick_starts": "Quick starts",
+        "welcome_default": "Welcome. Ask a question about your maize or soybean field.",
+        "welcome_maize": "Welcome, maize farmer. What are you seeing in your field today?",
+        "welcome_soybean": "Welcome, soybean farmer. What are you seeing in your field today?",
+        "welcome_named": "Welcome, {name}. What are you seeing in your field today?",
+        "input_placeholder": "Describe what you see in your field…",
+        "analyze_photo": "Analyze photo",
+        "photo_upload": "Upload a close-up photo of the affected leaf or plant",
+        "photo_desc": "Add a short description (optional)",
+        "photo_desc_ph": "e.g. brown lesions on lower leaves, plant is at knee height",
+        "symptoms_detected": "What the AI sees in the photo",
+        "sources_used": "Sources used",
+        "agent_trace": "How the agent answered",
+        "confidence_high": "High confidence",
+        "confidence_medium": "Medium confidence",
+        "confidence_low": "Low confidence",
+        "escalation": "This answer has limited confidence. Please confirm with your local extension officer before acting.",
+        "helpful": "Helpful",
+        "not_helpful": "Not helpful",
+        "thanks_feedback": "Thanks for the feedback!",
+        "feedback_stats": "Session stats",
+        "responsible_use": "Responsible use",
+        "responsible_text": "AgiriteChat is a support tool for early interpretation only. Serious disease, pest, or fertility problems should always be confirmed with a local agronomist or extension officer.",
+        "library_search": "Search knowledge library",
+        "library_search_ph": "yellow lower leaves on maize…",
+        # Landing page sections
+        "how_kicker": "How it works",
+        "how_title": "Three steps from worry to action.",
+        "how_step1_title": "Ask",
+        "how_step1_desc": "Describe what you see in your field, or upload a photo of the affected plant.",
+        "how_step2_title": "Diagnose",
+        "how_step2_desc": "AgiriteChat analyzes your input against an agronomic knowledge base.",
+        "how_step3_title": "Act",
+        "how_step3_desc": "Get clear, practical next steps in your language — and know when to call extension.",
+        "impact_kicker": "Real impact",
+        "impact_title": "Built for your field, measured by your feedback.",
+        "impact_questions": "Questions answered",
+        "impact_confident": "Confident answers",
+        "impact_languages": "Languages supported",
+        "featured_kicker": "Featured topics",
+        "featured_title": "What farmers are asking right now.",
+        "featured_card_open": "Open this question",
+        "languages_kicker": "For every farmer",
+        "languages_title": "Available in your language.",
+        "languages_sub": "AgiriteChat speaks the languages farmers actually use across East and Central Africa.",
+        # Action cards
+        "action_ask_title": "Ask a question",
+        "action_ask_desc": "Describe what you see in your field and get expert guidance.",
+        "action_photo_title": "Upload a photo",
+        "action_photo_desc": "Take a photo of the problem and get a diagnosis.",
+        # Source labels
+        "source_kb": "From knowledge base",
+        "source_ai": "Additional AI guidance",
+        "source_tag": "Verified source",
     },
     "sw": {
-        "greeting": "Habari! Mimi ni AgiriteChat, msaidizi wako wa ushauri wa mazao kwa kilimo cha mahindi na soya. Nawezaje kukusaidia leo?",
-        "thanks": "Karibu! Ukiwa na maswali zaidi kuhusu mazao yako, niko hapa kukusaidia.",
-        "farewell": "Kwaheri! Kumbuka, kwa matatizo makubwa ya mazao, thibitisha kila mara na afisa ugani wako wa karibu.",
-        "who": "Mimi ni AgiriteChat, mshauri wa mazao wa AI kwa wakulima wadogo wa mahindi na soya. Jaribu kuniuliza kuhusu tatizo maalum unaloliona shambani kwako.",
-        "other": "Nimeundwa kusaidia na maswali ya kilimo cha mahindi na soya. Je, unaweza kuelezea tatizo la mazao unalokutana nalo?",
+        "brand_tag": "Ushauri wa kilimo kwa wakulima wadogo",
+        "hero_title": "Ushauri wa vitendo wa mazao,\nuliojikita katika shamba lako.",
+        "hero_sub": "AgiriteChat inasaidia wakulima wa mahindi na soya kutambua matatizo, kuelewa sababu, na kuchukua hatua — ikizingatia maarifa ya kilimo, iliyobinafsishwa kwa shamba lako.",
+        "filter_pests": "Wadudu",
+        "filter_diseases": "Magonjwa",
+        "filter_soil": "Udongo na virutubisho",
+        "filter_active": "Inachuja kwa",
+        "filter_clear": "Ondoa kichujio",
+        "sidebar_profile": "Wasifu wa shamba lako",
+        "sidebar_language": "Lugha",
+        "sidebar_status": "Hali ya mfumo",
+        "sidebar_dev": "Hali ya msanidi",
+        "sidebar_dev_help": "Onyesha maelezo ya wakala (kwa maonyesho)",
+        "name": "Jina lako",
+        "region": "Mkoa / Wilaya",
+        "farm_size": "Ukubwa wa shamba",
+        "crops": "Mazao unayolima",
+        "planting_date": "Tarehe ya kupanda",
+        "save_profile": "Hifadhi wasifu",
+        "profile_saved": "Wasifu umehifadhiwa kwa kipindi hiki",
+        "profile_note": "Imehifadhiwa kwa kipindi hiki tu. Hakuna akaunti inayohitajika.",
+        "tab_ask": "Uliza swali",
+        "tab_photo": "Kagua picha",
+        "tab_browse": "Maktaba ya maarifa",
+        "quick_starts": "Maswali ya haraka",
+        "welcome_default": "Karibu. Uliza swali kuhusu shamba lako la mahindi au soya.",
+        "welcome_maize": "Karibu, mkulima wa mahindi. Unaona nini shambani mwako leo?",
+        "welcome_soybean": "Karibu, mkulima wa soya. Unaona nini shambani mwako leo?",
+        "welcome_named": "Karibu, {name}. Unaona nini shambani mwako leo?",
+        "input_placeholder": "Eleza unachoona shambani mwako…",
+        "analyze_photo": "Chambua picha",
+        "photo_upload": "Pakia picha ya karibu ya jani au mmea ulioathirika",
+        "photo_desc": "Ongeza maelezo mafupi (hiari)",
+        "photo_desc_ph": "mfano: madoa ya kahawia kwenye majani ya chini",
+        "symptoms_detected": "Kile AI inachokiona kwenye picha",
+        "sources_used": "Vyanzo vilivyotumika",
+        "agent_trace": "Jinsi wakala alivyojibu",
+        "confidence_high": "Uhakika wa juu",
+        "confidence_medium": "Uhakika wa wastani",
+        "confidence_low": "Uhakika wa chini",
+        "escalation": "Jibu hili lina uhakika mdogo. Tafadhali thibitisha na afisa wa ugani kabla ya kuchukua hatua.",
+        "helpful": "Lilikuwa la msaada",
+        "not_helpful": "Halikuwa la msaada",
+        "thanks_feedback": "Asante kwa maoni!",
+        "feedback_stats": "Takwimu za kipindi",
+        "responsible_use": "Matumizi yenye uwajibikaji",
+        "responsible_text": "AgiriteChat ni chombo cha msaada cha tafsiri ya mapema tu. Matatizo makubwa ya magonjwa, wadudu, au rutuba yanapaswa kuthibitishwa na mtaalam wa kilimo wa ndani.",
+        "library_search": "Tafuta katika maktaba",
+        "library_search_ph": "majani ya njano ya chini ya mahindi…",
+        "how_kicker": "Jinsi inavyofanya kazi",
+        "how_title": "Hatua tatu kutoka wasiwasi hadi hatua.",
+        "how_step1_title": "Uliza",
+        "how_step1_desc": "Eleza unachoona shambani, au pakia picha ya mmea ulioathirika.",
+        "how_step2_title": "Tambua",
+        "how_step2_desc": "AgiriteChat inachambua mchango wako dhidi ya hifadhi ya maarifa ya kilimo.",
+        "how_step3_title": "Tenda",
+        "how_step3_desc": "Pata hatua wazi za vitendo katika lugha yako — na ujue wakati wa kupiga simu kwa ugani.",
+        "impact_kicker": "Athari halisi",
+        "impact_title": "Imejengwa kwa shamba lako, imepimwa kwa maoni yako.",
+        "impact_questions": "Maswali yaliyojibiwa",
+        "impact_confident": "Majibu ya uhakika",
+        "impact_languages": "Lugha zinazoungwa mkono",
+        "featured_kicker": "Mada zinazoangaziwa",
+        "featured_title": "Kile wakulima wanachouliza sasa hivi.",
+        "featured_card_open": "Fungua swali hili",
+        "languages_kicker": "Kwa kila mkulima",
+        "languages_title": "Inapatikana katika lugha yako.",
+        "languages_sub": "AgiriteChat inazungumza lugha ambazo wakulima wanazitumia Afrika Mashariki na Kati.",
+        "action_ask_title": "Uliza swali",
+        "action_ask_desc": "Eleza unachoona shambani na upate ushauri wa kitaalamu.",
+        "action_photo_title": "Pakia picha",
+        "action_photo_desc": "Piga picha ya tatizo na upate uchunguzi.",
+        "source_kb": "Kutoka kwa msingi wa maarifa",
+        "source_ai": "Mwongozo wa ziada wa AI",
+        "source_tag": "Chanzo kilichothibitishwa",
     },
     "fr": {
-        "greeting": "Bonjour! Je suis AgiriteChat, votre assistant conseil pour la culture du maïs et du soja. Comment puis-je vous aider aujourd'hui?",
-        "thanks": "De rien! Si vous avez d'autres questions sur vos cultures, je suis là pour vous aider.",
-        "farewell": "Au revoir! N'oubliez pas, pour les problèmes graves, confirmez toujours avec votre agent de vulgarisation local.",
-        "who": "Je suis AgiriteChat, un conseiller agricole IA pour les petits agriculteurs de maïs et de soja. Essayez de me poser une question sur un problème spécifique dans votre champ.",
-        "other": "Je suis conçu pour aider avec les questions sur le maïs et le soja. Pouvez-vous décrire un problème de culture que vous rencontrez?",
+        "brand_tag": "Conseil agricole pour petits exploitants",
+        "hero_title": "Des conseils pratiques,\nenracinés dans votre champ.",
+        "hero_sub": "AgiriteChat aide les cultivateurs de maïs et de soja à identifier les problèmes, comprendre les causes et agir — avec un savoir agronomique ancré, personnalisé pour votre exploitation.",
+        "filter_pests": "Ravageurs",
+        "filter_diseases": "Maladies",
+        "filter_soil": "Sol et nutriments",
+        "filter_active": "Filtré par",
+        "filter_clear": "Effacer le filtre",
+        "sidebar_profile": "Votre profil agricole",
+        "sidebar_language": "Langue",
+        "sidebar_status": "État du système",
+        "sidebar_dev": "Vue développeur",
+        "sidebar_dev_help": "Afficher le raisonnement de l'agent (pour les démos)",
+        "name": "Votre nom",
+        "region": "Région / District",
+        "farm_size": "Taille de l'exploitation",
+        "crops": "Cultures pratiquées",
+        "planting_date": "Date de semis",
+        "save_profile": "Enregistrer le profil",
+        "profile_saved": "Profil enregistré pour cette session",
+        "profile_note": "Conservé uniquement pour cette session. Pas de compte requis.",
+        "tab_ask": "Poser une question",
+        "tab_photo": "Analyse de photo",
+        "tab_browse": "Bibliothèque",
+        "quick_starts": "Démarrage rapide",
+        "welcome_default": "Bienvenue. Posez une question sur votre champ de maïs ou de soja.",
+        "welcome_maize": "Bienvenue, cultivateur de maïs. Que voyez-vous dans votre champ aujourd'hui ?",
+        "welcome_soybean": "Bienvenue, cultivateur de soja. Que voyez-vous dans votre champ aujourd'hui ?",
+        "welcome_named": "Bienvenue, {name}. Que voyez-vous dans votre champ aujourd'hui ?",
+        "input_placeholder": "Décrivez ce que vous voyez dans votre champ…",
+        "analyze_photo": "Analyser la photo",
+        "photo_upload": "Téléchargez une photo en gros plan de la feuille ou de la plante affectée",
+        "photo_desc": "Ajoutez une courte description (optionnel)",
+        "photo_desc_ph": "ex. lésions brunes sur les feuilles basses",
+        "symptoms_detected": "Ce que l'IA voit sur la photo",
+        "sources_used": "Sources utilisées",
+        "agent_trace": "Comment l'agent a répondu",
+        "confidence_high": "Confiance élevée",
+        "confidence_medium": "Confiance moyenne",
+        "confidence_low": "Confiance faible",
+        "escalation": "Cette réponse a une confiance limitée. Veuillez confirmer avec votre agent de vulgarisation avant d'agir.",
+        "helpful": "Utile",
+        "not_helpful": "Peu utile",
+        "thanks_feedback": "Merci pour votre retour !",
+        "feedback_stats": "Statistiques de session",
+        "responsible_use": "Utilisation responsable",
+        "responsible_text": "AgiriteChat est un outil d'aide à l'interprétation précoce. Les problèmes graves de maladies, ravageurs ou fertilité doivent toujours être confirmés par un agronome local.",
+        "library_search": "Rechercher dans la bibliothèque",
+        "library_search_ph": "feuilles basses jaunes de maïs…",
+        "how_kicker": "Comment ça marche",
+        "how_title": "Trois étapes du souci à l'action.",
+        "how_step1_title": "Demander",
+        "how_step1_desc": "Décrivez ce que vous voyez dans votre champ, ou téléchargez une photo de la plante affectée.",
+        "how_step2_title": "Diagnostiquer",
+        "how_step2_desc": "AgiriteChat analyse votre demande dans une base de connaissances agronomiques.",
+        "how_step3_title": "Agir",
+        "how_step3_desc": "Recevez des étapes claires et pratiques dans votre langue — et sachez quand contacter la vulgarisation.",
+        "impact_kicker": "Impact réel",
+        "impact_title": "Conçu pour votre champ, mesuré par vos retours.",
+        "impact_questions": "Questions répondues",
+        "impact_confident": "Réponses confiantes",
+        "impact_languages": "Langues prises en charge",
+        "featured_kicker": "Sujets en vedette",
+        "featured_title": "Ce que les agriculteurs demandent en ce moment.",
+        "featured_card_open": "Ouvrir cette question",
+        "languages_kicker": "Pour chaque agriculteur",
+        "languages_title": "Disponible dans votre langue.",
+        "languages_sub": "AgiriteChat parle les langues que les agriculteurs utilisent réellement en Afrique de l'Est et centrale.",
+        "action_ask_title": "Poser une question",
+        "action_ask_desc": "Décrivez ce que vous voyez et recevez des conseils d'expert.",
+        "action_photo_title": "Envoyer une photo",
+        "action_photo_desc": "Prenez une photo du problème et obtenez un diagnostic.",
+        "source_kb": "De la base de connaissances",
+        "source_ai": "Conseils AI supplémentaires",
+        "source_tag": "Source vérifiée",
     },
     "rw": {
-        "greeting": "Muraho! Ndi AgiriteChat, umufasha wawe w'inama z'imyaka ku buhinzi bw'ibigori n'ibishyimbo. Nagufasha nte uyu munsi?",
-        "thanks": "Murakaza neza! Niba ufite ibibazo byinshi ku bihingwa byawe, ndi hano kugufasha.",
-        "farewell": "Murabeho! Ibuka, ku bibazo bikomeye by'ibihingwa, buri gihe wemeze n'umujyanama w'ubuhinzi wo hafi.",
-        "who": "Ndi AgiriteChat, umujyanama w'ibihingwa wa AI ku bahinzi bato b'ibigori n'ibishyimbo. Gerageza kumbaza ikibazo kidasanzwe ubona mu murima wawe.",
-        "other": "Nakoze kugira ngo mfashe ibibazo by'ubuhinzi bw'ibigori n'ibishyimbo. Ushobora gusobanura ikibazo cy'igihingwa uhura nacyo?",
+        "brand_tag": "Inama z'ubuhinzi ku bahinzi bato",
+        "hero_title": "Inama z'ubuhinzi zifatika,\nzishingiye ku murima wawe.",
+        "hero_sub": "AgiriteChat ifasha abahinzi b'ibigori n'ibishyimbo kumenya ibibazo, gusobanukirwa impamvu, no gufata ibyemezo — ishingiye ku bumenyi bw'ubuhinzi, ihariwe umurima wawe.",
+        "filter_pests": "Udukoko",
+        "filter_diseases": "Indwara",
+        "filter_soil": "Ubutaka n'intungamubiri",
+        "filter_active": "Biyungurura ku",
+        "filter_clear": "Siba iyungurura",
+        "sidebar_profile": "Umwirondoro w'umurima wawe",
+        "sidebar_language": "Ururimi",
+        "sidebar_status": "Imimerere ya sisitemu",
+        "sidebar_dev": "Uburyo bw'umukoraporogaramu",
+        "sidebar_dev_help": "Erekana uburyo agent ikora (ku magaragaza)",
+        "name": "Izina ryawe",
+        "region": "Intara / Akarere",
+        "farm_size": "Ingano y'umurima",
+        "crops": "Ibihingwa uhinga",
+        "planting_date": "Itariki yo gutera",
+        "save_profile": "Bika umwirondoro",
+        "profile_saved": "Umwirondoro wabitswe muri iki gihe",
+        "profile_note": "Bibitswe muri iki gihe gusa. Nta konti ikenewe.",
+        "tab_ask": "Baza ikibazo",
+        "tab_photo": "Isesengura ry'ifoto",
+        "tab_browse": "Ububiko bw'ubumenyi",
+        "quick_starts": "Gutangira vuba",
+        "welcome_default": "Murakaza neza. Baza ikibazo ku murima wawe w'ibigori cyangwa ibishyimbo.",
+        "welcome_maize": "Murakaza neza, umuhinzi w'ibigori. Uravye iki mu murima wawe uyu munsi?",
+        "welcome_soybean": "Murakaza neza, umuhinzi w'ibishyimbo. Uravye iki mu murima wawe uyu munsi?",
+        "welcome_named": "Murakaza neza, {name}. Uravye iki mu murima wawe uyu munsi?",
+        "input_placeholder": "Sobanura ibyo urabona mu murima wawe…",
+        "analyze_photo": "Sesengura ifoto",
+        "photo_upload": "Shyiraho ifoto y'ibabi cyangwa igihingwa cyanduye",
+        "photo_desc": "Ongeraho ibisobanuro bigufi (bishoboka)",
+        "photo_desc_ph": "urugero: utuntu two mu ibara ry'umukara",
+        "symptoms_detected": "Ibyo AI ireba kuri iyi foto",
+        "sources_used": "Inkomoko zakoreshejwe",
+        "agent_trace": "Uburyo agent yasubije",
+        "confidence_high": "Ikizere gikomeye",
+        "confidence_medium": "Ikizere rwagati",
+        "confidence_low": "Ikizere gike",
+        "escalation": "Iyi nyishyu ifite ikizere gike. Nyamuneka bimenyeshe umukozi w'ubuhinzi mbere yo gufata icyemezo.",
+        "helpful": "Byanyunguye",
+        "not_helpful": "Ntibyanyunguye",
+        "thanks_feedback": "Murakoze ku gitekerezo!",
+        "feedback_stats": "Imibare y'iki gihe",
+        "responsible_use": "Imikoreshereze y'inshingano",
+        "responsible_text": "AgiriteChat ni igikoresho cy'ubufasha gusa. Ibibazo bikomeye by'indwara, udukoko, cyangwa umwanda bigomba kwemezwa n'umuhanga mu buhinzi wa hafi.",
+        "library_search": "Shakisha mu bubiko",
+        "library_search_ph": "amababi y'umuhondo y'ibigori…",
+        "how_kicker": "Uko bikora",
+        "how_title": "Intambwe eshatu uva ku guhangayika ujya ku gukora.",
+        "how_step1_title": "Baza",
+        "how_step1_desc": "Sobanura ibyo urabona mu murima wawe, cyangwa shyiraho ifoto y'igihingwa cyanduye.",
+        "how_step2_title": "Suzuma",
+        "how_step2_desc": "AgiriteChat isuzuma ibyo wavuze ihereye ku bumenyi bw'ubuhinzi.",
+        "how_step3_title": "Korera",
+        "how_step3_desc": "Bonera intambwe zigaragara mu rurimi rwawe — kandi umenye igihe cyo guhamagara umufasha.",
+        "impact_kicker": "Ingaruka nyazo",
+        "impact_title": "Yakozwe ku murima wawe, ipimwe n'ibitekerezo byawe.",
+        "impact_questions": "Ibibazo byashubijwe",
+        "impact_confident": "Ibisubizo by'ikizere",
+        "impact_languages": "Indimi zifashishwa",
+        "featured_kicker": "Ingingo zihariwe",
+        "featured_title": "Ibyo abahinzi babaza ubu.",
+        "featured_card_open": "Fungura iki kibazo",
+        "languages_kicker": "Ku muhinzi wese",
+        "languages_title": "Iraboneka mu rurimi rwawe.",
+        "languages_sub": "AgiriteChat ivuga indimi abahinzi bakoresha mu Afurika y'Iburasirazuba no Hagati.",
+        "action_ask_title": "Baza ikibazo",
+        "action_ask_desc": "Sobanura ibyo ubona mu murima wawe ubonere inama z'inzobere.",
+        "action_photo_title": "Shyiraho ifoto",
+        "action_photo_desc": "Fata ifoto y'ikibazo ubonere isuzuma.",
+        "source_kb": "Biturutse ku bumenyi bwujujwe",
+        "source_ai": "Inama z'inyongera za AI",
+        "source_tag": "Isoko ryemejwe",
     },
 }
 
 
-# Language config: name for UI, instruction for the LLM
-LANGUAGES = {
-    "en": {"name": "English", "instruction": "Respond in clear, simple English."},
-    "sw": {"name": "Kiswahili", "instruction": "Jibu kwa Kiswahili sanifu, rahisi na cha wazi."},
-    "fr": {"name": "Français", "instruction": "Réponds en français clair et simple, adapté aux agriculteurs."},
-    "rw": {"name": "Kinyarwanda", "instruction": "Subiza mu Kinyarwanda cyoroshye kandi gisobanutse."},
+def t(key: str) -> str:
+    lang = st.session_state.get("language", "en")
+    return UI.get(lang, UI["en"]).get(key, UI["en"].get(key, key))
+
+
+# ---------------- Category mapping ----------------
+# Maps filter button names to KB category tags
+CATEGORY_MAP = {
+    "pest": ["pest"],
+    "disease": ["disease"],
+    "soil": ["soil", "nutrient_deficiency", "fertilizer"],
 }
 
 
-class AgentState(TypedDict, total=False):
-    # Inputs
-    user_question: str
-    crop_hint: str
-    category_hint: str
-    image_symptoms: List[str]
-    image_source: str
-    language: str                # "en" | "sw" | "fr" | "rw"
-    farmer_profile: Dict[str, str]  # name, region, farm_size, crops, planting_date
-
-    # Classification output
-    classified_crop: str
-    classified_category: str
-    is_clear: bool
-    is_agricultural: bool       # NEW: False for greetings/off-topic
-    greeting_type: str          # NEW: "greeting" | "thanks" | "farewell" | "who" | "other"
-    clarification_needed: Optional[str]
-
-    # Retrieval output
-    matches: List[Dict]
-    top_score: float
-
-    # Routing decision
-    route: Literal["greet", "clarify", "synthesize", "refuse"]
-
-    # Final response
-    response: Dict[str, str]
-    kb_sources: List[Dict]      # NEW: the actual KB entries used
-    needs_escalation: bool
-    trace: List[str]
-
-
-_retriever: Optional[Retriever] = None
-
-
-def get_retriever() -> Retriever:
-    global _retriever
-    if _retriever is None:
-        _retriever = Retriever()
-    return _retriever
-
-
-def _language_instruction(state: AgentState) -> str:
-    lang = state.get("language", "en")
-    return LANGUAGES.get(lang, LANGUAGES["en"])["instruction"]
-
-
-def _farmer_context(state: AgentState) -> str:
-    """Build a farmer context block to inject into prompts."""
-    profile = state.get("farmer_profile") or {}
-    if not profile or not any(profile.values()):
-        return ""
-    parts = []
-    if profile.get("name"):
-        parts.append(f"Farmer name: {profile['name']}")
-    if profile.get("region"):
-        parts.append(f"Region: {profile['region']}")
-    if profile.get("farm_size"):
-        parts.append(f"Farm size: {profile['farm_size']}")
-    if profile.get("crops"):
-        parts.append(f"Crops grown: {profile['crops']}")
-    if profile.get("planting_date"):
-        parts.append(f"Planting date: {profile['planting_date']}")
-    if not parts:
-        return ""
-    return "Farmer context:\n" + "\n".join(f"- {p}" for p in parts) + "\n"
-
-
-def _detect_greeting(text: str) -> Optional[str]:
-    """Check if text is a greeting/non-agricultural message. Returns type or None."""
-    text_clean = text.strip().lower()
-
-    # Very short messages (1-3 words) that aren't crop-related are likely greetings
-    if len(text_clean.split()) <= 2:
-        for pattern in GREETING_PATTERNS:
-            if re.match(pattern, text_clean, re.IGNORECASE):
-                # Determine type
-                if re.match(r".*(thank|thx|merci|asante|murakoze).*", text_clean):
-                    return "thanks"
-                if re.match(r".*(bye|goodbye|see\s*you|take\s*care).*", text_clean):
-                    return "farewell"
-                if re.match(r".*(who|what\s*are\s*you|what\s*can).*", text_clean):
-                    return "who"
-                return "greeting"
-
-    # Check all patterns regardless of length
-    for pattern in GREETING_PATTERNS:
-        if re.match(pattern, text_clean, re.IGNORECASE):
-            if re.match(r".*(thank|thx|merci|asante|murakoze).*", text_clean):
-                return "thanks"
-            if re.match(r".*(bye|goodbye|see\s*you|take\s*care).*", text_clean):
-                return "farewell"
-            if re.match(r".*(who|what\s*are|what\s*can).*", text_clean):
-                return "who"
-            return "greeting"
-
-    return None
+# ---------------- Crop-specific preset questions ----------------
+# Each preset has: (label, question, category) — category enables filtering
+PRESETS = {
+    "maize": {
+        "en": [
+            ("🟡 Yellow lower leaves", "Why are the lower leaves on my maize turning yellow?", "soil"),
+            ("🟣 Purple leaves", "My maize leaves are turning purple. What is wrong?", "soil"),
+            ("🐛 Fall armyworm", "How do I control fall armyworm in maize?", "pest"),
+            ("🍃 Leaf blight", "What are the signs of maize leaf blight?", "disease"),
+        ],
+        "sw": [
+            ("🟡 Majani ya chini ya njano", "Kwa nini majani ya chini ya mahindi yanageuka njano?", "soil"),
+            ("🟣 Majani ya zambarau", "Majani ya mahindi yangu yanageuka zambarau. Kuna shida gani?", "soil"),
+            ("🐛 Viwavi wa majani", "Nidhibiti vipi viwavi wa majani katika mahindi?", "pest"),
+            ("🍃 Ugonjwa wa majani", "Dalili za ugonjwa wa majani ya mahindi ni zipi?", "disease"),
+        ],
+        "fr": [
+            ("🟡 Feuilles basses jaunes", "Pourquoi les feuilles basses de mon maïs jaunissent-elles ?", "soil"),
+            ("🟣 Feuilles violettes", "Les feuilles de mon maïs deviennent violettes. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🐛 Chenille légionnaire", "Comment lutter contre la chenille légionnaire d'automne sur le maïs ?", "pest"),
+            ("🍃 Brûlure des feuilles", "Quels sont les signes de la brûlure des feuilles du maïs ?", "disease"),
+        ],
+        "rw": [
+            ("🟡 Amababi yo hasi y'umuhondo", "Kubera iki amababi yo hasi y'ibigori byanjye ahinduka umuhondo?", "soil"),
+            ("🟣 Amababi y'umutuku", "Amababi y'ibigori byanjye ahinduka umutuku. Iki kibazo ni iki?", "soil"),
+            ("🐛 Udukoko tw'amababi", "Nigute nakurikirana udukoko tw'amababi mu bigori?", "pest"),
+            ("🍃 Indwara y'amababi", "Ni ibihe bimenyetso by'indwara y'amababi y'ibigori?", "disease"),
+        ],
+    },
+    "soybean": {
+        "en": [
+            ("💧 Not fixing nitrogen", "My soybeans are weak and not fixing nitrogen well. What could be wrong?", "soil"),
+            ("🌱 Poor nodulation", "How can I improve soybean nodulation?", "soil"),
+            ("🦠 Root rot", "What causes root rot in soybean?", "disease"),
+            ("🟡 Yellow leaves", "Why are my soybean leaves turning yellow?", "soil"),
+        ],
+        "sw": [
+            ("💧 Hazifungi naitrojeni", "Soya zangu ni dhaifu na hazifungi naitrojeni vizuri. Kuna shida gani?", "soil"),
+            ("🌱 Unodushaji mbaya", "Ninawezaje kuboresha unodushaji wa soya?", "soil"),
+            ("🦠 Uozo wa mizizi", "Ni nini husababisha uozo wa mizizi katika soya?", "disease"),
+            ("🟡 Majani ya njano", "Kwa nini majani ya soya yangu yanageuka njano?", "soil"),
+        ],
+        "fr": [
+            ("💧 Pas de fixation d'azote", "Mes sojas sont faibles et ne fixent pas bien l'azote. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🌱 Mauvaise nodulation", "Comment améliorer la nodulation du soja ?", "soil"),
+            ("🦠 Pourriture racinaire", "Qu'est-ce qui cause la pourriture racinaire chez le soja ?", "disease"),
+            ("🟡 Feuilles jaunes", "Pourquoi mes feuilles de soja deviennent-elles jaunes ?", "soil"),
+        ],
+        "rw": [
+            ("💧 Ntizikora azote", "Ibishyimbo byanjye birananiwe ntibikora azote neza. Ni ikihe kibazo?", "soil"),
+            ("🌱 Noduli nke", "Nigute nahindura noduli z'ibishyimbo?", "soil"),
+            ("🦠 Kubora kw'imizi", "Ni iki gitera kubora kw'imizi y'ibishyimbo?", "disease"),
+            ("🟡 Amababi y'umuhondo", "Kubera iki amababi y'ibishyimbo byanjye ahinduka umuhondo?", "soil"),
+        ],
+    },
+    "general": {
+        "en": [
+            ("🌽 Maize leaf blight", "How do I manage maize leaf blight?", "disease"),
+            ("🟣 Purple maize leaves", "My maize leaves are turning purple. What could be wrong?", "soil"),
+            ("🫘 Soybean nitrogen", "My soybeans are weak and not fixing nitrogen. What could be wrong?", "soil"),
+            ("🦠 Soybean root rot", "What causes root rot in soybean?", "disease"),
+            ("🐛 Fall armyworm", "How do I control fall armyworm in maize?", "pest"),
+            ("🌾 Soybean pod borer", "How do I manage soybean pod borers?", "pest"),
+        ],
+        "sw": [
+            ("🌽 Ugonjwa wa majani", "Ninawezaje kudhibiti ugonjwa wa majani ya mahindi?", "disease"),
+            ("🟣 Majani ya zambarau", "Majani ya mahindi yangu yanageuka zambarau. Kuna shida gani?", "soil"),
+            ("🫘 Naitrojeni ya soya", "Soya zangu ni dhaifu na hazifungi naitrojeni. Kuna shida gani?", "soil"),
+            ("🦠 Uozo wa mizizi", "Ni nini husababisha uozo wa mizizi katika soya?", "disease"),
+            ("🐛 Viwavi wa majani", "Nidhibiti vipi viwavi wa majani katika mahindi?", "pest"),
+            ("🌾 Wadudu wa maganda", "Nidhibiti vipi wadudu wa maganda ya soya?", "pest"),
+        ],
+        "fr": [
+            ("🌽 Brûlure du maïs", "Comment gérer la brûlure des feuilles du maïs ?", "disease"),
+            ("🟣 Maïs violet", "Mes feuilles de maïs deviennent violettes. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🫘 Azote du soja", "Mes sojas sont faibles et ne fixent pas l'azote. Qu'est-ce qui ne va pas ?", "soil"),
+            ("🦠 Pourriture du soja", "Qu'est-ce qui cause la pourriture racinaire du soja ?", "disease"),
+            ("🐛 Chenille légionnaire", "Comment lutter contre la chenille légionnaire sur le maïs ?", "pest"),
+            ("🌾 Borer du soja", "Comment gérer les borers de gousses de soja ?", "pest"),
+        ],
+        "rw": [
+            ("🌽 Indwara y'ibigori", "Nigute nakurikirana indwara y'amababi y'ibigori?", "disease"),
+            ("🟣 Amababi y'umutuku", "Amababi y'ibigori byanjye ahinduka umutuku. Ni iki kibazo?", "soil"),
+            ("🫘 Azote y'ibishyimbo", "Ibishyimbo byanjye birananiwe ntibikora azote. Ni iki kibazo?", "soil"),
+            ("🦠 Kubora kw'imizi", "Ni iki gitera kubora kw'imizi y'ibishyimbo?", "disease"),
+            ("🐛 Udukoko tw'amababi", "Nigute nakurikirana udukoko tw'amababi mu bigori?", "pest"),
+            ("🌾 Udukoko tw'ibiryo", "Nigute nakurikirana udukoko tw'ibiryo by'ibishyimbo?", "pest"),
+        ],
+    },
+}
 
 
-# -------- Node implementations --------
+# ---------------- CSS ----------------
+st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-def node_classify(state: AgentState) -> AgentState:
-    state.setdefault("trace", []).append("classify")
-    question = state["user_question"]
-    crop_hint = state.get("crop_hint", "general")
+<style>
+:root {
+    --cream: #faf6ee;
+    --cream-dark: #f2ecdd;
+    --ink: #1a1d14;
+    --ink-soft: #5a5d50;
+    --ink-mute: #8a8d7e;
+    --forest-900: #1f3a26;
+    --forest-700: #2d5234;
+    --forest-500: #4a7c52;
+    --forest-100: #e6efe4;
+    --terracotta: #c65a3a;
+    --terracotta-dark: #9a3f23;
+    --terracotta-light: #f4dfd4;
+    --gold: #c8984a;
+    --border: #e4ddc9;
+    --shadow-warm: 0 2px 12px rgba(90, 70, 30, 0.08), 0 1px 3px rgba(90, 70, 30, 0.05);
+    --shadow-lifted: 0 12px 40px rgba(90, 70, 30, 0.12), 0 2px 8px rgba(90, 70, 30, 0.06);
+}
 
-    # Step 0: Check if this is a greeting or non-agricultural message
-    greeting_type = _detect_greeting(question)
-    if greeting_type:
-        state["is_agricultural"] = False
-        state["greeting_type"] = greeting_type
-        state["classified_crop"] = "none"
-        state["classified_category"] = "greeting"
-        state["is_clear"] = True
-        return state
+html, body, [class*="css"] {
+    font-family: 'DM Sans', -apple-system, sans-serif !important;
+    color: var(--ink) !important;
+    background: var(--cream) !important;
+}
 
-    # If we get here, treat as potentially agricultural
-    state["is_agricultural"] = True
-    state["greeting_type"] = ""
+.main .block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1180px !important;
+}
 
-    # Step 1: Check if input is too short or just a crop name with no problem
-    # "maize", "soybean", "corn", "my maize", "soya" — these aren't questions
-    q_stripped = question.strip().lower()
-    q_words = q_stripped.split()
-    just_crop_words = {"maize", "corn", "soybean", "soya", "soy", "beans", "crop", "crops", "plant", "plants", "field", "farm", "my"}
+section[data-testid="stSidebar"] {
+    background: var(--cream-dark) !important;
+    border-right: 1px solid var(--border) !important;
+}
+section[data-testid="stSidebar"] * {
+    color: var(--ink) !important;
+}
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stTextInput label,
+section[data-testid="stSidebar"] .stDateInput label {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: var(--forest-700) !important;
+}
 
-    if len(q_words) <= 3 and all(w.strip(".,!?") in just_crop_words for w in q_words):
-        # It's just a crop name, not a question
-        state["is_agricultural"] = True
-        state["classified_crop"] = "maize" if any(w in q_stripped for w in ["maize", "corn"]) else "soybean" if any(w in q_stripped for w in ["soybean", "soya", "soy"]) else "unknown"
-        state["classified_category"] = "general"
-        state["is_clear"] = False
-        state["clarification_needed"] = "What problem are you seeing with your crop? Describe the symptoms — for example, yellow leaves, holes, wilting, or spots."
-        return state
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+}
+.brand-group { display: flex; align-items: center; gap: 0.8rem; }
+.brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--forest-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cream);
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+.brand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--forest-900);
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+.brand-tag {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
+}
+.topbar-session {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
 
-    image_symptoms = state.get("image_symptoms", [])
-    if image_symptoms:
-        question = f"{question}\n\nVisible symptoms from photo: {', '.join(image_symptoms)}"
-        state["user_question"] = question
+/* Hero */
+.hero {
+    background:
+        linear-gradient(135deg, rgba(31, 58, 38, 0.88) 0%, rgba(45, 82, 52, 0.78) 55%, rgba(61, 101, 64, 0.7) 100%),
+        url('https://images.pexels.com/photos/13525130/pexels-photo-13525130.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat,
+        linear-gradient(135deg, var(--forest-900) 0%, var(--forest-700) 55%, #3d6540 100%);
+    background-blend-mode: normal;
+    border-radius: 20px;
+    padding: 2.5rem 2.8rem 2.2rem 2.8rem;
+    margin-bottom: 1.4rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lifted);
+}
+.hero::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(200, 152, 74, 0.25) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero::after {
+    content: "";
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(198, 90, 58, 0.18) 0%, transparent 65%);
+    pointer-events: none;
+}
+.hero-label {
+    display: inline-block;
+    background: rgba(250, 246, 238, 0.15);
+    color: var(--cream);
+    border: 1px solid rgba(250, 246, 238, 0.25);
+    padding: 0.4rem 0.9rem;
+    border-radius: 100px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    position: relative;
+    z-index: 1;
+}
+.hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+    white-space: pre-line;
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+}
+.hero-sub {
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: rgba(250, 246, 238, 0.88);
+    max-width: 620px;
+    position: relative;
+    z-index: 1;
+}
 
-    if llm_available():
-        farmer_ctx = _farmer_context(state)
-        prompt = f"""Classify this farming question.
+/* Category filter bar — below hero, above tabs */
+.category-bar {
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+.category-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 0.3rem;
+}
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--terracotta-light);
+    border: 1px solid var(--terracotta);
+    color: var(--terracotta-dark);
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
 
-{farmer_ctx}Farmer question: {question}
-Farmer selected crop: {crop_hint}
+/* Welcome card */
+.welcome-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--terracotta);
+    border-radius: 12px;
+    padding: 1rem 1.3rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-warm);
+}
+.welcome-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--terracotta-light);
+    color: var(--terracotta-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.welcome-text {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--forest-900);
+    line-height: 1.3;
+}
+.welcome-meta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 2px;
+}
 
-Return JSON only:
-{{
-  "is_agricultural": true | false,
-  "crop": "maize" | "soybean" | "both" | "unknown",
-  "category": "pest" | "disease" | "nutrient_deficiency" | "soil" | "weeds" | "drought" | "fertilizer" | "agronomy" | "harvest" | "nodulation" | "storage" | "variety" | "general",
-  "is_clear": true | false,
-  "clarification": "one short follow-up question if not clear, else empty string"
-}}
+.section-header {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--forest-900);
+    margin: 0.3rem 0 0.2rem 0;
+    letter-spacing: -0.01em;
+}
+.section-sub {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.2rem;
+}
 
-Rules:
-- "is_agricultural" = false if the question is a greeting, off-topic, or has nothing to do with farming.
-- "is_clear" = false if the crop is unknown AND the farmer didn't say, OR if symptoms are vague.
-- If farmer selected a crop, trust it unless question clearly contradicts.
-- Keep clarification under 15 words and actionable (ask for ONE thing).
-- The clarification should be in English (internal use only).
-"""
-        result = generate_json(prompt)
-        if result:
-            # Check if LLM says it's not agricultural
-            if not result.get("is_agricultural", True):
-                state["is_agricultural"] = False
-                state["greeting_type"] = "other"
-                state["classified_crop"] = "none"
-                state["classified_category"] = "off_topic"
-                state["is_clear"] = True
-                return state
+/* Streamlit buttons (default styling for presets and filters) */
+div.stButton > button {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    padding: 0.7rem 1rem !important;
+    color: var(--ink) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 2px rgba(90, 70, 30, 0.04) !important;
+    height: auto !important;
+    min-height: 48px !important;
+}
+div.stButton > button:hover {
+    border-color: var(--forest-500) !important;
+    background: var(--forest-100) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-warm) !important;
+}
+div.stButton > button:active, div.stButton > button:focus {
+    border-color: var(--forest-700) !important;
+}
+div.stButton > button[kind="primary"] {
+    background: var(--terracotta) !important;
+    border-color: var(--terracotta-dark) !important;
+    color: var(--cream) !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+div.stButton > button[kind="primary"]:hover {
+    background: var(--terracotta-dark) !important;
+}
 
-            state["classified_crop"] = result.get("crop", "unknown")
-            state["classified_category"] = result.get("category", "general")
-            state["is_clear"] = bool(result.get("is_clear", True))
-            state["clarification_needed"] = result.get("clarification", "") or None
-            return state
+/* Answer card */
+.answer-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.6rem 1.8rem;
+    margin: 1rem 0;
+    box-shadow: var(--shadow-warm);
+    position: relative;
+}
+.answer-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 1.8rem;
+    right: 1.8rem;
+    height: 3px;
+    background: linear-gradient(90deg, var(--forest-700), var(--terracotta), var(--gold));
+    border-radius: 0 0 3px 3px;
+}
+.answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+.answer-kicker {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+.conf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.conf-high { background: var(--forest-100); color: var(--forest-900); border: 1px solid #c3dac2; }
+.conf-medium { background: #fdf4e1; color: #7a5a00; border: 1px solid #ead9a7; }
+.conf-low { background: var(--terracotta-light); color: var(--terracotta-dark); border: 1px solid #eac5b5; }
 
-    # Fallback classification
-    q_lower = question.lower()
+.answer-issue {
+    font-family: 'Fraunces', serif;
+    font-size: 1.55rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--forest-900);
+    margin-bottom: 1.2rem;
+    letter-spacing: -0.01em;
+}
+.answer-section { margin-bottom: 1.1rem; }
+.answer-section:last-child { margin-bottom: 0; }
+.answer-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.35rem;
+}
+.answer-body {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--ink);
+}
 
-    # Simple non-agricultural check for fallback
-    agri_keywords = [
-        "maize", "corn", "soybean", "soya", "crop", "plant", "leaf", "leaves",
-        "pest", "disease", "soil", "fertilizer", "weed", "harvest", "seed",
-        "yellow", "brown", "wilting", "spots", "holes", "rot", "blight",
-        "armyworm", "borer", "rust", "nodule", "nitrogen", "phosphorus",
-        "field", "farm", "planting", "germination", "drought", "rain",
-    ]
-    has_agri_keyword = any(kw in q_lower for kw in agri_keywords)
+.escalate-box {
+    background: #fff5e8;
+    border: 1px solid #ead9a7;
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6b4a10;
+}
 
-    if not has_agri_keyword and len(question.split()) < 5:
-        state["is_agricultural"] = False
-        state["greeting_type"] = "other"
-        state["classified_crop"] = "none"
-        state["classified_category"] = "off_topic"
-        state["is_clear"] = True
-        return state
+.symptoms-box {
+    background: var(--forest-100);
+    border: 1px solid #c8dcc6;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+}
+.symptoms-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--forest-700);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
 
-    if crop_hint != "general":
-        state["classified_crop"] = crop_hint
-    elif "soybean" in q_lower or "soya" in q_lower:
-        state["classified_crop"] = "soybean"
-    elif "maize" in q_lower or "corn" in q_lower:
-        state["classified_crop"] = "maize"
+.footer-card {
+    background: var(--cream-dark);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-top: 2rem;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+}
+.footer-card strong {
+    font-family: 'Fraunces', serif;
+    font-size: 1.0rem;
+    color: var(--forest-900);
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+/* Streamlit tab styling */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.4rem;
+    background: transparent !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border: none !important;
+    color: var(--ink-soft) !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 0.7rem 1.2rem !important;
+}
+.stTabs [aria-selected="true"] {
+    color: var(--forest-900) !important;
+    border-bottom: 2px solid var(--terracotta) !important;
+}
+
+.stChatInput textarea, .stChatInput input {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.98rem !important;
+    padding: 0.8rem 1rem !important;
+}
+
+details[data-testid="stExpander"] {
+    background: var(--cream) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    margin: 0.5rem 0 !important;
+}
+details[data-testid="stExpander"] summary {
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--forest-900) !important;
+    padding: 0.8rem 1rem !important;
+}
+
+/* ============================================================ */
+/*  LANDING PAGE SECTIONS (v3.3)                                  */
+/* ============================================================ */
+
+/* Section spacing — used by all landing sections */
+.land-section {
+    margin: 2.5rem 0 2rem 0;
+}
+.land-kicker {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.4rem;
+}
+.land-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700;
+    color: var(--forest-900);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    max-width: 640px;
+}
+.land-sub {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 600px;
+    margin-top: -0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+/* "How it works" — three step cards */
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.how-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.4rem 1.4rem 1.5rem 1.4rem;
+    box-shadow: var(--shadow-warm);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.how-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.how-card-image {
+    width: 100%;
+    height: 140px;
+    border-radius: 12px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+.how-card-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(180deg, transparent 50%, rgba(31, 58, 38, 0.35) 100%);
+}
+.how-step-number {
+    font-family: 'Fraunces', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+}
+.how-step-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+}
+.how-step-desc {
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+}
+
+/* "Real impact" — three big numbers */
+.impact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.impact-card {
+    background: linear-gradient(160deg, var(--forest-700) 0%, var(--forest-900) 100%);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem 1.6rem 1.6rem;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-warm);
+}
+.impact-card.terracotta {
+    background: linear-gradient(160deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+}
+.impact-card.gold {
+    background: linear-gradient(160deg, var(--gold) 0%, #a17a36 100%);
+}
+.impact-card::before {
+    content: "";
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(250, 246, 238, 0.15) 0%, transparent 65%);
+}
+.impact-number {
+    font-family: 'Fraunces', serif;
+    font-size: 3.2rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    position: relative;
+    z-index: 1;
+}
+.impact-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.7rem;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
+}
+
+/* "Featured topics" — three real KB cards */
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+}
+.featured-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-warm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+.featured-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.featured-image {
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+.featured-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(31, 58, 38, 0.5) 100%);
+}
+.featured-tag {
+    position: absolute;
+    top: 0.8rem;
+    left: 0.8rem;
+    background: rgba(250, 246, 238, 0.92);
+    color: var(--forest-900);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.3rem 0.65rem;
+    border-radius: 100px;
+    z-index: 1;
+}
+.featured-body {
+    padding: 1.2rem 1.3rem 1.4rem 1.3rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.featured-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+}
+.featured-summary {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    flex: 1;
+}
+.featured-cta {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--terracotta-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* "Languages" strip */
+.lang-section {
+    background: linear-gradient(180deg, var(--cream-dark) 0%, var(--cream) 100%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 2rem 2.2rem;
+    margin: 2.5rem 0 2rem 0;
+}
+.lang-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+    margin-top: 1.4rem;
+}
+.lang-pill {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+.lang-pill:hover {
+    border-color: var(--forest-500);
+    transform: translateY(-1px);
+}
+.lang-pill-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--forest-900);
+    margin-bottom: 0.2rem;
+}
+.lang-pill-native {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.lang-pill.beta::after {
+    content: "BETA";
+    display: inline-block;
+    margin-left: 0.4rem;
+    background: var(--gold);
+    color: var(--cream);
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 100px;
+    vertical-align: middle;
+    letter-spacing: 0.08em;
+}
+
+/* SVG icon system — replaces emojis */
+.svg-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+    opacity: 0.9;
+}
+
+/* ── BIG ACTION CARDS (Ask / Upload) ── */
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0 1rem 0;
+}
+.action-card {
+    background: var(--forest-900);
+    border-radius: 18px;
+    padding: 1.8rem 1.6rem;
+    color: var(--cream);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-warm);
+}
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lifted);
+}
+.action-card.terra {
+    background: linear-gradient(160deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+}
+.action-card::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(250,246,238,0.12) 0%, transparent 65%);
+}
+.action-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.8rem;
+    display: block;
+}
+.action-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+}
+.action-desc {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* ── SOURCE SEPARATION in answers ── */
+.source-badge {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    margin-bottom: 0.6rem;
+}
+.source-badge.kb {
+    background: var(--forest-100);
+    color: var(--forest-700);
+    border: 1px solid #c8dcc6;
+}
+.source-badge.ai {
+    background: #fff5e8;
+    color: #6b4a10;
+    border: 1px solid #ead9a7;
+}
+.ai-context-section {
+    margin-top: 1rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed var(--border);
+}
+.conversational-msg {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.4rem 1.6rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    box-shadow: var(--shadow-warm);
+}
+
+/* Inline SVG icons used in filter buttons via background-image */
+.icon-bug, .icon-leaf, .icon-sprout, .icon-globe, .icon-wheat, .icon-arrow {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    vertical-align: -3px;
+    margin-right: 0.45rem;
+}
+.icon-bug {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 2l1.88 1.88'/><path d='M14.12 3.88L16 2'/><path d='M9 7.13v-1a3.003 3.003 0 116 0v1'/><path d='M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4'/></svg>");
+}
+.icon-leaf {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96a1 1 0 0 1 1.8.5c0 8.42-3.42 14.66-9.4 16.4Z'/><path d='M2 21c0-3 1.85-5.36 5.08-6'/></svg>");
+}
+.icon-sprout {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7 20h10'/><path d='M10 20c5.5-2.5.8-6.4 3-10'/><path d='M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z'/><path d='M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z'/></svg>");
+}
+.icon-globe {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d5234' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><line x1='2' y1='12' x2='22' y2='12'/><path d='M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z'/></svg>");
+}
+.icon-wheat {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232d5234' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 22 16 8'/><path d='M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z'/><path d='M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z'/><path d='M11.47 17.47 13 19l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L5 19l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/><path d='M15.47 13.47 17 15l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L9 15l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/><path d='M19.47 9.47 21 11l-1.53 1.53a3.5 3.5 0 0 1-4.94 0L13 11l1.53-1.53a3.5 3.5 0 0 1 4.94 0Z'/></svg>");
+}
+.icon-arrow {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a3f23' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><line x1='5' y1='12' x2='19' y2='12'/><polyline points='12 5 19 12 12 19'/></svg>");
+    width: 14px;
+    height: 14px;
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 1.8rem 1.5rem 1.5rem 1.5rem; }
+    .hero-title { font-size: 1.9rem; }
+    .answer-card { padding: 1.2rem 1.3rem; }
+    .answer-issue { font-size: 1.3rem; }
+    .brand-name { font-size: 1.4rem; }
+    .topbar-session { display: none; }
+    .how-grid, .impact-grid, .featured-grid { grid-template-columns: 1fr; }
+    .lang-grid { grid-template-columns: repeat(2, 1fr); }
+    .impact-number { font-size: 2.5rem; }
+    .action-grid { grid-template-columns: 1fr; }
+    .action-title { font-size: 1.3rem; }
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ---------------- Rendering helpers ----------------
+def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation: bool = False, kb_sources: list = None):
+    # Handle conversational responses (greetings, off-topic)
+    if response.get("type") == "conversational":
+        message = response.get("message", "").replace("<", "&lt;").replace(">", "&gt;")
+        st.markdown(
+            '<div class="conversational-msg">' + message + '</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    # Detect clarify/refuse responses — render as simple message, not full card
+    likely = response.get("Likely issue", "")
+    if likely in ("More information needed", "Unable to give a confident answer"):
+        # Simple clarification or refusal — no complex card needed
+        what_to_check = response.get("What to check next", "")
+        suggested = response.get("Suggested action", "")
+        when_support = response.get("When to seek local support", "")
+        parts = []
+        if what_to_check:
+            parts.append(what_to_check)
+        if suggested:
+            parts.append(suggested)
+        if when_support and "extension" in when_support.lower():
+            parts.append(when_support)
+        msg = " ".join(parts) if parts else "Could you describe what you are seeing in your field?"
+        msg_safe = msg.replace("<", "&lt;").replace(">", "&gt;")
+        st.markdown(
+            '<div class="conversational-msg">'
+            '<div style="font-weight:600;margin-bottom:0.4rem;color:var(--forest-900);">' + escape(likely) + '</div>'
+            + msg_safe +
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    # Full advisory response with source separation
+    if top_score >= 0.55:
+        badge_class = "conf-high"
+        badge_label = t("confidence_high")
+    elif top_score >= 0.35:
+        badge_class = "conf-medium"
+        badge_label = t("confidence_medium")
     else:
-        state["classified_crop"] = "unknown"
+        badge_class = "conf-low"
+        badge_label = t("confidence_low")
 
-    state["classified_category"] = state.get("category_hint", "general").lower()
-    state["is_clear"] = state["classified_crop"] != "unknown" and len(question.split()) >= 4
-    if not state["is_clear"]:
-        state["clarification_needed"] = "Which crop — maize or soybean — and what symptoms are you seeing?"
-    return state
+    badge_text = "● " + badge_label + " · " + f"{top_score:.2f}"
+
+    def s(key):
+        val = response.get(key, "") or "—"
+        return val.replace("<", "&lt;").replace(">", "&gt;")
+
+    # Build source names
+    source_line = ""
+    if kb_sources:
+        names = []
+        seen = set()
+        for src in kb_sources:
+            n = src.get("source", "Knowledge Base")
+            if n not in seen and src.get("score", 0) > 0.3:
+                names.append(n)
+                seen.add(n)
+            if len(names) >= 3:
+                break
+        if names:
+            source_line = (
+                '<div style="font-size:0.72rem;color:var(--ink-mute);font-style:italic;">'
+                + " · ".join(n.replace("<", "&lt;").replace(">", "&gt;") for n in names)
+                + '</div>'
+            )
+
+    kb_label = t("source_kb")
+
+    # Build each piece separately, then join
+    card_parts = [
+        '<div class="answer-card">',
+        '<div class="answer-header">',
+        '<div class="answer-kicker">AGIRITECHAT · ADVISORY</div>',
+        '<div class="conf-badge ' + badge_class + '">' + badge_text + '</div>',
+        '</div>',
+        '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;">',
+        '<div class="source-badge kb">' + kb_label + '</div>',
+        source_line,
+        '</div>',
+        '<div class="answer-issue">' + s("Likely issue") + '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">Why this may be happening</div>',
+        '<div class="answer-body">' + s("Why this may be happening") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">What to check next</div>',
+        '<div class="answer-body">' + s("What to check next") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">Suggested action</div>',
+        '<div class="answer-body">' + s("Suggested action") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">When to seek local support</div>',
+        '<div class="answer-body">' + s("When to seek local support") + '</div>',
+        '</div>',
+        '</div>',
+    ]
+    st.markdown("".join(card_parts), unsafe_allow_html=True)
+
+    # AI additional context as separate call
+    ai_context = response.get("AI additional context", "")
+    if ai_context and ai_context.lower().strip() not in ("", "—", "no additional context needed.", "no additional context needed"):
+        ai_label = t("source_ai")
+        ai_safe = ai_context.replace("<", "&lt;").replace(">", "&gt;")
+        st.markdown(
+            '<div style="margin-top:-0.5rem;padding:1rem 1.6rem 1.2rem;background:var(--cream);border:1px solid var(--border);border-top:2px dashed var(--border);border-radius:0 0 18px 18px;">'
+            + '<div class="source-badge ai">' + ai_label + '</div>'
+            + '<div style="font-size:0.72rem;color:var(--ink-mute);font-style:italic;margin-bottom:0.4rem;">Generated by Llama 3.3 70B via Groq — not from verified knowledge base</div>'
+            + '<div class="answer-body">' + ai_safe + '</div>'
+            + '</div>',
+            unsafe_allow_html=True,
+        )
+
+    if needs_escalation:
+        st.markdown(
+            '<div class="escalate-box">⚠ ' + t("escalation") + '</div>',
+            unsafe_allow_html=True,
+        )
 
 
-def node_greet(state: AgentState) -> AgentState:
-    """Handle greetings, thank-yous, and off-topic messages conversationally."""
-    state.setdefault("trace", []).append("greet")
-    lang = state.get("language", "en")
-    greeting_type = state.get("greeting_type", "greeting")
+def process_question(user_question, crop_hint, category_hint="general",
+                     image_symptoms=None, image_source="none"):
+    with st.spinner("…"):
+        state = run_agent(
+            user_question=user_question,
+            crop_hint=crop_hint,
+            category_hint=category_hint,
+            image_symptoms=image_symptoms or [],
+            image_source=image_source,
+            language=st.session_state.language,
+            farmer_profile=st.session_state.farmer_profile,
+        )
 
-    responses = GREETING_RESPONSES.get(lang, GREETING_RESPONSES["en"])
-    message = responses.get(greeting_type, responses["other"])
+    interaction_id = log_interaction(st.session_state.session_id, state)
 
-    state["response"] = {
-        "type": "conversational",
-        "message": message,
-    }
-    state["kb_sources"] = []
-    state["needs_escalation"] = False
-    return state
+    render_answer_card(
+        state.get("response", {}),
+        state.get("top_score", 0.0),
+        state.get("needs_escalation", False),
+        kb_sources=state.get("kb_sources", []),
+    )
+
+    # Only show feedback buttons for advisory responses
+    response_type = (state.get("response") or {}).get("type", "advisory")
+    if response_type == "advisory":
+        fb1, fb2, _ = st.columns([1, 1, 8])
+        if fb1.button("👍 " + t("helpful"), key=f"up_{interaction_id}"):
+            record_feedback(interaction_id, 1)
+            st.toast(t("thanks_feedback"))
+        if fb2.button("👎 " + t("not_helpful"), key=f"down_{interaction_id}"):
+            record_feedback(interaction_id, -1)
+            st.toast(t("thanks_feedback"))
+
+    # Show KB sources with attribution — always visible for advisory
+    kb_sources = state.get("kb_sources", [])
+    matches = state.get("matches", [])
+    sources_to_show = kb_sources if kb_sources else matches
+    if sources_to_show and response_type == "advisory":
+        with st.expander(f"📚 {t('sources_used')} ({len(sources_to_show)})"):
+            for m in sources_to_show:
+                source_name = m.get("source", "Knowledge Base")
+                score_val = m.get("score", 0)
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">'
+                    f'<div class="source-badge kb">{escape(source_name)}</div>'
+                    f'<span style="font-size:0.72rem;color:var(--ink-mute);">Score: {score_val:.2f}</span>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                st.markdown(f"**{m['question']}**")
+                st.write(m.get("answer", ""))
+                st.write("---")
+
+    # Agent trace only shown in developer view
+    if st.session_state.developer_view:
+        with st.expander(f"⚙ {t('agent_trace')}"):
+            st.write("**Path:**", " → ".join(state.get("trace", [])))
+            st.write("**Language:**", LANGUAGES[state.get("language", "en")]["name"])
+            st.write("**Classified crop:**", state.get("classified_crop", "unknown"))
+            st.write("**Is agricultural:**", state.get("is_agricultural", True))
+            st.write("**Top retrieval score:**", round(state.get("top_score", 0.0), 3))
+            if state.get("image_source") and state.get("image_source") != "none":
+                st.write("**Image analysis source:**", state.get("image_source"))
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "response": state.get("response"),
+        "top_score": state.get("top_score", 0.0),
+        "needs_escalation": state.get("needs_escalation", False),
+        "kb_sources": state.get("kb_sources", []),
+        "interaction_id": interaction_id,
+    })
 
 
-def node_retrieve(state: AgentState) -> AgentState:
-    state.setdefault("trace", []).append("retrieve")
+# ---------------- Sidebar ----------------
+with st.sidebar:
+    # Language selector
+    lang_names = [LANGUAGES[code]["name"] for code in ["en", "sw", "fr", "rw"]]
+    lang_codes = ["en", "sw", "fr", "rw"]
+    current_idx = lang_codes.index(st.session_state.language)
+    st.markdown(f'<div style="font-family: \'DM Sans\', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--forest-700); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem;"><span class="icon-globe"></span>{t("sidebar_language")}</div>', unsafe_allow_html=True)
+    selected_lang = st.selectbox(
+        "language_selector",
+        options=lang_names,
+        index=current_idx,
+        label_visibility="collapsed",
+    )
+    new_lang = lang_codes[lang_names.index(selected_lang)]
+    if new_lang != st.session_state.language:
+        st.session_state.language = new_lang
+        st.rerun()
+
+    st.markdown("---")
+
+    # Farmer profile
+    st.markdown(f"### {t('sidebar_profile')}")
+
+    name = st.text_input(t("name"), value=st.session_state.farmer_profile.get("name", ""), key="f_name")
+    region = st.text_input(t("region"), value=st.session_state.farmer_profile.get("region", ""), key="f_region", placeholder="e.g. Musanze, Kigali…")
+    farm_size = st.text_input(t("farm_size"), value=st.session_state.farmer_profile.get("farm_size", ""), key="f_size", placeholder="e.g. 0.5 ha")
+    crops_grown = st.text_input(t("crops"), value=st.session_state.farmer_profile.get("crops", ""), key="f_crops", placeholder="e.g. Maize, Soybean")
+    planting_date = st.text_input(t("planting_date"), value=st.session_state.farmer_profile.get("planting_date", ""), key="f_planting", placeholder="e.g. March 2026")
+
+    if st.button(t("save_profile"), use_container_width=True):
+        st.session_state.farmer_profile = {
+            "name": name.strip(),
+            "region": region.strip(),
+            "farm_size": farm_size.strip(),
+            "crops": crops_grown.strip(),
+            "planting_date": planting_date.strip(),
+        }
+        st.session_state.profile_saved = True
+        st.toast(t("profile_saved"))
+
+    st.caption(t("profile_note"))
+
+    st.markdown("---")
+
+    # Crop & topic focus
+    st.markdown('<div style="font-family: \'DM Sans\', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--forest-700); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.3rem;"><span class="icon-wheat"></span>Crop focus</div>', unsafe_allow_html=True)
+    selected_crop = st.selectbox(
+        "crop_focus",
+        ["General", "Maize", "Soybean"],
+        index=0,
+        label_visibility="collapsed",
+    )
+
+    st.markdown("---")
+
+    # Developer view toggle (new)
+    dev_view = st.checkbox(
+        t('sidebar_dev'),
+        value=st.session_state.developer_view,
+        help=t("sidebar_dev_help"),
+    )
+    if dev_view != st.session_state.developer_view:
+        st.session_state.developer_view = dev_view
+        st.rerun()
+
+    # Status — only visible in developer view
+    if st.session_state.developer_view:
+        st.markdown("---")
+        st.markdown(f"**{t('sidebar_status')}**")
+        if llm_available():
+            st.write("🟢 AI reasoning: active")
+        else:
+            st.write("🟡 AI reasoning: offline")
+        st.write("🟢 Semantic retrieval")
+        st.write("🟢 Image analysis")
+        st.write("🟢 Feedback logging")
+
+        with st.expander(f"📊 {t('feedback_stats')}"):
+            stats = recent_stats()
+            st.write(f"Total interactions: **{stats['total']}**")
+            st.write(f"👍 {stats['thumbs_up']}   👎 {stats['thumbs_down']}")
+            st.write(f"Escalations: **{stats['escalations']}**")
+
+
+# ---------------- Top bar ----------------
+session_badge = (
+    f'<div class="topbar-session">Session · {st.session_state.session_id}</div>'
+    if st.session_state.developer_view else ""
+)
+st.markdown(f"""
+<div class="topbar">
+    <div class="brand-group">
+        <div class="brand-mark">A</div>
+        <div>
+            <div class="brand-name">AgiriteChat</div>
+            <div class="brand-tag">{t('brand_tag')}</div>
+        </div>
+    </div>
+    {session_badge}
+</div>
+""", unsafe_allow_html=True)
+
+# ---------------- Hero ----------------
+st.markdown(f"""
+<div class="hero">
+    <div class="hero-label">AgiriteChat · v3</div>
+    <div class="hero-title">{t('hero_title')}</div>
+    <div class="hero-sub">{t('hero_sub')}</div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---------------- Category filter buttons (real working filters) ----------------
+st.markdown(f'<div class="category-label">QUICK FILTERS</div>', unsafe_allow_html=True)
+
+fcol1, fcol2, fcol3, fcol4 = st.columns([1, 1, 1.3, 5])
+if fcol1.button(t("filter_pests"),
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "pest" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "pest" else "pest"
+    st.rerun()
+if fcol2.button(t("filter_diseases"),
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "disease" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "disease" else "disease"
+    st.rerun()
+if fcol3.button(t("filter_soil"),
+                use_container_width=True,
+                type="primary" if st.session_state.category_filter == "soil" else "secondary"):
+    st.session_state.category_filter = None if st.session_state.category_filter == "soil" else "soil"
+    st.rerun()
+
+# Active filter badge
+if st.session_state.category_filter:
+    filter_label_key = f"filter_{st.session_state.category_filter}s" if st.session_state.category_filter != "soil" else "filter_soil"
+    filter_display = t(filter_label_key)
+    bc1, bc2 = st.columns([3, 9])
+    with bc1:
+        st.markdown(
+            f'<div class="active-filter-badge">● {t("filter_active")}: {filter_display}</div>',
+            unsafe_allow_html=True,
+        )
+    with bc2:
+        if st.button(f"✕ {t('filter_clear')}", key="clear_filter"):
+            st.session_state.category_filter = None
+            st.rerun()
+
+# ============================================================
+# MAIN INTERACTION AREA — Ask / Photo / Library
+# Farmers need these immediately. Big tabs, no decoration.
+# ============================================================
+
+tab1, tab2, tab3 = st.tabs([
+    f"💬  {t('action_ask_title')}",
+    f"📷  {t('action_photo_title')}",
+    f"📚  {t('tab_browse')}",
+])
+
+# ---- ASK A QUESTION ----
+with tab1:
+    # Welcome card
+    profile = st.session_state.farmer_profile
+    has_profile = st.session_state.profile_saved and profile.get("name")
+    if has_profile:
+        avatar = profile["name"][0].upper() if profile["name"] else "F"
+        welcome = t("welcome_named").format(name=profile["name"])
+        meta_parts = [p for p in [profile.get("region"), profile.get("crops"), profile.get("farm_size")] if p]
+        meta = " · ".join(meta_parts) if meta_parts else ""
+        meta_html = f'<div class="welcome-meta">{escape(meta)}</div>' if meta else ""
+        st.markdown(
+            f'<div class="welcome-card">'
+            f'<div class="welcome-avatar">{escape(avatar)}</div>'
+            f'<div><div class="welcome-text">{escape(welcome)}</div>{meta_html}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    # Quick starts
+    crop_key = selected_crop.lower() if selected_crop != "General" else "general"
+    lang_key = st.session_state.language
+    preset_list = PRESETS.get(crop_key, PRESETS["general"]).get(lang_key, PRESETS[crop_key]["en"])
+
+    if st.session_state.category_filter:
+        preset_list = [p for p in preset_list if p[2] == st.session_state.category_filter]
+
+    if preset_list:
+        st.markdown(f'<div class="section-header">{t("quick_starts")}</div>', unsafe_allow_html=True)
+        num_cols = min(len(preset_list), 4)
+        cols = st.columns(num_cols)
+        for i, (label, question, _cat) in enumerate(preset_list):
+            if cols[i % num_cols].button(label, key=f"preset_{i}_{lang_key}_{crop_key}", use_container_width=True):
+                st.session_state["preset_q"] = question
+
+    # Message history
+    for msg in st.session_state.messages:
+        if msg.get("response"):
+            render_answer_card(msg["response"], msg.get("top_score", 0.0), msg.get("needs_escalation", False), kb_sources=msg.get("kb_sources", []))
+
+    preset_q = st.session_state.pop("preset_q", None)
+    if preset_q:
+        st.chat_message("user").write(preset_q)
+        process_question(preset_q, selected_crop)
+
+    user_q = st.chat_input(t("input_placeholder"))
+    if user_q:
+        st.chat_message("user").write(user_q)
+        process_question(user_q, selected_crop)
+
+# ---- UPLOAD A PHOTO ----
+with tab2:
+    st.markdown(f'<div class="section-sub" style="margin-bottom: 0.8rem;">{t("photo_upload")}</div>', unsafe_allow_html=True)
+
+    photo = st.file_uploader(" ", type=["png", "jpg", "jpeg"], label_visibility="collapsed", key="photo_uploader_main")
+    photo_desc = st.text_input(t("photo_desc"), placeholder=t("photo_desc_ph"), key="photo_desc_main")
+
+    if photo is None:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(180deg, var(--forest-100) 0%, var(--cream) 100%);
+            border: 1px dashed #c8dcc6; border-radius: 16px;
+            padding: 2.5rem 1.5rem; text-align: center; margin: 1rem 0;
+        ">
+            <div style="width:110px;height:110px;margin:0 auto 1rem;border-radius:50%;
+                background-image:url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=240&h=240&fit=crop');
+                background-size:cover;background-position:center;border:3px solid var(--cream);box-shadow:var(--shadow-warm);"></div>
+            <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--forest-900);margin-bottom:0.4rem;">No photo uploaded yet</div>
+            <div style="font-size:0.9rem;color:var(--ink-soft);max-width:360px;margin:0 auto;line-height:1.5;">Upload a close-up photo of an affected leaf or plant. Best results come from clear, well-lit photos in daylight.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    if photo is not None:
+        st.image(photo, use_container_width=True)
+        if st.button(t("analyze_photo"), type="primary", use_container_width=True, key="analyze_btn_main"):
+            from vision import analyze_photo
+            image_bytes = photo.getvalue()
+            with st.spinner("Analyzing photo…"):
+                vision_result = analyze_photo(image_bytes)
+            if vision_result and vision_result.get("symptoms"):
+                st.markdown(f'<div class="section-header">{t("symptoms_detected")}</div>', unsafe_allow_html=True)
+                for sym in vision_result["symptoms"]:
+                    st.write(f"• {sym}")
+                question = photo_desc if photo_desc else "What is wrong with this crop?"
+                process_question(question, selected_crop, image_symptoms=vision_result["symptoms"], image_source=vision_result.get("source", "groq_vision"))
+            elif vision_result and vision_result.get("error"):
+                st.warning(vision_result["error"])
+            else:
+                st.warning("Could not analyze the photo. Please try a clearer image.")
+
+# ---- KNOWLEDGE LIBRARY ----
+with tab3:
+    search_term = st.text_input(t("library_search"), placeholder=t("library_search_ph"), label_visibility="collapsed", key="lib_search_main")
     retriever = get_retriever()
-
-    crop = state.get("classified_crop", "unknown")
-    if crop == "unknown":
-        crop = None
-
-    hits = retriever.search(
-        query=state["user_question"],
-        crop=crop,
-        category=None,
-        top_k=4,
-    )
-    state["matches"] = hits
-    state["top_score"] = hits[0]["score"] if hits else 0.0
-    return state
-
-
-def node_check_confidence(state: AgentState) -> AgentState:
-    state.setdefault("trace", []).append("check_confidence")
-
-    top = state.get("top_score", 0.0)
-    is_clear = state.get("is_clear", True)
-    has_clarification = bool(state.get("clarification_needed"))
-
-    # If the question was explicitly marked as unclear (e.g. just a crop name
-    # with no symptoms), ALWAYS clarify — the KB match is noise, not signal.
-    if not is_clear and has_clarification:
-        state["route"] = "clarify"
-        return state
-
-    # Clear question with a good KB match → synthesize
-    if top >= LOW_CONFIDENCE:
-        state["route"] = "synthesize"
-        return state
-
-    # Low retrieval score, clear question → refuse honestly
-    state["route"] = "refuse"
-    return state
-
-
-def node_clarify(state: AgentState) -> AgentState:
-    """Return a clarifying question — translated into the chosen language."""
-    state.setdefault("trace", []).append("clarify")
-    q_en = state.get("clarification_needed") or "Could you share more details — which crop and what symptoms?"
-
-    lang = state.get("language", "en")
-
-    # For non-English, ask the LLM to translate the clarification naturally
-    if lang != "en" and llm_available():
-        trans_prompt = f"Translate this short farming clarification question into {LANGUAGES[lang]['name']}, keeping it friendly and simple. Return only the translation, nothing else.\n\nEnglish: {q_en}"
-        translated = generate_text(trans_prompt, temperature=0.1)
-        if translated:
-            q_en = translated.strip()
-
-    state["response"] = _translated_fallback({
-        "type": "advisory",
-        "Likely issue": "More information needed",
-        "Why this may be happening": "The question doesn't yet have enough detail to give reliable guidance.",
-        "What to check next": q_en,
-        "Suggested action": "Please reply with the crop, the symptoms you see, and the growth stage if known.",
-        "When to seek local support": "If the problem is urgent or spreading quickly, contact your local extension officer while gathering these details.",
-    }, state)
-    state["kb_sources"] = []
-    state["needs_escalation"] = False
-    return state
-
-
-def node_refuse(state: AgentState) -> AgentState:
-    """Honest 'I don't know' with escalation, translated if needed."""
-    state.setdefault("trace", []).append("refuse")
-    state["response"] = _translated_fallback({
-        "type": "advisory",
-        "Likely issue": "Unable to give a confident answer",
-        "Why this may be happening": "The question does not closely match any entry in my knowledge base. I would rather say I don't know than guess on a crop decision.",
-        "What to check next": "Take photos of the affected plants, note the growth stage, and record how many plants or what fraction of the field is affected.",
-        "Suggested action": "Please consult your local agricultural extension officer or a trusted agronomist before taking action.",
-        "When to seek local support": "Now — this situation needs someone who can see the field directly.",
-    }, state)
-    state["kb_sources"] = []
-    state["needs_escalation"] = True
-    return state
-
-
-def _translated_fallback(response_en: Dict[str, str], state: AgentState) -> Dict[str, str]:
-    """Translate a fixed English fallback response into the chosen language."""
-    lang = state.get("language", "en")
-    if lang == "en" or not llm_available():
-        return response_en
-
-    import json
-    # Don't translate the "type" key
-    to_translate = {k: v for k, v in response_en.items() if k != "type"}
-    prompt = (
-        f"Translate these agricultural advisory sections into {LANGUAGES[lang]['name']}. "
-        "Keep the JSON structure exactly the same, only translate the values. "
-        "Return ONLY the translated JSON, no markdown.\n\n"
-        + json.dumps(to_translate, ensure_ascii=False)
-    )
-    translated = generate_json(prompt)
-    if translated and all(k in translated for k in to_translate.keys()):
-        translated["type"] = response_en.get("type", "advisory")
-        return translated
-    return response_en
-
-
-def node_synthesize(state: AgentState) -> AgentState:
-    """Generate the structured answer with source separation."""
-    state.setdefault("trace", []).append("synthesize")
-    matches = state["matches"]
-    top_score = state["top_score"]
-
-    # Store the KB sources for display
-    state["kb_sources"] = [
-        {
-            "question": m["question"],
-            "answer": m["answer"],
-            "crop": m.get("crop", ""),
-            "category": m.get("category", ""),
-            "source": m.get("source", "Knowledge Base"),
-            "score": m["score"],
-        }
-        for m in matches[:3]  # Top 3 sources
-    ]
-
-    context = "\n\n".join(
-        f"[Source {i+1}: {m.get('source', 'Knowledge Base')}] Q: {m['question']}\nA: {m['answer']}"
-        for i, m in enumerate(matches)
-    )
-
-    image_context = ""
-    if state.get("image_symptoms"):
-        image_context = f"\n\nVisible symptoms from uploaded photo ({state.get('image_source', 'unknown')}): {', '.join(state['image_symptoms'])}"
-
-    farmer_ctx = _farmer_context(state)
-    lang_instruction = _language_instruction(state)
-
-    system = (
-        "You are AgiriteChat, a practical agricultural advisor for smallholder "
-        "maize and soybean farmers. You give clear, simple, field-ready guidance. "
-        "You NEVER invent information not in the provided sources. "
-        "You NEVER give specific pesticide or fertilizer doses — always refer to "
-        "local extension for doses. You keep language simple and concrete. "
-        f"{lang_instruction}"
-    )
-
-    prompt = f"""{farmer_ctx}Farmer's question: {state['user_question']}{image_context}
-
-Retrieved knowledge base sources:
-{context}
-
-Using ONLY the information in the sources above, answer in this exact JSON format:
-{{
-  "Likely issue": "one short phrase naming the most probable issue",
-  "Why this may be happening": "2-3 plain sentences explaining the likely cause, referencing the knowledge base sources",
-  "What to check next": "2-3 specific things the farmer can check in the field today",
-  "Suggested action": "2-3 concrete actions, no specific chemical doses",
-  "When to seek local support": "specific conditions that should trigger a call to extension",
-  "AI additional context": "1-2 sentences of helpful general context that goes BEYOND what the sources say. Clearly state this is general AI guidance, not from the verified knowledge base. If there is nothing useful to add, say 'No additional context needed.'"
-}}
-
-Rules:
-- The first 5 sections MUST only use information from the knowledge base sources above.
-- The "AI additional context" section is the ONLY place where you can add general knowledge.
-- If the sources don't support a confident answer, say so in "Likely issue".
-- Do not invent diseases, pests, or treatments not in the sources.
-- Never give specific pesticide or fertilizer doses.
-- Match the crop the farmer asked about.
-- {lang_instruction}
-- The JSON keys MUST stay in English, but the VALUES should be in the target language.
-"""
-
-    result = generate_json(prompt, system=system, temperature=0.2)
-    expected_keys = ["Likely issue", "Why this may be happening", "What to check next", "Suggested action", "When to seek local support"]
-    if result and all(k in result for k in expected_keys):
-        result["type"] = "advisory"
-        state["response"] = result
+    if search_term:
+        hits = retriever.search(query=search_term, top_k=8)
+        if st.session_state.category_filter:
+            target_cats = CATEGORY_MAP.get(st.session_state.category_filter, [])
+            hits = [h for h in hits if h.get("category") in target_cats]
+        for h in hits:
+            with st.expander(h["question"]):
+                st.write(h["answer"])
+                st.caption(f"{h.get('crop', '')} · {h.get('category', '')} · Source: {h.get('source', 'Knowledge Base')}")
     else:
-        # Fallback: use top match verbatim, translated
-        top = matches[0]
-        fallback_en = {
-            "type": "advisory",
-            "Likely issue": top["question"].rstrip("?"),
-            "Why this may be happening": top["answer"],
-            "What to check next": "Compare the described symptoms with what you see in the field, and check growth stage.",
-            "Suggested action": "Use this guidance as a starting point and confirm with direct field observation.",
-            "When to seek local support": "If symptoms are spreading or affecting a large area, contact your local extension officer.",
-            "AI additional context": "No additional context needed.",
-        }
-        state["response"] = _translated_fallback(fallback_en, state)
-        state.setdefault("trace", []).append("synthesize_fallback")
+        st.info("Search the knowledge base by typing symptoms or topics above.")
 
-    # Escalation check
-    needs_esc = top_score < HIGH_CONFIDENCE
-    q_lower = state["user_question"].lower()
-    if any(kw in q_lower for kw in ESCALATION_KEYWORDS):
-        needs_esc = True
-    state["needs_escalation"] = needs_esc
+# ============================================================
+# LANDING SECTIONS — below the interaction area
+# ============================================================
 
-    return state
+# ---- Section 1: How it works ----
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('how_kicker')}</div>
+    <div class="land-title">{t('how_title')}</div>
+    <div class="how-grid">
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 01</div>
+            <div class="how-step-title">{t('how_step1_title')}</div>
+            <div class="how-step-desc">{t('how_step1_desc')}</div>
+        </div>
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 02</div>
+            <div class="how-step-title">{t('how_step2_title')}</div>
+            <div class="how-step-desc">{t('how_step2_desc')}</div>
+        </div>
+        <div class="how-card">
+            <div class="how-card-image" style="background-image: url('https://images.pexels.com/photos/20111827/pexels-photo-20111827.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop');"></div>
+            <div class="how-step-number">STEP 03</div>
+            <div class="how-step-title">{t('how_step3_title')}</div>
+            <div class="how-step-desc">{t('how_step3_desc')}</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
+# ---- Section 2: Real impact (live stats from feedback DB) ----
+try:
+    _stats = recent_stats()
+    _total = _stats.get('total', 0)
+    _escalations = _stats.get('escalations', 0)
+    _confident = max(0, _total - _escalations)
+except Exception:
+    _total = 0
+    _confident = 0
 
-# -------- Graph construction --------
+st.markdown(f"""
+<div class="land-section">
+    <div class="land-kicker">{t('impact_kicker')}</div>
+    <div class="land-title">{t('impact_title')}</div>
+    <div class="impact-grid">
+        <div class="impact-card">
+            <div class="impact-number">{_total}</div>
+            <div class="impact-label">{t('impact_questions')}</div>
+        </div>
+        <div class="impact-card terracotta">
+            <div class="impact-number">{_confident}</div>
+            <div class="impact-label">{t('impact_confident')}</div>
+        </div>
+        <div class="impact-card gold">
+            <div class="impact-number">4</div>
+            <div class="impact-label">{t('impact_languages')}</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-def _route_after_classify(state: AgentState) -> str:
-    """Route based on whether the input is agricultural or not."""
-    if not state.get("is_agricultural", True):
-        return "greet"
-    return "retrieve"
+# ---- Section 3: Featured topics (real KB cards, clickable) ----
+# Pull three real entries from the knowledge base
+import json as _json
+try:
+    with open("knowledge_base.json", "r", encoding="utf-8") as _f:
+        _kb_all = _json.load(_f)
+except Exception:
+    _kb_all = []
 
+def _find_kb(question_substring, fallback_question):
+    """Find a KB entry whose question contains the substring; fallback to a literal Q."""
+    for e in _kb_all:
+        if question_substring.lower() in e.get("question", "").lower():
+            return e
+    return {"question": fallback_question, "answer": "", "crop": "general", "category": "general"}
 
-def _route_from_confidence(state: AgentState) -> str:
-    return state["route"]
+_featured = [
+    {
+        "entry": _find_kb("fall armyworm", "How do I control fall armyworm in maize?"),
+        "tag": "Maize · Pest",
+        "image": "https://images.pexels.com/photos/9324755/pexels-photo-9324755.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+    {
+        "entry": _find_kb("purple", "My maize leaves are turning purple. What is wrong?"),
+        "tag": "Maize · Soil",
+        "image": "https://images.pexels.com/photos/13525130/pexels-photo-13525130.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+    {
+        "entry": _find_kb("nodulation", "How can I improve soybean nodulation?"),
+        "tag": "Soybean · Soil",
+        "image": "https://images.pexels.com/photos/28301257/pexels-photo-28301257.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop",
+    },
+]
 
-
-def build_graph():
-    g = StateGraph(AgentState)
-    g.add_node("classify", node_classify)
-    g.add_node("greet", node_greet)
-    g.add_node("retrieve", node_retrieve)
-    g.add_node("check_confidence", node_check_confidence)
-    g.add_node("clarify", node_clarify)
-    g.add_node("refuse", node_refuse)
-    g.add_node("synthesize", node_synthesize)
-
-    g.set_entry_point("classify")
-
-    # After classify: either greet (non-agricultural) or retrieve (agricultural)
-    g.add_conditional_edges(
-        "classify",
-        _route_after_classify,
-        {
-            "greet": "greet",
-            "retrieve": "retrieve",
-        },
+# Build all card HTML first, then render as one block.
+# Avoid html.escape on card content because it was causing double-escaping issues
+# that made Streamlit render raw HTML tags as text.
+_cards_html_parts = []
+for i, _f in enumerate(_featured):
+    _e = _f["entry"]
+    _q = (_e.get("question") or "").replace("<", "&lt;").replace(">", "&gt;")
+    _raw_answer = (_e.get("answer") or "")
+    _summary = _raw_answer[:140].replace("<", "&lt;").replace(">", "&gt;")
+    if len(_raw_answer) > 140:
+        _summary += "…"
+    _tag = _f["tag"].replace("<", "&lt;").replace(">", "&gt;")
+    _img = _f["image"]
+    _cta = t('featured_card_open')
+    _cards_html_parts.append(
+        '<div class="featured-card">'
+        f'<div class="featured-image" style="background-image: url(\'{_img}\');">'
+        f'<div class="featured-tag">{_tag}</div>'
+        '</div>'
+        '<div class="featured-body">'
+        f'<div class="featured-title">{_q}</div>'
+        f'<div class="featured-summary">{_summary}</div>'
+        f'<div class="featured-cta">{_cta} <span class="icon-arrow"></span></div>'
+        '</div>'
+        '</div>'
     )
 
-    g.add_edge("retrieve", "check_confidence")
-    g.add_conditional_edges(
-        "check_confidence",
-        _route_from_confidence,
-        {
-            "clarify": "clarify",
-            "refuse": "refuse",
-            "synthesize": "synthesize",
-        },
-    )
-    g.add_edge("greet", END)
-    g.add_edge("clarify", END)
-    g.add_edge("refuse", END)
-    g.add_edge("synthesize", END)
-    return g.compile()
+_all_cards = "".join(_cards_html_parts)
+_kicker = t('featured_kicker')
+_title = t('featured_title')
 
+st.markdown(
+    f'<div class="land-section">'
+    f'<div class="land-kicker">{_kicker}</div>'
+    f'<div class="land-title">{_title}</div>'
+    f'<div class="featured-grid">{_all_cards}</div>'
+    f'</div>',
+    unsafe_allow_html=True,
+)
 
-_graph = None
+# Wire up the cards: real Streamlit buttons sit just below as click triggers
+_btn_cols = st.columns(3)
+for i, _f in enumerate(_featured):
+    with _btn_cols[i]:
+        if st.button(t('featured_card_open'), key=f"featured_btn_{i}", use_container_width=True):
+            st.session_state["preset_q"] = _f["entry"]["question"]
+            st.rerun()
 
+# ---- Section 4: Languages strip ----
+st.markdown(f"""
+<div class="lang-section">
+    <div class="land-kicker">{t('languages_kicker')}</div>
+    <div class="land-title" style="margin-bottom: 0.4rem;">{t('languages_title')}</div>
+    <div style="font-size: 0.95rem; color: var(--ink-soft); max-width: 580px; line-height: 1.55;">{t('languages_sub')}</div>
+    <div class="lang-grid">
+        <div class="lang-pill">
+            <div class="lang-pill-name">English</div>
+            <div class="lang-pill-native">EN</div>
+        </div>
+        <div class="lang-pill">
+            <div class="lang-pill-name">Kiswahili</div>
+            <div class="lang-pill-native">SW</div>
+        </div>
+        <div class="lang-pill">
+            <div class="lang-pill-name">Français</div>
+            <div class="lang-pill-native">FR</div>
+        </div>
+        <div class="lang-pill beta">
+            <div class="lang-pill-name">Kinyarwanda</div>
+            <div class="lang-pill-native">RW</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-def get_graph():
-    global _graph
-    if _graph is None:
-        _graph = build_graph()
-    return _graph
-
-
-# -------- Public entry point --------
-
-def run(
-    user_question: str,
-    crop_hint: str = "general",
-    category_hint: str = "general",
-    image_symptoms: Optional[List[str]] = None,
-    image_source: str = "none",
-    language: str = "en",
-    farmer_profile: Optional[Dict[str, str]] = None,
-) -> Dict[str, Any]:
-    """Main entry point. Returns full state dict for logging + display."""
-    graph = get_graph()
-    initial: AgentState = {
-        "user_question": user_question,
-        "crop_hint": crop_hint.lower(),
-        "category_hint": category_hint.lower(),
-        "image_symptoms": image_symptoms or [],
-        "image_source": image_source,
-        "language": language if language in LANGUAGES else "en",
-        "farmer_profile": farmer_profile or {},
-        "trace": [],
-    }
-    final_state = graph.invoke(initial)
-    return final_state
+# ---------------- Footer ----------------
+st.markdown(f"""
+<div class="footer-card">
+    <strong>{t('responsible_use')}</strong>
+    {t('responsible_text')}
+</div>
+""", unsafe_allow_html=True)
