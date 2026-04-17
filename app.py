@@ -1368,80 +1368,125 @@ details[data-testid="stExpander"] summary {
 def render_answer_card(response: dict, top_score: float = 0.0, needs_escalation: bool = False, kb_sources: list = None):
     # Handle conversational responses (greetings, off-topic)
     if response.get("type") == "conversational":
-        message = escape(response.get("message", ""))
-        st.markdown(f'<div class="conversational-msg">{message}</div>', unsafe_allow_html=True)
+        message = response.get("message", "").replace("<", "&lt;").replace(">", "&gt;")
+        st.markdown(
+            '<div class="conversational-msg">' + message + '</div>',
+            unsafe_allow_html=True,
+        )
         return
 
-    # Advisory response with source separation
+    # Detect clarify/refuse responses — render as simple message, not full card
+    likely = response.get("Likely issue", "")
+    if likely in ("More information needed", "Unable to give a confident answer"):
+        # Simple clarification or refusal — no complex card needed
+        what_to_check = response.get("What to check next", "")
+        suggested = response.get("Suggested action", "")
+        when_support = response.get("When to seek local support", "")
+        parts = []
+        if what_to_check:
+            parts.append(what_to_check)
+        if suggested:
+            parts.append(suggested)
+        if when_support and "extension" in when_support.lower():
+            parts.append(when_support)
+        msg = " ".join(parts) if parts else "Could you describe what you are seeing in your field?"
+        msg_safe = msg.replace("<", "&lt;").replace(">", "&gt;")
+        st.markdown(
+            '<div class="conversational-msg">'
+            '<div style="font-weight:600;margin-bottom:0.4rem;color:var(--forest-900);">' + escape(likely) + '</div>'
+            + msg_safe +
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    # Full advisory response with source separation
     if top_score >= 0.55:
         badge_class = "conf-high"
-        badge_text = f"● {t('confidence_high')} · {top_score:.2f}"
+        badge_label = t("confidence_high")
     elif top_score >= 0.35:
         badge_class = "conf-medium"
-        badge_text = f"● {t('confidence_medium')} · {top_score:.2f}"
+        badge_label = t("confidence_medium")
     else:
         badge_class = "conf-low"
-        badge_text = f"● {t('confidence_low')} · {top_score:.2f}"
+        badge_label = t("confidence_low")
 
-    def safe(key):
-        return escape(response.get(key, "") or "—")
+    badge_text = "● " + badge_label + " · " + f"{top_score:.2f}"
 
-    # Build source names string from kb_sources
-    source_names = ""
+    def s(key):
+        val = response.get(key, "") or "—"
+        return val.replace("<", "&lt;").replace(">", "&gt;")
+
+    # Build source names
+    source_line = ""
     if kb_sources:
-        unique_sources = list(dict.fromkeys(s.get("source", "Knowledge Base") for s in kb_sources if s.get("score", 0) > 0.3))
-        if unique_sources:
-            source_names = " · ".join(unique_sources[:3])
+        names = []
+        seen = set()
+        for src in kb_sources:
+            n = src.get("source", "Knowledge Base")
+            if n not in seen and src.get("score", 0) > 0.3:
+                names.append(n)
+                seen.add(n)
+            if len(names) >= 3:
+                break
+        if names:
+            source_line = (
+                '<div style="font-size:0.72rem;color:var(--ink-mute);font-style:italic;">'
+                + " · ".join(n.replace("<", "&lt;").replace(">", "&gt;") for n in names)
+                + '</div>'
+            )
 
-    # Build the KB-sourced sections
-    html = f"""
-    <div class="answer-card">
-        <div class="answer-header">
-            <div class="answer-kicker">AGIRITECHAT · ADVISORY</div>
-            <div class="conf-badge {badge_class}">{badge_text}</div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.8rem;">
-            <div class="source-badge kb">{t('source_kb')}</div>
-            {f'<div style="font-size: 0.72rem; color: var(--ink-mute); font-style: italic;">{escape(source_names)}</div>' if source_names else ''}
-        </div>
-        <div class="answer-issue">{safe("Likely issue")}</div>
-        <div class="answer-section">
-            <div class="answer-label">Why this may be happening</div>
-            <div class="answer-body">{safe("Why this may be happening")}</div>
-        </div>
-        <div class="answer-section">
-            <div class="answer-label">What to check next</div>
-            <div class="answer-body">{safe("What to check next")}</div>
-        </div>
-        <div class="answer-section">
-            <div class="answer-label">Suggested action</div>
-            <div class="answer-body">{safe("Suggested action")}</div>
-        </div>
-        <div class="answer-section">
-            <div class="answer-label">When to seek local support</div>
-            <div class="answer-body">{safe("When to seek local support")}</div>
-        </div>
-    </div>
-    """
-    st.markdown(html, unsafe_allow_html=True)
+    kb_label = t("source_kb")
 
-    # Add AI additional context section as a SEPARATE markdown call
+    # Build each piece separately, then join
+    card_parts = [
+        '<div class="answer-card">',
+        '<div class="answer-header">',
+        '<div class="answer-kicker">AGIRITECHAT · ADVISORY</div>',
+        '<div class="conf-badge ' + badge_class + '">' + badge_text + '</div>',
+        '</div>',
+        '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;">',
+        '<div class="source-badge kb">' + kb_label + '</div>',
+        source_line,
+        '</div>',
+        '<div class="answer-issue">' + s("Likely issue") + '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">Why this may be happening</div>',
+        '<div class="answer-body">' + s("Why this may be happening") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">What to check next</div>',
+        '<div class="answer-body">' + s("What to check next") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">Suggested action</div>',
+        '<div class="answer-body">' + s("Suggested action") + '</div>',
+        '</div>',
+        '<div class="answer-section">',
+        '<div class="answer-label">When to seek local support</div>',
+        '<div class="answer-body">' + s("When to seek local support") + '</div>',
+        '</div>',
+        '</div>',
+    ]
+    st.markdown("".join(card_parts), unsafe_allow_html=True)
+
+    # AI additional context as separate call
     ai_context = response.get("AI additional context", "")
     if ai_context and ai_context.lower().strip() not in ("", "—", "no additional context needed.", "no additional context needed"):
-        ai_label = t('source_ai')
-        ai_text = escape(ai_context)
+        ai_label = t("source_ai")
+        ai_safe = ai_context.replace("<", "&lt;").replace(">", "&gt;")
         st.markdown(
             '<div style="margin-top:-0.5rem;padding:1rem 1.6rem 1.2rem;background:var(--cream);border:1px solid var(--border);border-top:2px dashed var(--border);border-radius:0 0 18px 18px;">'
-            f'<div class="source-badge ai">{ai_label}</div>'
-            '<div style="font-size:0.72rem;color:var(--ink-mute);font-style:italic;margin-bottom:0.4rem;">Generated by Llama 3.3 70B via Groq — not from verified knowledge base</div>'
-            f'<div class="answer-body">{ai_text}</div>'
-            '</div>',
+            + '<div class="source-badge ai">' + ai_label + '</div>'
+            + '<div style="font-size:0.72rem;color:var(--ink-mute);font-style:italic;margin-bottom:0.4rem;">Generated by Llama 3.3 70B via Groq — not from verified knowledge base</div>'
+            + '<div class="answer-body">' + ai_safe + '</div>'
+            + '</div>',
             unsafe_allow_html=True,
         )
 
     if needs_escalation:
         st.markdown(
-            f'<div class="escalate-box">⚠ {t("escalation")}</div>',
+            '<div class="escalate-box">⚠ ' + t("escalation") + '</div>',
             unsafe_allow_html=True,
         )
 
