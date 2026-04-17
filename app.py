@@ -18,8 +18,9 @@ import streamlit as st
 
 from agent import run as run_agent, get_retriever, LANGUAGES
 from vision import analyze_field_image
-from llm import is_available as llm_available
+from llm import is_available as llm_available, transcribe_audio
 from feedback import log_interaction, record_feedback, recent_stats, init_db
+from weather import get_weather
 
 # ---------------- Page config ----------------
 st.set_page_config(
@@ -137,6 +138,14 @@ UI = {
         "source_kb": "From knowledge base",
         "source_ai": "Additional AI guidance",
         "source_tag": "Verified source",
+        "voice_label": "Or speak your question",
+        "voice_transcribing": "Transcribing your voice…",
+        "voice_result": "I heard",
+        "weather_title": "Weather now",
+        "weather_humidity": "Humidity",
+        "weather_wind": "Wind",
+        "weather_forecast": "3-day forecast",
+        "weather_rain_chance": "Rain chance",
     },
     "sw": {
         "brand_tag": "Ushauri wa kilimo kwa wakulima wadogo",
@@ -214,6 +223,14 @@ UI = {
         "source_kb": "Kutoka kwa msingi wa maarifa",
         "source_ai": "Mwongozo wa ziada wa AI",
         "source_tag": "Chanzo kilichothibitishwa",
+        "voice_label": "Au sema swali lako",
+        "voice_transcribing": "Inabadilisha sauti yako…",
+        "voice_result": "Nimesikia",
+        "weather_title": "Hali ya hewa sasa",
+        "weather_humidity": "Unyevu",
+        "weather_wind": "Upepo",
+        "weather_forecast": "Utabiri wa siku 3",
+        "weather_rain_chance": "Nafasi ya mvua",
     },
     "fr": {
         "brand_tag": "Conseil agricole pour petits exploitants",
@@ -291,6 +308,14 @@ UI = {
         "source_kb": "De la base de connaissances",
         "source_ai": "Conseils AI supplémentaires",
         "source_tag": "Source vérifiée",
+        "voice_label": "Ou posez votre question à voix haute",
+        "voice_transcribing": "Transcription en cours…",
+        "voice_result": "J'ai entendu",
+        "weather_title": "Météo actuelle",
+        "weather_humidity": "Humidité",
+        "weather_wind": "Vent",
+        "weather_forecast": "Prévisions 3 jours",
+        "weather_rain_chance": "Chance de pluie",
     },
     "rw": {
         "brand_tag": "Inama z'ubuhinzi ku bahinzi bato",
@@ -368,6 +393,14 @@ UI = {
         "source_kb": "Biturutse ku bumenyi bwujujwe",
         "source_ai": "Inama z'inyongera za AI",
         "source_tag": "Isoko ryemejwe",
+        "voice_label": "Cyangwa vuga ikibazo cyawe",
+        "voice_transcribing": "Irahindura ijwi ryawe…",
+        "voice_result": "Numvise",
+        "weather_title": "Ikirere ubu",
+        "weather_humidity": "Umwuka",
+        "weather_wind": "Umuyaga",
+        "weather_forecast": "Iteganyagihe ry'iminsi 3",
+        "weather_rain_chance": "Amahirwe y'imvura",
     },
 }
 
@@ -1620,6 +1653,50 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # Weather display (Open-Meteo, no API key)
+    farmer_region = st.session_state.farmer_profile.get("region", "")
+    weather = get_weather(farmer_region)
+    if weather:
+        st.markdown(
+            '<div style="font-family: \'DM Sans\', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--forest-700); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">'
+            + t("weather_title") + ' · ' + weather["location"].replace("<","&lt;")
+            + '</div>',
+            unsafe_allow_html=True,
+        )
+        temp = weather.get("temperature")
+        humidity = weather.get("humidity")
+        desc = weather.get("description", "")
+        wind = weather.get("wind_speed")
+
+        weather_html = '<div style="background:var(--forest-100);border:1px solid #c8dcc6;border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.5rem;">'
+        if temp is not None:
+            weather_html += '<div style="font-family:\'Fraunces\',serif;font-size:1.6rem;font-weight:700;color:var(--forest-900);">' + str(round(temp)) + '°C</div>'
+        weather_html += '<div style="font-size:0.85rem;color:var(--ink-soft);margin-bottom:0.3rem;">' + desc.replace("<","&lt;") + '</div>'
+        if humidity is not None:
+            weather_html += '<div style="font-size:0.78rem;color:var(--ink-mute);">' + t("weather_humidity") + ': ' + str(humidity) + '%</div>'
+        if wind is not None:
+            weather_html += '<div style="font-size:0.78rem;color:var(--ink-mute);">' + t("weather_wind") + ': ' + str(round(wind)) + ' km/h</div>'
+        weather_html += '</div>'
+        st.markdown(weather_html, unsafe_allow_html=True)
+
+        # 3-day forecast
+        forecast = weather.get("forecast", [])
+        if forecast:
+            st.markdown('<div style="font-size:0.72rem;font-weight:600;color:var(--ink-mute);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.3rem;">' + t("weather_forecast") + '</div>', unsafe_allow_html=True)
+            for day in forecast:
+                d = day.get("date", "")[-5:]  # MM-DD
+                hi = day.get("max_temp")
+                lo = day.get("min_temp")
+                rain = day.get("rain_chance", 0)
+                line = d
+                if hi is not None and lo is not None:
+                    line += f"  {round(lo)}–{round(hi)}°C"
+                if rain and rain > 0:
+                    line += f"  🌧 {rain}%"
+                st.caption(line)
+
+    st.markdown("---")
+
     # Developer view toggle (new)
     dev_view = st.checkbox(
         t('sidebar_dev'),
@@ -1766,6 +1843,21 @@ with tab1:
     if preset_q:
         st.chat_message("user").write(preset_q)
         process_question(preset_q, selected_crop)
+
+    # Voice input (Whisper via Groq)
+    with st.expander("🎤 " + t("voice_label"), expanded=False):
+        audio_data = st.audio_input("Record your question", label_visibility="collapsed", key="voice_input")
+        if audio_data is not None:
+            audio_bytes = audio_data.getvalue()
+            if audio_bytes and len(audio_bytes) > 100:
+                with st.spinner(t("voice_transcribing")):
+                    transcribed = transcribe_audio(audio_bytes, language=st.session_state.language)
+                if transcribed:
+                    st.success(t("voice_result") + ": " + transcribed)
+                    st.session_state["preset_q"] = transcribed
+                    st.rerun()
+                else:
+                    st.warning("Could not transcribe audio. Please try again or type your question.")
 
     user_q = st.chat_input(t("input_placeholder"))
     if user_q:
