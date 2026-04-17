@@ -330,15 +330,21 @@ def node_retrieve(state: AgentState) -> AgentState:
 def node_check_confidence(state: AgentState) -> AgentState:
     state.setdefault("trace", []).append("check_confidence")
 
+    top = state.get("top_score", 0.0)
+
+    # If we have a good KB match, always synthesize — even if the LLM
+    # thought the question was vague. The KB match is more trustworthy.
+    if top >= LOW_CONFIDENCE:
+        state["route"] = "synthesize"
+        return state
+
+    # Low retrieval score AND unclear question → clarify
     if not state.get("is_clear", True) and state.get("clarification_needed"):
         state["route"] = "clarify"
         return state
 
-    top = state.get("top_score", 0.0)
-    if top < LOW_CONFIDENCE:
-        state["route"] = "refuse"
-    else:
-        state["route"] = "synthesize"
+    # Low retrieval score, clear question → refuse honestly
+    state["route"] = "refuse"
     return state
 
 
