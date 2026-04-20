@@ -1,750 +1,1712 @@
 [
   {
     "question": "How do I control fall armyworm in maize?",
-    "answer": "Scout maize regularly, especially inside the whorl at V6 to V10. For small plots, hand-remove larvae and egg masses. For larger damage, use approved pesticides such as chlorantraniliprole or spinetoram, applied early in the morning or late afternoon when larvae are active. Biological control with Trichogramma wasps or Bacillus thuringiensis (Bt) sprays can reduce populations. Practice push-pull intercropping with Desmodium and Napier grass as a long-term strategy. Rotate crops to break the pest cycle.",
+    "answer": "Scout maize regularly, especially inside the whorl at V6 to V10. For small plots, hand-remove larvae and egg masses. For larger damage, use approved pesticides such as chlorantraniliprole or spinetoram, applied early morning or late afternoon when larvae are active. Biological control with Trichogramma wasps or Bacillus thuringiensis (Bt) sprays can reduce populations. Practice push-pull intercropping with Desmodium and Napier grass. Rotate crops to break the pest cycle. In Rwanda Eastern Province, fall armyworm pressure is highest during Season A (September-December).",
     "crop": "maize",
     "category": "pest",
-    "symptoms": ["holes in leaves", "frass in whorl", "windowpane feeding", "damaged tassels", "larvae in cob"],
-    "growth_stage": ["vegetative", "V6-V10", "tasseling"],
-    "region": "East Africa",
-    "source": "CIMMYT Fall Armyworm Management Guide",
+    "symptoms": [
+      "holes in leaves",
+      "frass in whorl",
+      "windowpane feeding",
+      "damaged tassels",
+      "larvae in cob"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V6-V10",
+      "tasseling"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "CIMMYT Fall Armyworm Management Guide for East Africa, 2023",
     "confidence": 0.95
   },
   {
     "question": "What are the signs of fall armyworm damage in maize?",
-    "answer": "Look for irregular holes in leaves, wet sawdust-like frass (droppings) in the whorl, windowpane feeding where only the upper leaf surface remains, and larvae curled inside the whorl. Older larvae can damage tassels and bore into ears. Egg masses are fuzzy, tan-colored patches on the underside of leaves. Early detection at the whorl stage gives the best chance for control.",
+    "answer": "Look for irregular holes in leaves, wet sawdust-like frass (droppings) in the whorl, windowpane feeding where only the upper leaf surface remains, and larvae curled inside the whorl. Older larvae can damage tassels and bore into ears. Egg masses are fuzzy, tan-colored patches on the underside of leaves. In Rwanda Eastern Province, check fields weekly starting 2 weeks after emergence. Early detection at the whorl stage gives the best chance for control.",
     "crop": "maize",
     "category": "pest",
-    "symptoms": ["holes in leaves", "frass in whorl", "windowpane feeding", "egg masses on leaves"],
-    "growth_stage": ["vegetative", "V4-V8"],
-    "region": "East Africa",
-    "source": "FAO Fall Armyworm Monitoring Guide",
+    "symptoms": [
+      "holes in leaves",
+      "frass in whorl",
+      "windowpane feeding",
+      "egg masses on leaves"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V4-V8"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "FAO Fall Armyworm Monitoring and Early Warning System, 2022",
     "confidence": 0.95
   },
   {
-    "question": "How do I control stalk borers in maize?",
-    "answer": "Stalk borers (Busseola fusca, Chilo partellus) tunnel into maize stems, causing deadheart in young plants and stem breakage in older plants. Control by destroying crop residues after harvest to remove overwintering pupae. Apply granular insecticides into the whorl at the early vegetative stage. Use push-pull technology with Brachiaria and Desmodium. Early planting helps avoid peak borer populations. Bt maize varieties offer built-in resistance where available.",
+    "question": "How do I control western corn rootworm in Nebraska?",
+    "answer": "Western corn rootworm (Diabrotica virgifera) is the most economically important corn pest in Nebraska. Larvae feed on roots, causing lodging and yield loss. Adults feed on silks, pollen, and leaves. Management includes crop rotation (corn-soybean rotation breaks the life cycle), Bt corn hybrids expressing Cry3Bb1 or other rootworm-active proteins, soil-applied insecticides at planting, and adult management with foliar insecticides if beetle counts exceed 0.75 beetles per plant during silking. Monitor with sticky traps July through August. Resistance management requires rotating Bt traits and integrating multiple control methods.",
     "crop": "maize",
     "category": "pest",
-    "symptoms": ["deadheart", "holes in stem", "frass at stem base", "stem breakage", "wilting central leaves"],
-    "growth_stage": ["vegetative", "V4-V10"],
-    "region": "East Africa",
-    "source": "ICIPE Stem Borer Management",
-    "confidence": 0.92
+    "symptoms": [
+      "lodged plants",
+      "goose-necking",
+      "root pruning",
+      "silk clipping",
+      "poor kernel set"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "silking",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension CropWatch - Western Corn Rootworm Management, 2024",
+    "confidence": 0.94
   },
   {
-    "question": "What causes maize streak virus and how do I manage it?",
-    "answer": "Maize streak virus (MSV) is transmitted by leafhoppers (Cicadulina spp.). Symptoms include narrow, pale yellow streaks along leaf veins, stunting, and reduced cob size. There is no cure once infected. Control leafhoppers with systemic seed treatments. Remove infected plants early to reduce spread. Plant MSV-tolerant varieties. Avoid late planting when leafhopper populations are highest.",
+    "question": "How do I manage European corn borer in Nebraska?",
+    "answer": "European corn borer (Ostrinia nubilalis) has two generations per year in Nebraska. First generation larvae bore into stalks and midribs in June-July. Second generation bores into stalks, ear shanks, and ears in August-September. Bt corn hybrids (Cry1Ab, Cry1F) provide excellent control. For non-Bt corn, scout by examining 20 plants in 5 locations for shot-hole feeding, broken tassels, and frass at leaf axils. Treat with insecticide when 50 percent of plants show feeding damage. Shredding and disking stalks after harvest destroys overwintering larvae.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["yellow streaks on leaves", "stunted growth", "small cobs", "pale streaks along veins"],
-    "growth_stage": ["seedling", "vegetative"],
-    "region": "East Africa",
-    "source": "IITA Maize Disease Guide",
+    "category": "pest",
+    "symptoms": [
+      "shot-hole leaf feeding",
+      "broken tassels",
+      "stalk tunneling",
+      "ear shank damage",
+      "frass at leaf axils"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "silking",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC1530 - European Corn Borer Management, 2023",
     "confidence": 0.93
   },
   {
-    "question": "What is gray leaf spot in maize?",
-    "answer": "Gray leaf spot (GLS) is caused by the fungus Cercospora zeae-maydis. It produces rectangular, gray to tan lesions that run parallel to leaf veins. Severe infections cause premature leaf death and reduced grain fill. The fungus survives in crop residues. Manage by rotating maize with non-host crops (soybean, beans), using resistant varieties, and removing or burying crop residues. Fungicide application may be warranted in severe cases during early tasseling.",
+    "question": "How do I control stalk borers in maize in Rwanda?",
+    "answer": "Stalk borers (Busseola fusca and Chilo partellus) tunnel into maize stems, causing deadheart in young plants and stem breakage in older plants. Chilo partellus is more common in the warmer, lower-altitude areas of Eastern Province (Kayonza, Kirehe, Bugesera). Control by destroying crop residues after harvest. Apply granular insecticides into the whorl at the early vegetative stage. Use push-pull technology with Brachiaria and Desmodium. Early planting at the onset of rains helps avoid peak borer populations.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["rectangular gray lesions", "tan lesions parallel to veins", "premature leaf death", "lower leaf damage first"],
-    "growth_stage": ["tasseling", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Pathology Handbook",
+    "category": "pest",
+    "symptoms": [
+      "deadheart",
+      "holes in stem",
+      "frass at stem base",
+      "stem breakage",
+      "wilting central leaves"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V4-V10"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "ICIPE Push-Pull Technology Manual for East Africa, 2022",
     "confidence": 0.92
   },
   {
-    "question": "What is northern leaf blight in maize?",
-    "answer": "Northern leaf blight (NLB) is caused by Exserohilum turcicum. It produces long, elliptical, gray-green to tan lesions (5-15 cm) on leaves, starting from lower leaves and moving upward. Severe infections can cause significant yield loss by reducing photosynthetic area during grain fill. Manage by planting resistant varieties, rotating crops, and removing infected residues. Fungicide application at VT to R1 (tassel to silking) is effective in high-pressure situations.",
+    "question": "What is corn earworm and how do I manage it in Nebraska?",
+    "answer": "Corn earworm (Helicoverpa zea) is a major pest of sweet corn and field corn in Nebraska. Moths lay eggs on fresh corn silks, and larvae feed on developing kernels from the ear tip. Damage is most severe in late-planted corn with fresh silks during peak moth flights in July-August. In field corn, Bt hybrids with Vip3A protein provide the best control. In sweet corn, monitor moth flights with pheromone traps and apply insecticides to silks every 3-5 days when trap catches exceed 10 moths per night.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["long elliptical lesions", "gray-green lesions", "lesions on lower leaves first", "cigar-shaped spots"],
-    "growth_stage": ["tasseling", "silking", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Pathology Handbook",
-    "confidence": 0.93
+    "category": "pest",
+    "symptoms": [
+      "damaged ear tips",
+      "larvae feeding on kernels",
+      "frass on ear tip",
+      "mold following damage"
+    ],
+    "growth_stage": [
+      "silking",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G2373 - Corn Earworm Management, 2023",
+    "confidence": 0.92
   },
   {
-    "question": "What is common rust in maize?",
-    "answer": "Common rust is caused by Puccinia sorghi. It produces small, round to elongated, reddish-brown pustules on both leaf surfaces. Pustules release rusty-colored spores when rubbed. Severe infections cause premature leaf death. Common rust is favored by cool, humid conditions (15-25 degrees Celsius). Manage by planting resistant varieties. Fungicide application is rarely economical unless infection is severe before tasseling.",
+    "question": "How do I manage cutworms in maize?",
+    "answer": "Cutworms are moth larvae that cut young maize seedlings at or just below the soil surface, usually at night. Damage appears as rows of missing or toppled seedlings. Dig around damaged plants in the morning to find larvae curled in soil. Control with seed treatment, insecticide bait along rows in the evening, hand collection in the morning, and clean fields before planting. Replant if less than 25 percent of seedlings are affected. In Nebraska, black cutworm moths migrate from the south each spring. In Rwanda Eastern Province, cutworms are most problematic during the transition between dry and rainy seasons.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["reddish-brown pustules", "rusty spores on leaves", "pustules on both leaf surfaces", "premature leaf death"],
-    "growth_stage": ["vegetative", "tasseling"],
-    "region": "East Africa",
-    "source": "IITA Maize Disease Guide",
+    "category": "pest",
+    "symptoms": [
+      "cut seedlings at soil level",
+      "missing plants in rows",
+      "toppled seedlings",
+      "larvae in soil near plants"
+    ],
+    "growth_stage": [
+      "emergence",
+      "seedling",
+      "V1-V4"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1153 - Cutworm Management in Corn; RAB Crop Protection Guide, 2023",
     "confidence": 0.91
   },
   {
-    "question": "What causes ear rot in maize?",
-    "answer": "Ear rot in maize can be caused by several fungi including Fusarium (pink to reddish mold), Aspergillus (gray-green mold, produces aflatoxin), and Diplodia (white mold starting from the base). Ear rot is favored by insect damage to ears, wet conditions during grain fill, and delayed harvest. Manage by controlling ear-boring insects, harvesting promptly at physiological maturity, and drying grain quickly to below 13 percent moisture. Do not store or consume visibly moldy grain as it may contain mycotoxins.",
+    "question": "How do I manage spider mites in corn in Nebraska?",
+    "answer": "Two-spotted spider mites and Banks grass mites cause significant yield loss in Nebraska corn during hot, dry summers. Mites feed on leaf undersides, causing stippling that progresses to bronzing and leaf death from the bottom up. Heavy infestations during grain fill can reduce yields by 30 percent or more. Scout lower leaf undersides with a hand lens. Apply miticide when colonies are found on lower leaves and conditions favor growth (hot, dry, windy). Effective miticides include dimethoate and bifenthrin. Avoid pyrethroids alone as they flare mite populations. Overhead irrigation reduces mite pressure.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["mold on ears", "pink mold on kernels", "gray-green mold", "white mold from ear base", "discolored kernels"],
-    "growth_stage": ["grain fill", "maturity", "post-harvest"],
-    "region": "East Africa",
-    "source": "IITA Post-Harvest Management Guide",
-    "confidence": 0.92
+    "category": "pest",
+    "symptoms": [
+      "stippled leaves",
+      "bronzing",
+      "webbing on leaf undersides",
+      "leaf death from bottom up"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1167 - Spider Mite Management in Corn, 2024",
+    "confidence": 0.91
   },
   {
-    "question": "What is maize lethal necrosis disease?",
-    "answer": "Maize lethal necrosis (MLN) is caused by co-infection of maize chlorotic mottle virus (MCMV) and a potyvirus. Symptoms include chlorotic mottling of leaves, necrosis starting from leaf margins, premature drying of entire plants, and small or no ears. MLN can cause total crop loss. It is spread by thrips, beetles, and contaminated seed. There is no cure. Manage by planting certified, virus-free seed, controlling vector insects, removing infected plants immediately, and rotating with non-maize crops for at least one season.",
+    "question": "What are the major storage pests of maize in Rwanda?",
+    "answer": "The two major storage pests are the maize weevil (Sitophilus zeamais) and the larger grain borer (Prostephanus truncatus). Maize weevils bore small circular holes in kernels and leave powdery dust. The larger grain borer is more destructive, creating large amounts of flour-like dust and causing 30-40 percent grain loss in 3-4 months. A third pest, the Angoumois grain moth, develops inside kernels. Control: dry grain below 13 percent moisture, use hermetic PICS bags, apply Actellic Super Dust, clean storage structures before new harvest, and check monthly.",
     "crop": "maize",
-    "category": "disease",
-    "symptoms": ["chlorotic mottling", "leaf necrosis from margins", "premature plant death", "small or absent ears", "dead heart"],
-    "growth_stage": ["vegetative", "tasseling", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT MLN Management Brief",
+    "category": "pest",
+    "symptoms": [
+      "holes in kernels",
+      "powdery dust in grain",
+      "weight loss of grain",
+      "flour-like residue",
+      "moths flying from grain"
+    ],
+    "growth_stage": [
+      "post-harvest",
+      "storage"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Storage Pest Management Guide for East Africa, 2023; RAB Post-Harvest Extension Brief, 2022",
     "confidence": 0.93
   },
   {
+    "question": "How do I manage grasshoppers in maize and soybean?",
+    "answer": "Grasshoppers can cause significant defoliation of both maize and soybean, especially during dry years when populations are high and natural vegetation dries up, driving grasshoppers into cropland. In Nebraska, differential grasshopper and two-striped grasshopper are the most common crop-feeding species. Treatment thresholds: 8 or more grasshoppers per square yard in field margins, or 20 percent defoliation before tasseling in corn or before bloom in soybeans. Apply insecticides (carbaryl, lambda-cyhalothrin, chlorpyrifos) to field borders and margins first to create a treated barrier. In Rwanda Eastern Province, localized grasshopper outbreaks occur occasionally during dry periods. Hand collection and community-organized control are common approaches.",
+    "crop": "both",
+    "category": "pest",
+    "symptoms": [
+      "defoliation",
+      "chewed leaf edges",
+      "missing leaf tissue",
+      "pods damaged"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "flowering"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1628 - Grasshopper Management; FAO Grasshopper and Locust Management, 2022",
+    "confidence": 0.88
+  },
+  {
+    "question": "How do I manage termites in crops?",
+    "answer": "Termites can damage maize and soybean by feeding on roots, lower stems, and stored grain. Above-ground symptoms include wilting, plant death, and plants that pull up easily because roots are eaten. Termites are most problematic in dry conditions when they seek moisture from plant roots. In Rwanda Eastern Province, termites are common in Nyagatare and Bugesera districts. Management: destroy termite mounds near fields, apply approved insecticides around mounds, maintain adequate soil moisture, remove dead plant material that attracts termites, and keep stored grain off the ground and away from walls.",
+    "crop": "both",
+    "category": "pest",
+    "symptoms": [
+      "wilting plants",
+      "dead plants in patches",
+      "plants pull up easily",
+      "eaten roots",
+      "mud tubes on stems"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "reproductive"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Termite Management Brief for East Africa, 2022",
+    "confidence": 0.87
+  },
+  {
+    "question": "How do I manage aphids on my crops?",
+    "answer": "Aphids are small, soft-bodied insects that cluster on new growth, leaf undersides, and tassels. They suck plant sap, causing leaf curling, stunting, and honeydew deposits that attract sooty mold. In maize, corn leaf aphids cluster in the whorl and on tassels. In soybean, soybean aphids colonize leaf undersides. Natural enemies (ladybugs, lacewings, parasitic wasps) often control populations naturally. Avoid broad-spectrum insecticides that kill natural enemies. Treat only when populations are high and causing visible damage. Strong rain often washes aphids off plants.",
+    "crop": "both",
+    "category": "pest",
+    "symptoms": [
+      "curled new leaves",
+      "sticky honeydew",
+      "sooty mold",
+      "clusters of small insects",
+      "stunted tips"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "flowering"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Aphid Management in Field Crops; IITA Pest Management Guide, 2023",
+    "confidence": 0.89
+  },
+  {
+    "question": "How do I use integrated pest management (IPM)?",
+    "answer": "Integrated Pest Management combines multiple strategies to manage pests effectively while minimizing pesticide use and environmental impact. The IPM approach: 1) Prevention - rotate crops, plant resistant varieties, use certified clean seed, adjust planting dates to avoid pest peaks. 2) Monitoring - scout fields regularly, use thresholds to decide when treatment is needed, identify the specific pest before treating. 3) Cultural control - destroy crop residues, manage weeds that harbor pests, use proper spacing and fertility. 4) Biological control - conserve natural enemies (ladybugs, parasitic wasps), use Bt products, release biological control agents. 5) Chemical control - use pesticides only when other methods are insufficient and economic thresholds are reached, choose selective pesticides that spare natural enemies, rotate pesticide modes of action to prevent resistance. In both Nebraska and Rwanda, IPM reduces costs and produces better long-term pest management than calendar-based spraying.",
+    "crop": "both",
+    "category": "pest",
+    "symptoms": [],
+    "growth_stage": [],
+    "region": "both",
+    "source": "UNL Extension EC1563 - Integrated Pest Management; FAO IPM Guidelines for East Africa, 2023",
+    "confidence": 0.91
+  },
+  {
+    "question": "What is gray leaf spot in corn?",
+    "answer": "Gray leaf spot (GLS) caused by Cercospora zeae-maydis produces rectangular, gray to tan lesions that run parallel to leaf veins. Lesions are distinctly rectangular because the fungus grows between veins. The disease starts on lower leaves and moves upward. Severe infections during grain fill can cause 20-40 percent yield loss. The fungus survives in corn residue. In Nebraska, plant resistant hybrids, rotate with soybeans, consider tillage in severe fields, and apply foliar fungicide at VT-R1 if susceptible hybrid shows lesions on the third leaf below the ear. In Rwanda Eastern Province, rotate crops, remove residues, and plant tolerant varieties.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "rectangular gray lesions",
+      "tan lesions parallel to veins",
+      "premature leaf death",
+      "lower leaf damage first"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC1906 - Gray Leaf Spot of Corn; CIMMYT Maize Pathology Handbook, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is northern corn leaf blight?",
+    "answer": "Northern corn leaf blight (NCLB) caused by Exserohilum turcicum produces long, elliptical, cigar-shaped, gray-green to tan lesions (5-15 cm). Lesions start on lower leaves and move upward. Severe infections can cause 30 percent or more yield loss when lesions reach the ear leaf before grain fill. In Nebraska, plant resistant hybrids with Ht genes. Fungicide at VT-R1 is warranted when susceptible hybrids show lesions above the third leaf below the ear. In Rwanda Eastern Province, practice crop rotation, remove residues, and plant tolerant varieties. Humid conditions with heavy dew favor the disease.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "long elliptical lesions",
+      "gray-green lesions",
+      "lesions on lower leaves first",
+      "cigar-shaped spots"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "silking",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2181 - Northern Corn Leaf Blight; CIMMYT Maize Pathology, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is common rust in corn?",
+    "answer": "Common rust caused by Puccinia sorghi produces small, round to elongated, reddish-brown pustules on both upper and lower leaf surfaces. Rusty-colored spores come off on fingers when rubbed. Favored by cool to moderate temperatures (15-25 degrees Celsius) and high humidity. In Nebraska, most commercial hybrids have good resistance and fungicide is rarely needed. In Rwanda Eastern Province, common rust pressure is lower due to warmer temperatures but can appear during cooler periods. Fungicide is rarely economical unless infection is severe before tasseling on a susceptible hybrid.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "reddish-brown pustules",
+      "rusty spores on leaves",
+      "pustules on both leaf surfaces",
+      "premature leaf death"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2408 - Corn Rust Diseases; IITA Maize Disease Guide, 2022",
+    "confidence": 0.91
+  },
+  {
+    "question": "What is southern rust in corn?",
+    "answer": "Southern rust (Puccinia polysora) is more aggressive than common rust and favors warmer temperatures (25-30 degrees Celsius). Produces smaller, more densely packed, orange to light brown pustules primarily on the upper leaf surface. Can cause rapid defoliation and 20-40 percent yield loss if it arrives before grain fill. In Nebraska, southern rust blows in from the Gulf Coast on storm fronts in late July through August and does not overwinter. In Rwanda Eastern Province, warmer conditions make southern rust a more consistent threat. Key difference from common rust: smaller pustules, mainly on upper leaf surface, progresses much faster. Apply fungicide if detected before or during early grain fill.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "orange pustules on upper leaf surface",
+      "small dense pustules",
+      "rapid defoliation",
+      "light brown pustules"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Southern Rust of Corn in Nebraska, 2024; IITA Disease Guide, 2022",
+    "confidence": 0.92
+  },
+  {
+    "question": "What is Goss's wilt in corn?",
+    "answer": "Goss's wilt (Clavibacter michiganensis subsp. nebraskensis) is a bacterial disease particularly important in Nebraska. First identified in Nebraska in 1969. Symptoms include water-soaked, freckling lesions on leaves that produce a shiny bacterial exudate visible as dark, glistening droplets when leaves dry. The freckles (dark spots within the lesion) distinguish Goss's wilt from fungal blights. Systemic infection causes wilting and death. Survives in corn residue for up to 10 months. Plant resistant hybrids, rotate crops, reduce surface residue, and manage hail or wind damage that creates entry wounds. No effective bactericides. Does not occur in Rwanda.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "water-soaked lesions",
+      "freckling on leaves",
+      "bacterial ooze",
+      "shiny leaf spots",
+      "wilting"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G2249 - Goss's Bacterial Wilt and Leaf Blight of Corn, 2023",
+    "confidence": 0.94
+  },
+  {
+    "question": "What causes ear rot in maize?",
+    "answer": "Ear rot can be caused by Fusarium (pink to reddish-white mold, scattered), Gibberella (reddish-pink from ear tip, cooler conditions), Aspergillus (gray-green mold, dangerous aflatoxin, hot drought stress), and Diplodia (white mold from ear base). In Nebraska, Gibberella and Fusarium are most common. In Rwanda Eastern Province, Aspergillus (aflatoxin risk) is the primary concern due to hot conditions. Management: harvest promptly at maturity, dry grain quickly below 13 percent moisture, control ear-boring insects, select hybrids with tight husk coverage, and do not store or consume visibly moldy grain.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "mold on ears",
+      "pink mold on kernels",
+      "gray-green mold",
+      "white mold from ear base",
+      "discolored kernels"
+    ],
+    "growth_stage": [
+      "grain fill",
+      "maturity",
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1898 - Corn Ear Rots; IITA Post-Harvest Management Guide, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "What is maize streak virus?",
+    "answer": "Maize streak virus (MSV) is transmitted by leafhoppers (Cicadulina spp.) and is one of the most important maize diseases in sub-Saharan Africa. Symptoms include narrow, pale yellow streaks running parallel to leaf veins, stunting, and reduced cob size. Plants infected early may produce no ears. No cure once infected. In Rwanda Eastern Province, MSV pressure is higher because the warmer, drier climate favors leafhopper populations. Plant MSV-tolerant varieties, use systemic seed treatments, remove infected plants early, remove alternate grass hosts from field margins, and avoid late planting. Does not occur in Nebraska.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "yellow streaks on leaves",
+      "stunted growth",
+      "small cobs",
+      "pale streaks along veins"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Maize Disease Guide for Sub-Saharan Africa, 2022; RAB Disease Alert, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is maize lethal necrosis disease?",
+    "answer": "Maize lethal necrosis (MLN) is caused by co-infection of maize chlorotic mottle virus (MCMV) and a potyvirus. One of the most devastating maize diseases in East Africa. Symptoms include chlorotic mottling, necrosis from leaf margins, premature plant death, and small or no ears. Can cause total crop loss. Spread by thrips, beetles, and contaminated seed. No cure. Plant certified virus-free seed, control vector insects, remove and destroy infected plants immediately, rotate with non-maize crops for at least one season, and report outbreaks to RAB district office. Does not occur in Nebraska.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "chlorotic mottling",
+      "leaf necrosis from margins",
+      "premature plant death",
+      "small or absent ears"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "CIMMYT MLN Management Brief, 2023; Rwanda Agriculture Board Disease Alert, 2022",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is head smut in corn?",
+    "answer": "Head smut (Sphacelotheca reiliana) infects corn seedlings through the soil and colonizes the plant internally. Symptoms appear at tasseling when tassel and ear are replaced by large masses of dark brown to black smut spores. The disease is soil-borne and persists for years. More common in hot, dry conditions, making it a concern in Rwanda Eastern Province and western Nebraska. Plant resistant hybrids, rotate crops for at least 2 years, and treat seed with systemic fungicides.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "tassel replaced by dark spore mass",
+      "ear replaced by gall",
+      "white membrane covering spores"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "silking"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Corn Smut Diseases; IITA Maize Disease Guide, 2022",
+    "confidence": 0.89
+  },
+  {
+    "question": "What is common smut in corn?",
+    "answer": "Common smut (Ustilago maydis) causes large, silvery-white galls on ears, tassels, stalks, and leaves. Galls enlarge to softball size, then rupture releasing dark spore masses. Unlike head smut (systemic), common smut infects through wounds from hail, insects, detasseling, or cultivation. More prevalent in hot weather (25-33 degrees Celsius), high nitrogen, and dry conditions followed by rain. Rarely a significant yield reducer in field corn. Avoid wounding plants, manage insects, plant resistant hybrids, and avoid excessive nitrogen.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "large silvery galls on ears",
+      "white swellings on stalks",
+      "dark spore masses",
+      "galls on tassels"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2405 - Common Smut of Corn; CIMMYT Maize Pathology, 2022",
+    "confidence": 0.89
+  },
+  {
+    "question": "What is bacterial leaf streak in corn?",
+    "answer": "Bacterial leaf streak (Xanthomonas vasicola pv. vasculorum) is a newer disease in Nebraska, first confirmed in 2014. Produces narrow, brown, water-soaked streaks between leaf veins that can extend the full leaf length. Streaks may have a yellow halo. When backlit, lesions appear translucent with irregular wavy margins (distinguishing them from gray leaf spot's straight edges). No effective chemical controls. Plant tolerant hybrids, rotate crops, and manage residue. Research at UNL is ongoing.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "narrow brown streaks between veins",
+      "water-soaked leaf streaks",
+      "yellow halo around lesions"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension - Bacterial Leaf Streak of Corn, 2024",
+    "confidence": 0.91
+  },
+  {
+    "question": "How do I identify fungal vs bacterial vs viral diseases in corn?",
+    "answer": "Fungal diseases: defined shapes, visible spores. Gray leaf spot has rectangular lesions. Northern leaf blight has cigar shapes. Rusts have raised pustules. Bacterial diseases: water-soaked, greasy-looking, irregular or streaky lesions. Goss's wilt has freckles and bacterial ooze. Bacterial leaf streak has wavy-margined streaks. Viral diseases: mosaic patterns, streaking along veins (maize streak), or mottling. Hold suspect leaves to light: bacterial lesions are translucent, fungal lesions are opaque. Send samples to UNL Plant and Pest Diagnostic Lab (Nebraska) or RAB laboratory (Rwanda) if unsure.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Corn Disease Identification Guide; IITA Disease Diagnostic Manual, 2022",
+    "confidence": 0.9
+  },
+  {
+    "question": "What is downy mildew in maize?",
+    "answer": "Downy mildew (caused by Peronosclerospora spp.) produces chlorotic streaking on leaves, excessive tillering (multiple shoots), and malformed tassels that may become leafy. The fungus produces white, downy spore masses on the underside of infected leaves, especially visible in early morning. It is more common in tropical and subtropical environments. In Rwanda Eastern Province, downy mildew can occur during wet, humid conditions. Manage by planting resistant varieties, removing infected plants to prevent spread, treating seed with metalaxyl-based fungicides, avoiding planting in previously infected fields without rotation, and improving field drainage.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "chlorotic leaf streaks",
+      "excessive tillering",
+      "malformed tassels",
+      "white downy growth on leaf underside"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "CIMMYT Maize Disease Guide for the Tropics, 2022; IITA Disease Identification Manual, 2023",
+    "confidence": 0.88
+  },
+  {
+    "question": "What is Fusarium stalk rot in corn?",
+    "answer": "Fusarium stalk rot is one of the most common stalk diseases of corn in both Nebraska and worldwide. The fungus (Fusarium verticillioides and related species) enters through roots or stalk wounds and causes internal tissue breakdown. Symptoms include premature wilting, stalk breakage below the ear, and soft, discolored internal pith (pink to salmon colored when split open). Stalk rot is worsened by plant stress (drought, nutrient deficiency, leaf diseases, high populations). Test for stalk rot after R5 by pinching stalks at the lowest internode. If more than 10 percent of stalks crush easily, schedule early harvest to reduce lodging losses. Plant hybrids with good stalk strength, maintain balanced fertility (especially potassium), and manage foliar diseases that steal photosynthate.",
+    "crop": "maize",
+    "category": "disease",
+    "symptoms": [
+      "stalk breakage",
+      "wilting",
+      "soft pith when stalk is split",
+      "pink discolored pith",
+      "lodging"
+    ],
+    "growth_stage": [
+      "grain fill",
+      "maturity"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1902 - Corn Stalk Rots; CIMMYT Maize Agronomy Guide, 2023",
+    "confidence": 0.91
+  },
+  {
     "question": "My maize leaves are turning yellow from the bottom. What is wrong?",
-    "answer": "Yellowing of lower maize leaves that moves upward is the classic symptom of nitrogen deficiency. Nitrogen is mobile in the plant, so when supply is low, the plant moves nitrogen from older (lower) leaves to newer growth. The yellowing starts at the leaf tip and moves along the midrib in a V-shaped pattern. Confirm by checking if upper leaves are still green. Apply nitrogen fertilizer (urea or CAN) as a side-dress at V6-V8. Split applications (at planting and at knee height) are more efficient than a single large dose.",
+    "answer": "Yellowing of lower maize leaves moving upward is the classic symptom of nitrogen deficiency. Nitrogen is mobile, so the plant moves it from older leaves to newer growth. Yellowing starts at the leaf tip in a V-shaped pattern. Confirm by checking if upper leaves are still green. In Nebraska, common in continuous corn, sandy soils, or after heavy rains cause denitrification. Side-dress with UAN or urea through V8. In Rwanda Eastern Province, nitrogen deficiency is very common because most soils are low in organic matter. Apply urea or CAN as side-dress at V6-V8. Split applications are more efficient than single large doses.",
     "crop": "maize",
     "category": "nutrient_deficiency",
-    "symptoms": ["yellow lower leaves", "V-shaped yellowing", "bottom leaves yellow first", "green upper leaves"],
-    "growth_stage": ["vegetative", "V6-V10"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Fertilizer Guide",
+    "symptoms": [
+      "yellow lower leaves",
+      "V-shaped yellowing",
+      "bottom leaves yellow first",
+      "green upper leaves"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V6-V10"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1784 - Nitrogen Management for Corn; Rwanda Agriculture Board Fertilizer Guide, 2023",
     "confidence": 0.94
   },
   {
     "question": "What causes purple or reddish maize leaves?",
-    "answer": "Purple or reddish maize leaves usually indicate phosphorus deficiency, especially in young plants and in cold or waterlogged soils. Phosphorus is essential for root development and energy transfer. The purple color comes from anthocyanin accumulation when phosphorus is limited. Check soil temperature because cold soils reduce phosphorus availability even when soil phosphorus levels are adequate. Apply DAP or TSP fertilizer near the root zone. In acidic soils (pH below 5.5), lime application improves phosphorus availability.",
+    "answer": "Purple or reddish maize leaves usually indicate phosphorus deficiency, especially in young plants. The purple color comes from anthocyanin accumulation. In Nebraska, common in high-pH calcareous soils and cold wet springs when soil temperatures below 15 degrees reduce phosphorus availability. In Rwanda Eastern Province, phosphorus deficiency is widespread because many soils are naturally low in available P, especially in acidic soils of Kayonza and Ngoma. Apply DAP or TSP at planting near the seed. In acidic soils (pH below 5.5), apply lime to improve phosphorus availability.",
     "crop": "maize",
     "category": "nutrient_deficiency",
-    "symptoms": ["purple leaves", "reddish leaves", "stunted seedlings", "poor root development"],
-    "growth_stage": ["seedling", "vegetative", "V2-V6"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Fertilizer Guide",
+    "symptoms": [
+      "purple leaves",
+      "reddish leaves",
+      "stunted seedlings",
+      "poor root development"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative",
+      "V2-V6"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1859 - Phosphorus Management; Rwanda Agriculture Board Fertilizer Guide, 2023",
     "confidence": 0.93
   },
   {
     "question": "My maize leaves have yellow edges and look burnt. What is this?",
-    "answer": "Yellowing and browning of leaf margins (edges) in maize is typically potassium deficiency. It starts on lower leaves because potassium is mobile. The leaf edges turn yellow first, then brown and dry, giving a scorched or burnt appearance. Potassium is critical for water regulation, disease resistance, and stalk strength. Deficient plants are more prone to stalk lodging. Apply muriate of potash (KCl) or NPK fertilizer with adequate K. Soil testing confirms the deficiency.",
+    "answer": "Yellowing and browning of leaf margins in maize is typically potassium deficiency. Starts on lower leaves. Edges turn yellow then brown and dry, giving a scorched appearance. Potassium is critical for water regulation, disease resistance, and stalk strength. Deficient plants are prone to lodging. In Nebraska, occurs in sandy soils and river bottom fields. Apply muriate of potash (0-0-60) based on soil test. In Rwanda Eastern Province, potassium deficiency is increasing as intensive cropping depletes reserves. Apply NPK fertilizers or muriate of potash. Soil testing confirms deficiency.",
     "crop": "maize",
     "category": "nutrient_deficiency",
-    "symptoms": ["yellow leaf edges", "brown leaf margins", "burnt-looking leaves", "lower leaves affected first"],
-    "growth_stage": ["vegetative", "grain fill"],
-    "region": "East Africa",
-    "source": "IITA Soil Fertility Management",
+    "symptoms": [
+      "yellow leaf edges",
+      "brown leaf margins",
+      "burnt-looking leaves",
+      "lower leaves affected first"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1872 - Potassium Management; IITA Soil Fertility Management, 2022",
     "confidence": 0.91
   },
   {
     "question": "What causes white or pale stripes between maize leaf veins?",
-    "answer": "White or pale interveinal striping in maize is typically zinc deficiency. A broad band of white or light yellow tissue appears between the veins, while the veins themselves remain green. This is most common in high-pH soils, sandy soils, or after heavy phosphorus application (which can reduce zinc availability). Young leaves are affected most. Apply zinc sulfate as a foliar spray or soil application. In alkaline soils, reducing pH with sulfur improves zinc availability.",
+    "answer": "White or pale interveinal striping is typically zinc deficiency. Broad white or light yellow bands appear between veins while veins remain green. Young leaves affected most because zinc is immobile. In Nebraska, common in sandy soils, high-pH soils (above 7.5), or after topsoil removal. Apply zinc sulfate at 5-10 lb/acre or use zinc-containing starter fertilizers. In Rwanda Eastern Province, zinc deficiency can occur in heavily weathered soils. Foliar zinc sulfate (0.5 percent solution) provides rapid correction; soil application provides longer-term correction.",
     "crop": "maize",
     "category": "nutrient_deficiency",
-    "symptoms": ["white stripes between veins", "pale interveinal bands", "young leaves affected", "veins remain green"],
-    "growth_stage": ["vegetative", "V4-V8"],
-    "region": "East Africa",
-    "source": "IITA Micronutrient Guide",
+    "symptoms": [
+      "white stripes between veins",
+      "pale interveinal bands",
+      "young leaves affected",
+      "veins remain green"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V4-V8"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1737 - Zinc Management for Corn; IITA Micronutrient Guide, 2022",
+    "confidence": 0.9
+  },
+  {
+    "question": "What is sulfur deficiency in corn?",
+    "answer": "Sulfur deficiency causes uniform yellowing of young upper leaves (unlike nitrogen which starts on lower leaves). The entire young leaf turns pale yellow-green. Sulfur is immobile, so new growth shows symptoms first. In Nebraska, more common since the 1990s due to reduced atmospheric sulfur deposition and increased yields. Most common on sandy soils, eroded hillsides, and low organic matter soils. Apply 10-25 lb sulfur per acre as ammonium sulfate (21-0-0-24S) or gypsum. In Rwanda Eastern Province, sulfur deficiency is underdiagnosed but likely occurs in depleted soils, especially sandy soils in Bugesera and Nyagatare.",
+    "crop": "maize",
+    "category": "nutrient_deficiency",
+    "symptoms": [
+      "yellow upper leaves",
+      "pale new growth",
+      "uniform yellowing of young leaves"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V4-V8"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1859 - Sulfur Fertility for Corn; Nebraska Soil Fertility Update, 2024",
     "confidence": 0.89
   },
   {
-    "question": "How much fertilizer should I apply to my maize?",
-    "answer": "Fertilizer rates depend on soil fertility, target yield, and budget. A general recommendation for East African conditions is: at planting, apply DAP (18-46-0) at 100-150 kg/ha placed in the furrow near the seed. At knee height (V6-V8), top-dress with urea (46-0-0) at 100-150 kg/ha or CAN (26-0-0) at 150-200 kg/ha. For acidic soils (pH below 5.5), apply agricultural lime (1-2 tons/ha) before planting. Always conduct a soil test to determine actual nutrient needs. These are general guidelines and should be confirmed with your local extension officer for site-specific recommendations.",
+    "question": "What is magnesium deficiency in maize?",
+    "answer": "Magnesium deficiency causes interveinal chlorosis on older leaves (yellowing between veins) because magnesium is mobile. Leaves may develop a striped appearance. In severe cases, leaf edges turn reddish-purple. Common in acidic, sandy soils or after heavy potassium application (which competes with magnesium uptake). Correct with dolomitic lime (provides both calcium and magnesium) or magnesium sulfate (Epsom salt) as foliar spray or soil amendment.",
     "crop": "maize",
-    "category": "fertilizer",
-    "symptoms": [],
-    "growth_stage": ["planting", "vegetative", "V6-V8"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Fertilizer Guide",
-    "confidence": 0.88
-  },
-  {
-    "question": "When is the best time to plant maize in Rwanda?",
-    "answer": "In Rwanda, maize is planted in two main seasons. Season A runs from September to October (long rains), with harvest in January-February. Season B runs from February to March (short rains), with harvest in June-July. The exact timing depends on the agro-ecological zone. Higher altitude areas like Musanze may plant slightly later. Plant when soils have received adequate moisture (at least 2-3 good rains). Avoid planting too late in the season as this exposes grain fill to dry conditions. In marshland areas, season C (June-September) is also possible for irrigated maize.",
-    "crop": "maize",
-    "category": "planting",
-    "symptoms": [],
-    "growth_stage": ["pre-planting", "planting"],
-    "region": "Rwanda",
-    "source": "Rwanda Agriculture Board Crop Calendar",
-    "confidence": 0.94
-  },
-  {
-    "question": "What is the recommended maize spacing?",
-    "answer": "Recommended maize spacing for East African conditions is 75 cm between rows and 25-30 cm between plants within the row, giving approximately 44,000-53,000 plants per hectare. For fertile soils and improved varieties, closer spacing (25 cm in-row) maximizes yield. For low-fertility soils or drought-prone areas, wider spacing (30 cm or more) reduces competition. Plant one seed per hole at 5-7 cm depth. In Rwanda, RAB recommends 75 x 25 cm for most zones.",
-    "crop": "maize",
-    "category": "planting",
-    "symptoms": [],
-    "growth_stage": ["planting"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Maize Production Guide",
-    "confidence": 0.93
-  },
-  {
-    "question": "What maize varieties are recommended for Rwanda?",
-    "answer": "Recommended maize varieties for Rwanda include ZM 607 (medium maturity, drought tolerant, widely adapted), Pool 16 (early maturity, good for short rainy seasons), and IITA hybrids (high yield potential for favorable environments). For highland zones above 1800m, use varieties adapted to cooler temperatures. For mid-altitude zones, ZM 607 and similar varieties perform well. Always buy certified seed from approved distributors. Consult RAB or your local agrodealer for the most current variety list for your specific zone.",
-    "crop": "maize",
-    "category": "variety",
-    "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "Rwanda",
-    "source": "Rwanda Agriculture Board Variety Recommendations",
+    "category": "nutrient_deficiency",
+    "symptoms": [
+      "interveinal yellowing on lower leaves",
+      "striped leaf appearance",
+      "reddish-purple leaf edges"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "IITA Soil Fertility Management Guide, 2022; UNL Extension Micronutrient Guide, 2023",
     "confidence": 0.87
   },
   {
-    "question": "How do I know when my maize is ready to harvest?",
-    "answer": "Maize is ready for harvest at physiological maturity, indicated by a black layer visible at the base of the kernel (scratch a kernel from the middle of the ear to check), husks turning brown and dry, and grain moisture around 25-30 percent. For dry grain harvest, leave ears in the field until moisture drops to 20 percent or below, then harvest and dry to 13 percent moisture for safe storage. Delayed harvest increases risk of ear rot and storage pest damage. In wet conditions, harvest earlier and dry grain using a drying platform or solar dryer.",
+    "question": "What is boron deficiency in maize?",
+    "answer": "Boron deficiency in maize causes irregular kernel set on ears (scattered missing kernels), misshapen ears, and poor tassel development. Leaves may show short, irregular chlorotic or white streaks. Boron is important for pollen tube growth and grain formation. Deficiency is most common in sandy, low organic matter soils and during drought. In Nebraska, boron deficiency in field corn is uncommon but can occur in sandy soils. Apply boron only based on soil test results as the margin between deficiency and toxicity is narrow. In Rwanda Eastern Province, boron deficiency may contribute to poor grain set in some sandy soils of Bugesera district.",
     "crop": "maize",
-    "category": "harvest",
+    "category": "nutrient_deficiency",
+    "symptoms": [
+      "irregular kernel set",
+      "scattered missing kernels",
+      "misshapen ears",
+      "short white leaf streaks"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "silking",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Boron in Crop Production; IITA Micronutrient Management, 2022",
+    "confidence": 0.85
+  },
+  {
+    "question": "How do I read a soil test report?",
+    "answer": "A soil test report tells you the nutrient levels, pH, and organic matter content of your soil. Key values to check: pH (target 5.8-7.0 for maize and soybean), organic matter (higher is better, affects nitrogen availability), phosphorus (Bray-1 or Olsen P, compare to sufficiency levels), potassium (exchangeable K, compare to sufficiency), and micronutrients (zinc, iron, manganese). In Nebraska, UNL Extension provides interpretation guides for each nutrient with sufficiency ranges. If a nutrient is below the critical level, apply fertilizer at the recommended rate. If above, you can reduce or skip that nutrient. In Rwanda, RAB laboratories provide soil test results with basic recommendations. Always compare your results to regional sufficiency levels, not just absolute numbers, because optimal ranges vary by soil type and crop.",
+    "crop": "both",
+    "category": "nutrient_deficiency",
     "symptoms": [],
-    "growth_stage": ["maturity", "harvest"],
-    "region": "East Africa",
-    "source": "IITA Maize Production Guide",
-    "confidence": 0.92
-  },
-  {
-    "question": "How do I store maize grain safely?",
-    "answer": "Dry maize grain to 13 percent moisture or below before storage. Test by biting a kernel, which should crack cleanly and not dent. Store in clean, airtight containers such as hermetic bags (PICS bags or GrainPro bags), metal silos, or sealed drums. Hermetic storage kills storage insects by cutting off oxygen. If using traditional bags, treat grain with approved storage insecticides. Store containers off the floor on pallets and away from walls. Check stored grain monthly for insect damage, mold, or moisture buildup. Do not mix new grain with old grain.",
-    "crop": "maize",
-    "category": "storage",
-    "symptoms": [],
-    "growth_stage": ["post-harvest"],
-    "region": "East Africa",
-    "source": "IITA Post-Harvest Loss Prevention Guide",
-    "confidence": 0.93
-  },
-  {
-    "question": "What are the major storage pests of maize?",
-    "answer": "The two major storage pests of maize in East Africa are the maize weevil (Sitophilus zeamais) and the larger grain borer (Prostephanus truncatus). Maize weevils bore circular holes in kernels and leave powdery dust. The larger grain borer is more destructive, creating large amounts of flour-like dust and can cause 30-40 percent grain loss in 3-4 months. Control by drying grain properly (below 13 percent moisture), using hermetic storage (PICS bags), treating with approved insecticides, and maintaining clean storage facilities. Remove old grain and residues before storing new harvest.",
-    "crop": "maize",
-    "category": "pest",
-    "symptoms": ["holes in kernels", "powdery dust in grain", "weight loss of grain", "flour-like residue"],
-    "growth_stage": ["post-harvest", "storage"],
-    "region": "East Africa",
-    "source": "IITA Storage Pest Management Guide",
-    "confidence": 0.93
-  },
-  {
-    "question": "My maize plants are falling over. What causes lodging?",
-    "answer": "Maize lodging can be caused by weak stalks due to stalk rot fungi (Fusarium, Diplodia), potassium deficiency (reduces stalk strength), high plant density (excessive competition), stalk borer damage (tunneling weakens stems), strong winds or heavy rain during grain fill, and shallow root systems in compacted soils. To prevent lodging: ensure adequate potassium fertilization, plant at recommended density, control stalk borers, harvest promptly at maturity, and use varieties with good standability. Root lodging (plants tipping at the base) is often caused by shallow rooting in compacted or waterlogged soils.",
-    "crop": "maize",
-    "category": "general",
-    "symptoms": ["plants falling over", "broken stalks", "plants leaning", "root exposure"],
-    "growth_stage": ["grain fill", "maturity"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Agronomy Guide",
-    "confidence": 0.90
-  },
-  {
-    "question": "What causes poor germination in maize?",
-    "answer": "Poor maize germination can result from poor seed quality (old seed, damaged seed, low germination rate), planting too deep (deeper than 7 cm) or too shallow (less than 3 cm), cold soil temperatures (below 10 degrees, common in highland areas), waterlogged soils (seeds rot before germinating), soil-borne diseases (Pythium, Fusarium seed rot), insect damage to seeds (wireworms, seed corn maggots), and insufficient soil moisture at planting. Use certified seed less than one year old. Plant at 5-7 cm depth in well-drained, adequately moist soil. Seed treatment with fungicide and insecticide protects against early-season threats.",
-    "crop": "maize",
-    "category": "planting",
-    "symptoms": ["uneven stand", "missing plants", "rotting seeds", "slow emergence"],
-    "growth_stage": ["planting", "germination", "emergence"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Production Manual",
-    "confidence": 0.91
-  },
-  {
-    "question": "How do I manage weeds in my maize field?",
-    "answer": "Weed management in maize is critical during the first 6-8 weeks after planting (the critical weed-free period). Options include hand weeding at 2-3 weeks and again at 5-6 weeks after planting, pre-emergence herbicide applied within 3 days of planting to moist soil, post-emergence herbicide for grassy weeds, or a combination of pre-emergence herbicide plus one hand weeding. Striga (witchweed) is a parasitic weed in some areas. Manage it with Imazapyr-resistant maize varieties, intercropping with Desmodium, or crop rotation with soybean. Keep the field weed-free until knee height for maximum yield.",
-    "crop": "maize",
-    "category": "weed",
-    "symptoms": ["stunted growth", "thin stand", "yellow maize near weeds"],
-    "growth_stage": ["vegetative", "V2-V8"],
-    "region": "East Africa",
-    "source": "IITA Weed Management Guide",
-    "confidence": 0.91
-  },
-  {
-    "question": "What is Striga and how do I control it?",
-    "answer": "Striga (witchweed) is a parasitic weed that attaches to maize roots and steals water and nutrients. Symptoms include stunting, wilting, yellowing, and eventually death of the maize plant. Purple or pink Striga flowers appear above ground after the damage is already done. Striga thrives in low-fertility, acidic soils. Control strategies include using Imazapyr-resistant maize varieties coated with herbicide, intercropping with Desmodium (which inhibits Striga germination), applying nitrogen and phosphorus fertilizer, rotating with trap crops like soybean, and hand-pulling Striga plants before they flower and set seed.",
-    "crop": "maize",
-    "category": "weed",
-    "symptoms": ["stunted plants", "wilting despite adequate moisture", "purple flowers near maize base", "yellowing"],
-    "growth_stage": ["vegetative", "reproductive"],
-    "region": "East Africa",
-    "source": "IITA Striga Control Guide",
-    "confidence": 0.93
-  },
-  {
-    "question": "What happens if I plant maize too close together?",
-    "answer": "Planting maize at excessive density leads to competition for light, water, and nutrients. Symptoms include thin stalks, barren plants (no ears), small ears with incomplete kernel fill, increased lodging, and greater susceptibility to diseases like gray leaf spot due to poor air circulation. The recommended density for most East African conditions is 44,000-53,000 plants per hectare (75 cm rows, 25-30 cm within row). If you have already planted too densely, thinning to recommended spacing at the 3-4 leaf stage minimizes yield loss.",
-    "crop": "maize",
-    "category": "planting",
-    "symptoms": ["thin stalks", "no ears", "small ears", "lodging", "barren plants"],
-    "growth_stage": ["vegetative", "tasseling"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Agronomy Guide",
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC155 - Nutrient Management for Nebraska; RAB Soil Testing Guide, 2023",
     "confidence": 0.89
   },
   {
-    "question": "My maize leaves are curling. What is the cause?",
-    "answer": "Leaf curling in maize is most commonly caused by drought stress — the leaves roll inward to reduce water loss. Check soil moisture by pushing a finger 10 cm into the soil. If it is dry, the plants need water. Other causes include heat stress (temporary curling during midday that recovers by evening), herbicide damage (curling plus abnormal growth patterns), and certain virus diseases. If curling persists after adequate rain or irrigation and is accompanied by unusual leaf patterns, it may be a virus — consult your extension officer. For drought-induced curling, irrigate if possible or wait for rain. Avoid applying fertilizer to drought-stressed plants.",
+    "question": "How much fertilizer should I apply to maize in Rwanda Eastern Province?",
+    "answer": "General RAB recommendation for Eastern Province: at planting, apply DAP (18-46-0) at 100 kg/ha placed in the furrow near the seed. At knee height (V6-V8, about 4-5 weeks after planting), top-dress with urea (46-0-0) at 100 kg/ha. For higher target yields on good soils, increase urea to 150 kg/ha. In acidic soils (pH below 5.5, common in parts of Kayonza and Ngoma), apply agricultural lime at 1-2 tons/ha at least 2-4 weeks before planting. These are general guidelines. Soil testing through RAB district offices provides field-specific recommendations. Never apply fertilizer to drought-stressed plants. Place fertilizer 5-10 cm from the stem.",
     "crop": "maize",
-    "category": "general",
-    "symptoms": ["curled leaves", "rolled leaves", "wilting", "inward folding leaves"],
-    "growth_stage": ["vegetative", "tasseling", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Stress Management Guide",
-    "confidence": 0.90
+    "category": "fertilizer",
+    "symptoms": [],
+    "growth_stage": [
+      "planting",
+      "vegetative",
+      "V6-V8"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "Rwanda Agriculture Board Fertilizer Recommendation Guide, 2023; IFDC Rwanda Fertilizer Assessment, 2022",
+    "confidence": 0.9
   },
   {
-    "question": "Why is my maize not producing ears?",
-    "answer": "Maize failing to produce ears (barrenness) can be caused by severe drought stress during tasseling and silking (the most critical period), poor pollination due to asynchrony between tassel and silk emergence, excessive plant population, severe nitrogen deficiency, and late planting that causes silk emergence during dry periods. To prevent barrenness: plant at recommended density, ensure adequate nitrogen is available by V8, avoid severe moisture stress during flowering (irrigate if possible), and plant on time so flowering coincides with reliable rainfall.",
+    "question": "How much nitrogen do I need for corn in Nebraska?",
+    "answer": "UNL recommendations: irrigated corn after soybeans, 120-160 lb N/acre for 200-250 bu/acre targets. Irrigated continuous corn, add 40-50 lb N/acre more. Dryland corn after soybeans, 80-120 lb N/acre. Dryland continuous corn, add 30-40 lb N/acre. Subtract soybean credits (40-50 lb N/acre), manure credits, and irrigation water nitrogen. Use the UNL Corn Nitrogen Calculator at cropwatch.unl.edu. Split applications improve efficiency: 30-40 percent at planting, 60-70 percent as side-dress at V6-V8. Nitrogen stabilizers (N-Serve, Instinct) reduce losses on coarse soils. Fall nitrogen is not recommended on sandy soils.",
     "crop": "maize",
-    "category": "general",
-    "symptoms": ["no ears", "barren plants", "small cobs", "poor kernel set", "silks not emerged"],
-    "growth_stage": ["tasseling", "silking", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Agronomy Guide",
-    "confidence": 0.91
+    "category": "fertilizer",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting",
+      "planting",
+      "V6-V8"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC155 - Nutrient Management for Agronomic Crops in Nebraska, 2024",
+    "confidence": 0.93
   },
   {
-    "question": "How do I manage drought stress in maize?",
-    "answer": "Maize is most vulnerable to drought during tasseling and silking (2 weeks before and after). Signs of drought stress include leaf rolling during the day, gray-green leaf color, delayed silking, and poor kernel set. To manage drought: plant drought-tolerant varieties, use tied ridges or mulching to conserve soil moisture, apply fertilizer early so roots develop before dry periods, avoid excessive plant density in drought-prone areas, and consider supplemental irrigation during flowering if available. After a drought period, do not apply nitrogen until rain returns as it can burn roots in dry soil.",
-    "crop": "maize",
-    "category": "general",
-    "symptoms": ["leaf rolling", "gray-green leaves", "delayed silking", "wilting", "poor kernel set"],
-    "growth_stage": ["tasseling", "silking"],
-    "region": "East Africa",
-    "source": "CIMMYT Drought Management Brief",
-    "confidence": 0.91
+    "question": "What is the difference between organic and inorganic fertilizer?",
+    "answer": "Organic fertilizers (compost, farmyard manure, green manure) release nutrients slowly over months, improve soil structure, increase water-holding capacity, and feed soil organisms. They are lower in concentrated nutrients but provide long-term soil health benefits. Inorganic (mineral) fertilizers (DAP, urea, NPK, CAN) provide nutrients immediately in concentrated form, are easier to apply precisely, but do not improve soil structure and can acidify soil over time. The best approach is integrated soil fertility management (ISFM): combine organic matter for long-term soil health with targeted inorganic fertilizer for immediate crop needs. This is recommended in both Nebraska and Rwanda.",
+    "crop": "both",
+    "category": "fertilizer",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "both",
+    "source": "IITA Integrated Soil Fertility Management Manual, 2023; UNL Extension Soil Health, 2024",
+    "confidence": 0.9
   },
   {
-    "question": "What is the best soil pH for maize?",
-    "answer": "Maize grows best in soils with pH between 5.5 and 7.0. In much of East Africa, soils tend to be acidic (pH below 5.5) due to high rainfall and leaching of bases. Acidic soils reduce the availability of phosphorus, calcium, and magnesium, and can cause aluminum toxicity that damages roots. To correct acidic soils, apply agricultural lime at 1-2 tons per hectare based on soil test results. Lime should be incorporated into the soil at least 2-4 weeks before planting. Soil testing is essential to determine lime requirements.",
+    "question": "What is the best soil pH for maize and soybean?",
+    "answer": "Both crops grow best in soils with pH 5.8-7.0. In Nebraska, soil acidification is increasing in eastern counties due to decades of ammonium-based nitrogen fertilizer. When pH drops below 5.5, aluminum toxicity damages roots and nutrient availability decreases. Apply ag lime when pH falls below 5.8. Variable-rate liming based on grid sampling is cost-effective. In Rwanda Eastern Province, many soils are naturally acidic (pH 4.5-5.5) due to weathering, especially in Kayonza and Ngoma. Apply agricultural lime at 1-3 tons/ha based on soil test, incorporated 2-4 weeks before planting. For soybean, proper pH is critical because Bradyrhizobium bacteria are sensitive to acidity.",
     "crop": "both",
     "category": "soil",
-    "symptoms": ["stunted growth", "poor root development", "aluminum toxicity symptoms", "yellow leaves"],
-    "growth_stage": ["pre-planting", "planting"],
-    "region": "East Africa",
-    "source": "IITA Soil Fertility Management Guide",
-    "confidence": 0.91
+    "symptoms": [
+      "stunted growth",
+      "poor root development",
+      "aluminum toxicity symptoms",
+      "yellow leaves"
+    ],
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1503 - Soil pH and Liming; IITA Soil Fertility Management, 2023",
+    "confidence": 0.92
   },
   {
-    "question": "How do I improve my soil fertility for maize?",
-    "answer": "Improving soil fertility for maize requires an integrated approach. Apply organic matter (compost, farmyard manure, or crop residues) at 5-10 tons per hectare to improve soil structure and nutrient-holding capacity. Use inorganic fertilizers (DAP at planting, urea or CAN as topdress) based on soil test results. Practice crop rotation with legumes like soybean or beans which fix nitrogen and break pest cycles. Use green manure cover crops during fallow periods. Avoid burning crop residues as this destroys organic matter. In acidic soils, apply lime before planting.",
+    "question": "How do I improve my soil fertility?",
+    "answer": "Integrated approach: In Nebraska, soil test every 4 years, apply N based on yield goal and credits, maintain P and K at sufficiency levels, address micronutrients (zinc most common), build organic matter through reduced tillage and cover crops. In Rwanda Eastern Province, apply organic matter (compost, manure) at 5-10 tons/ha, use inorganic fertilizers (DAP at planting, urea as topdress) based on RAB recommendations, rotate with legumes like soybean, use green manure cover crops during fallow, apply lime for acidity, avoid burning crop residues. In both regions, soil health is a long-term investment. Consistent practices over 3-5 years produce measurable improvements.",
     "crop": "both",
     "category": "soil",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "IITA Integrated Soil Fertility Management",
-    "confidence": 0.90
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC155 - Nutrient Management; IITA ISFM Manual, 2023",
+    "confidence": 0.91
+  },
+  {
+    "question": "How do I make compost for my farm?",
+    "answer": "Choose a shaded spot. Layer green materials (fresh plant waste, manure) with brown materials (dry maize stalks, leaves, straw) in alternating 10-15 cm layers. Add thin soil layers between. Keep moist like a wrung-out sponge. Cover with banana leaves or plastic. Turn every 2-3 weeks. Ready in 2-3 months when dark brown, crumbly, and earthy-smelling. Apply 5-10 tons/ha before planting. In Rwanda Eastern Province, compost is especially valuable because most soils are low in organic matter. Add wood ash for potassium. Avoid composting diseased plant material or weed seeds.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Organic Farming Guide for East Africa, 2022; RAB Composting Extension Brief, 2023",
+    "confidence": 0.89
+  },
+  {
+    "question": "How do I manage soil erosion on my farm in Rwanda Eastern Province?",
+    "answer": "Even though Eastern Province is less mountainous than other parts of Rwanda, erosion is still a concern on rolling hills of Kayonza, Ngoma, and Kirehe. Construct progressive terraces on slopes above 15 percent (radical terraces above 40 percent as required by law). Plant along contours. Maintain grass strips (vetiver, Napier grass) at 10-15 meter intervals. Mulch bare soil after harvest. Practice minimum tillage. Plant cover crops during fallow. Build water channels for runoff. Maintain vegetation on field borders. Contact district land management office for terrace construction support.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [
+      "gullies in field",
+      "exposed subsoil",
+      "declining yields over time"
+    ],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Soil Conservation Guide for Eastern Province, 2023; MINAGRI Land Husbandry Manual, 2022",
+    "confidence": 0.91
+  },
+  {
+    "question": "How do I manage waterlogging in my field?",
+    "answer": "Both maize and soybean are sensitive to waterlogging because roots need oxygen. Symptoms: yellowing, wilting despite wet soil, stunted growth, root rot. Maize survives brief flooding (24-48 hours) if growing point is above water. Soybean is more sensitive. In Nebraska, install tile drainage, construct surface channels, and use raised beds. In Rwanda Eastern Province, waterlogging occurs in marshland fields and clay soils during peak rainfall in Ngoma and Kirehe. Dig drainage channels, plant on ridges, avoid lowest field positions. Do not cultivate waterlogged soil as it causes compaction.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [
+      "yellow leaves",
+      "wilting",
+      "stunted growth",
+      "standing water",
+      "root rot"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative",
+      "flowering"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2270 - Managing Excess Water; IITA Water Management Guide, 2023",
+    "confidence": 0.91
+  },
+  {
+    "question": "What is soil compaction and how do I fix it?",
+    "answer": "Soil compaction occurs when soil particles are pressed together, reducing pore space for air and water. Causes include heavy machinery traffic (especially when soil is wet), repeated tillage at the same depth (plow pan), and animal trampling. Symptoms: poor root growth (roots grow sideways instead of down), water pooling on surface, stunted plants in wheel tracks. In Nebraska, use controlled traffic patterns, avoid field operations when soil is wet, deep-rip compacted layers every few years, and plant cover crops with deep tap roots (radishes, turnips). In Rwanda Eastern Province, compaction occurs from repeated hand-hoe tillage at shallow depth. Break hardpan with deep digging every 2-3 seasons, reduce tillage passes, and add organic matter.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [
+      "poor root growth",
+      "water pooling",
+      "stunted plants in tracks",
+      "hard soil surface"
+    ],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1896 - Soil Compaction; IITA Soil Physical Properties Guide, 2022",
+    "confidence": 0.88
+  },
+  {
+    "question": "What is cover cropping and how does it benefit my farm?",
+    "answer": "Cover crops are planted between main crop seasons to protect and improve soil. In Nebraska, cereal rye is the most common (planted after harvest, terminated before spring planting). Benefits: reduce erosion, improve organic matter, scavenge residual nitrogen, fix N (legume covers), suppress weeds, and improve water infiltration. In Rwanda Eastern Province, suitable covers include mucuna, lab lab, crotalaria, and cowpea. These legumes fix nitrogen and can be incorporated as green manure. In both regions, terminate cover crops at least 2 weeks before planting the main crop to avoid moisture competition.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting",
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC3038 - Cover Crops in Nebraska; IITA Green Manure Guide, 2023",
+    "confidence": 0.9
+  },
+  {
+    "question": "What is the importance of soil testing?",
+    "answer": "Soil testing tells you nutrient levels, pH, and organic matter content so you can apply the right fertilizer at the right rate. Without testing, farmers often under-apply or over-apply, wasting money and risking environmental damage. In Nebraska, submit samples to the UNL Soil Testing Lab or commercial labs. Sample every 4 years at 0-8 inches depth, collecting 15-20 cores across the field mixed into one composite sample. In Rwanda, submit to RAB district offices. Sample at 0-20 cm depth from 15-20 spots. Test every 2-3 years or when changing crops.",
+    "crop": "both",
+    "category": "soil",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1740 - Guidelines for Soil Sampling; RAB Soil Testing Guide, 2023",
+    "confidence": 0.89
+  },
+  {
+    "question": "When is the best time to plant maize in Rwanda Eastern Province?",
+    "answer": "Season A: mid-September to early October with the long rains. Season B: late February to mid-March with short rains. Eastern Province receives less rainfall (800-1000 mm/year), so timing is critical. Plant within the first 2-3 weeks of consistent rainfall. Late planting is especially risky because end of rains can be abrupt. For Bugesera and southern Nyagatare (driest areas), early planting with shorter-duration varieties is essential. Season C (June-September) possible only with irrigation in marshland areas.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Crop Calendar for Eastern Province, 2023; MINAGRI Seasonal Bulletin, 2024",
+    "confidence": 0.94
+  },
+  {
+    "question": "When should I plant corn in Nebraska?",
+    "answer": "Optimal dates: Eastern Nebraska April 15 - May 10 (sweet spot April 25 - May 5). Central Nebraska April 20 - May 15. Western Nebraska May 1 - May 20. Plant when soil at 4-inch depth is consistently above 50 degrees F for 3 days. Earlier planting generally produces higher yields but planting into cold wet soil risks seedling diseases and imbibitional chilling. Use seed treatments for early plantings. After May 15 in eastern Nebraska, yield drops about 1 bushel per acre per day of delay.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC132 - Corn Planting Guide for Nebraska, 2024",
+    "confidence": 0.94
+  },
+  {
+    "question": "What is the recommended maize spacing in Rwanda Eastern Province?",
+    "answer": "75 cm between rows and 25 cm between plants (53,000 plants/ha). For drier areas (Bugesera, southern Nyagatare), wider at 75 x 30 cm (44,000/ha) to reduce water competition. For irrigated or high-fertility marshland, closer at 75 x 20 cm (67,000/ha). Plant one seed per hole at 5-7 cm depth. RAB district agronomists can advise for your specific zone and variety.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Maize Production Guide for Eastern Province, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "What corn seeding rate should I use in Nebraska?",
+    "answer": "Irrigated eastern Nebraska 200+ bu/acre goal: 34,000-36,000 seeds/acre. Irrigated central: 32,000-34,000. Dryland eastern good moisture: 28,000-32,000. Dryland western/limited moisture: 22,000-26,000. Overplant by 5-10 percent for emergence losses. Use variable-rate seeding on variable soil types. Most seed companies provide hybrid-specific population recommendations. 30-inch rows are standard; 20-inch rows can increase yields 3-5 percent in some environments.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC132 - Corn Planting Guide; Nebraska On-Farm Research, 2024",
+    "confidence": 0.93
+  },
+  {
+    "question": "What maize varieties are recommended for Rwanda Eastern Province?",
+    "answer": "Need drought tolerance, early to medium maturity (90-110 days), and resistance to MSV and gray leaf spot. Recommended: RHM 104 and RHM 1407 (RAB hybrids), PAN series (good drought tolerance), ZM 607 (CIMMYT OPV, widely adapted). For driest zones (Bugesera, southern Kirehe), prioritize early maturity and drought tolerance. Buy certified seed from RAB-approved distributors. Do not save seed from hybrids. Consult RAB district agronomist for current recommendations.",
+    "crop": "maize",
+    "category": "variety",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Official Variety Catalogue, 2024; RAB Eastern Province Variety Trials, 2023",
+    "confidence": 0.88
+  },
+  {
+    "question": "What corn hybrids should I plant in Nebraska?",
+    "answer": "Select based on relative maturity (eastern 111-115 day, central 108-112, western 100-108), Bt traits for rootworm and above-ground insects, herbicide tolerance, drought tolerance traits, and disease resistance (gray leaf spot, Goss's wilt, NCLB ratings). Use UNL Variety Testing data at cropwatch.unl.edu. Plant 2-3 different hybrids to spread risk. For dryland, choose hybrids tested under dryland conditions.",
+    "crop": "maize",
+    "category": "variety",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension Nebraska Corn Hybrid Performance Data, 2024",
+    "confidence": 0.91
+  },
+  {
+    "question": "What causes poor germination in maize?",
+    "answer": "Poor seed quality (old, damaged), wrong planting depth (too deep >7cm, too shallow <3cm), cold soil (<10C, common in early Nebraska planting), hot soil (>35C, possible in Rwanda Eastern Province during dry periods), waterlogged soil (seed rot), soil-borne pathogens (Pythium, Fusarium), insect damage (wireworms, seed corn maggots), and insufficient moisture. Use certified seed less than one season old. Plant at 5-7 cm depth. Use treated seed. Do a ragdoll germination test before planting.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [
+      "uneven stand",
+      "missing plants",
+      "rotting seeds",
+      "slow emergence"
+    ],
+    "growth_stage": [
+      "planting",
+      "germination",
+      "emergence"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1953 - Corn Emergence Problems; CIMMYT Maize Production Manual, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "How do I prepare my land for planting maize?",
+    "answer": "Clear previous crop residues (incorporate rather than burn). Plough or dig to 20-25 cm depth to break hardpan. On slopes, prepare along contours to reduce erosion. Make furrows or ridges at 75 cm spacing. Apply lime if pH below 5.5 (2-4 weeks before planting). Apply basal fertilizer (DAP) at planting. In erosion-prone areas, maintain grass strips and terraces. Avoid preparation when soil is too wet as this causes compaction. In Nebraska, fall tillage or no-till are both effective depending on soil type.",
+    "crop": "maize",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "RAB Land Preparation Guide; UNL Extension Tillage Guide, 2023",
+    "confidence": 0.9
+  },
+  {
+    "question": "What are corn growth stages and why do they matter?",
+    "answer": "Vegetative: VE (emergence), V1-Vn (leaf collar count). Key stages: V6 (growing point above soil, side-dress N timing), V12 (ear size determined, avoid stress), VT (tassel). Reproductive: R1 (silk, pollination), R2 (blister), R3 (milk), R4 (dough), R5 (dent), R6 (maturity, black layer). Timing: side-dress N by V8, scout pests V6-VT, critical water V12-R3, fungicide decision VT-R1, harvest after R6. Same staging system applies in both Nebraska and Rwanda.",
+    "crop": "maize",
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "silking",
+      "grain fill",
+      "maturity"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2260 - Corn Growth and Development; CIMMYT Maize Production Guide, 2023",
+    "confidence": 0.92
   },
   {
     "question": "How can I improve soybean nodulation?",
-    "answer": "Use fresh, correctly-stored Bradyrhizobium inoculant applied to seed just before planting. Keep inoculated seed out of direct sun and heat. Plant within 24 hours of inoculation. Store inoculant in a cool, dark place (not above 30 degrees). For fields with no soybean history, inoculation is essential. Check nodulation 4-6 weeks after planting by digging up plants and examining roots — healthy nodules are pink or red inside (active nitrogen fixation), while green or white nodules are inactive. Apply phosphorus fertilizer (DAP) to support nodulation. Do not apply nitrogen fertilizer to soybean as it suppresses nodulation. Soil pH should be 5.5-7.0 for optimal nodulation.",
+    "answer": "Use fresh Bradyrhizobium japonicum inoculant applied to seed before planting. Keep inoculant refrigerated until use, do not expose inoculated seed to sunlight or heat above 35 degrees. Plant within 24 hours. For fields without previous soybean (common in Rwanda Eastern Province), inoculation is essential. Check at V2-V4 by digging plants — healthy nodules are pink or red inside. White or green nodules are inactive. Apply phosphorus (DAP) to support nodulation. Do NOT apply nitrogen fertilizer to soybean. Maintain pH 5.5-7.0. In Nebraska, inoculate for first-time soybean fields or after 5+ years without soybean.",
     "crop": "soybean",
     "category": "soil",
-    "symptoms": ["poor growth", "yellow plants", "few or no nodules", "white or green nodules"],
-    "growth_stage": ["planting", "vegetative", "V2-V4"],
-    "region": "East Africa",
-    "source": "IITA Soybean Production Guide",
+    "symptoms": [
+      "poor growth",
+      "yellow plants",
+      "few or no nodules",
+      "white or green nodules"
+    ],
+    "growth_stage": [
+      "planting",
+      "vegetative",
+      "V2-V4"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2014 - Soybean Inoculation; IITA Soybean Production Guide, 2023",
     "confidence": 0.94
   },
   {
     "question": "What is soybean rust and how do I manage it?",
-    "answer": "Soybean rust (caused by Phakopsora pachyrhizi) is the most destructive soybean disease in East Africa. Symptoms begin as small, gray-green spots on lower leaves that turn tan to dark brown with pustules on the underside. Severely infected leaves turn yellow and drop prematurely, leading to pod abortion and yield losses of 10-80 percent. The disease spreads rapidly in warm, humid conditions. Manage by planting early to avoid peak disease pressure, using fungicides applied at R3 (beginning pod) and repeated 14-21 days later if conditions persist, planting resistant or tolerant varieties, and avoiding late planting.",
+    "answer": "Soybean rust (Phakopsora pachyrhizi) is the most destructive soybean disease in East Africa. Small gray-green spots on lower leaves turn tan to dark brown with pustules on leaf underside. Can cause 10-80 percent yield loss. Spreads rapidly in warm (18-28C), humid conditions. In Rwanda Eastern Province, major constraint in Season A. Plant early, apply fungicides (tebuconazole) at R3 and repeat 14-21 days later, plant tolerant varieties, avoid late planting. In Nebraska, not established due to cold winters but monitored through USDA Sentinel Plot Network.",
     "crop": "soybean",
     "category": "disease",
-    "symptoms": ["gray-green spots on lower leaves", "tan to brown lesions", "pustules on leaf underside", "premature defoliation", "pod abortion"],
-    "growth_stage": ["flowering", "pod fill", "R3-R6"],
-    "region": "East Africa",
-    "source": "IITA Soybean Disease Guide",
+    "symptoms": [
+      "gray-green spots on lower leaves",
+      "tan to brown lesions",
+      "pustules on leaf underside",
+      "premature defoliation"
+    ],
+    "growth_stage": [
+      "flowering",
+      "pod fill",
+      "R3-R6"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Soybean Disease Guide, 2023; USDA APHIS Soybean Rust Information, 2024",
     "confidence": 0.93
   },
   {
-    "question": "How do I manage soybean pod borers?",
-    "answer": "Soybean pod borers (Maruca vitrata) lay eggs on flowers and developing pods. Larvae bore into pods and feed on seeds, causing direct yield loss and secondary infection by fungi. Control by scouting during flowering (shake plants over a white cloth to check for larvae), removing and destroying infested pods, applying approved insecticides at early pod fill when threshold is exceeded, using early-maturing varieties that escape peak pod borer pressure, and maintaining field hygiene by removing crop residues after harvest.",
+    "question": "What is sudden death syndrome in soybeans?",
+    "answer": "SDS (Fusarium virguliforme) causes interveinal chlorosis on upper leaves that progresses to necrosis while veins remain green. Leaflets drop but petioles stay attached. Root cortex is gray-brown but pith remains white (unlike brown stem rot). Favored by cool wet early season then warm wet during flowering. In Nebraska, most common in eastern counties with heavier soils and high SCN populations. Plant resistant varieties, manage SCN, delay planting slightly, improve drainage, avoid compaction. Not a significant issue in Rwanda.",
+    "crop": "soybean",
+    "category": "disease",
+    "symptoms": [
+      "interveinal yellowing on upper leaves",
+      "interveinal necrosis",
+      "veins remain green",
+      "leaf drop but petioles attached"
+    ],
+    "growth_stage": [
+      "flowering",
+      "pod fill",
+      "R3-R6"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G2243 - Sudden Death Syndrome of Soybean, 2024",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is soybean cyst nematode and how do I manage it?",
+    "answer": "SCN (Heterodera glycines) is the number one yield-reducing pathogen of soybeans in the US. Can cause 15-30 percent yield loss without visible symptoms. When symptoms appear: stunted plants in patches, yellowing, poor canopy. Check roots for tiny white-yellow lemon-shaped females. In Nebraska, found in most soybean counties. Rotate with corn for 1-2 years, plant SCN-resistant varieties (diversify sources as PI 88788 resistance is weakening), consider nematicide seed treatments in high-pressure fields, and test soil for egg counts. Not yet a major issue in Rwanda.",
     "crop": "soybean",
     "category": "pest",
-    "symptoms": ["holes in pods", "damaged seeds", "webbing on flowers", "larvae inside pods"],
-    "growth_stage": ["flowering", "pod fill", "R3-R6"],
-    "region": "East Africa",
-    "source": "IITA Soybean Pest Management",
-    "confidence": 0.90
+    "symptoms": [
+      "stunted plants in patches",
+      "yellowing",
+      "poor canopy closure",
+      "white cysts on roots"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "flowering",
+      "pod fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1383 - Soybean Cyst Nematode Management; Nebraska SCN Coalition, 2024",
+    "confidence": 0.94
+  },
+  {
+    "question": "How do I manage soybean pod borers in Rwanda?",
+    "answer": "Maruca vitrata lays eggs on flowers and developing pods. Larvae bore into pods and feed on seeds. In Eastern Province, pressure is moderate to high in Season A. Scout during flowering: shake plants over a white cloth. Apply insecticides at early pod fill when 2+ larvae per meter of row. Time sprays in evening for pollinator safety. Use early-maturing varieties. Remove crop residues after harvest. Rotate with maize.",
+    "crop": "soybean",
+    "category": "pest",
+    "symptoms": [
+      "holes in pods",
+      "damaged seeds",
+      "webbing on flowers",
+      "larvae inside pods"
+    ],
+    "growth_stage": [
+      "flowering",
+      "pod fill",
+      "R3-R6"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Soybean Pest Management Guide, 2022; RAB Extension Brief, 2023",
+    "confidence": 0.9
   },
   {
     "question": "What causes yellowing in soybean leaves?",
-    "answer": "Soybean leaf yellowing can be caused by several factors: nitrogen deficiency (poor nodulation — check root nodules), iron deficiency chlorosis (interveinal yellowing on new leaves, common in high-pH soils), soybean rust (brown spots with yellowing), bacterial blight (angular water-soaked lesions that turn brown), sudden death syndrome (interveinal yellowing and necrosis while veins stay green), waterlogging (general yellowing from oxygen stress), and natural senescence (lower leaves yellow during pod fill as the plant remobilizes nutrients). Dig up a plant and check nodules first — poor nodulation is the most common cause of soybean yellowing in East Africa.",
+    "answer": "Most common cause in Rwanda: poor nodulation (check roots for pink nodules). Other causes: iron deficiency chlorosis (interveinal yellowing on new leaves, high-pH soils in Nebraska), soybean rust (brown spots, Rwanda), sudden death syndrome (veins stay green, Nebraska), waterlogging (general yellowing), potassium deficiency (leaf edges), and natural senescence during pod fill. First action in Rwanda: dig up plants and examine nodules. First action in Nebraska: check for IDC pattern on new leaves.",
     "crop": "soybean",
     "category": "general",
-    "symptoms": ["yellow leaves", "interveinal yellowing", "lower leaves yellow", "stunted plants"],
-    "growth_stage": ["vegetative", "flowering", "pod fill"],
-    "region": "East Africa",
-    "source": "IITA Soybean Diagnostic Guide",
-    "confidence": 0.90
-  },
-  {
-    "question": "When should I plant soybean in Rwanda?",
-    "answer": "In Rwanda, soybean is planted in Season A (September-October) and Season B (February-March). Soybean needs adequate moisture for germination and flowering but does not tolerate waterlogging. Plant when rains are established (after 2-3 good rains) but early enough that pod fill does not coincide with the end of rains. In high-altitude areas above 1500m, Season A is generally preferred. Soybean matures in 90-120 days depending on variety and altitude.",
-    "crop": "soybean",
-    "category": "planting",
-    "symptoms": [],
-    "growth_stage": ["pre-planting", "planting"],
-    "region": "Rwanda",
-    "source": "Rwanda Agriculture Board Crop Calendar",
-    "confidence": 0.92
-  },
-  {
-    "question": "What is the recommended soybean spacing?",
-    "answer": "Recommended soybean spacing in East Africa is 50 cm between rows and 5-7 cm between plants within the row, giving approximately 285,000-400,000 plants per hectare. For hand planting, space rows 50 cm apart and plant 2 seeds every 10 cm, then thin to one plant per 5-7 cm after emergence. Deeper row spacing (60 cm) is used if mechanical weeding is planned. Plant seeds at 3-5 cm depth. Too-deep planting causes poor emergence, especially in heavy soils.",
-    "crop": "soybean",
-    "category": "planting",
-    "symptoms": [],
-    "growth_stage": ["planting"],
-    "region": "East Africa",
-    "source": "IITA Soybean Production Guide",
+    "symptoms": [
+      "yellow leaves",
+      "interveinal yellowing",
+      "lower leaves yellow",
+      "stunted plants"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "flowering",
+      "pod fill"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2261 - Soybean Disease Identification; IITA Soybean Diagnostic Guide, 2023",
     "confidence": 0.91
   },
   {
-    "question": "How do I know when soybean is ready to harvest?",
-    "answer": "Soybean is ready for harvest when 95 percent of pods have turned brown, leaves have dropped, stems are dry, and seeds rattle inside the pods when shaken. Grain moisture should be around 14-16 percent at harvest. Do not wait too long because over-mature soybean pods shatter easily, spilling seeds on the ground. Harvest in the morning when pods are slightly damp to reduce shattering. Cut plants at the base or pull entire plants. Thresh by beating pods on a mat or using a mechanical thresher. Dry seeds to 12 percent moisture for safe storage.",
+    "question": "When should I plant soybean in Rwanda Eastern Province?",
+    "answer": "Season A: mid-September to early October. Season B: late February to mid-March. Plant when rains are established (after 2-3 good rains) but early enough that pod fill doesn't coincide with end of rains. In drier zones (Bugesera, southern Kirehe, southern Nyagatare), Season A is preferred. Use early-maturing varieties (90-100 days) in driest zones. Plant immediately after land preparation. Even one week delay can reduce yields significantly.",
     "crop": "soybean",
-    "category": "harvest",
+    "category": "planting",
     "symptoms": [],
-    "growth_stage": ["maturity", "harvest"],
-    "region": "East Africa",
-    "source": "IITA Soybean Production Guide",
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Crop Calendar for Eastern Province, 2023; IITA Soybean Planting Guide, 2022",
     "confidence": 0.92
   },
   {
-    "question": "How do I store soybean grain safely?",
-    "answer": "Dry soybean to 12 percent moisture content before storage. Store in clean, dry containers or hermetic bags. Soybean is less susceptible to storage insects than maize but can be damaged by bruchids in some areas. Keep storage areas clean and free of old grain residue. For seed to be used for planting, store in cool, dry conditions and use within one planting season as soybean seed viability declines quickly in tropical storage conditions. Do not store soybean near chemicals or strong-smelling products as the grain absorbs odors.",
+    "question": "When should I plant soybeans in Nebraska?",
+    "answer": "Optimal: Eastern May 1-25, Central May 5-30, Western May 10-June 5. Plant when soil at 2 inches is above 50F consistently. Earlier planting generally produces higher yields. Before May 1 increases Phytophthora and frost risk. After June 1, yield drops 0.3-0.5 bu/acre per day. Use treated seed for early plantings. 15-inch or drilled rows produce 3-7 percent more than 30-inch rows.",
     "crop": "soybean",
-    "category": "storage",
+    "category": "planting",
     "symptoms": [],
-    "growth_stage": ["post-harvest"],
-    "region": "East Africa",
-    "source": "IITA Soybean Post-Harvest Guide",
-    "confidence": 0.89
+    "growth_stage": [
+      "pre-planting",
+      "planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC130 - Soybean Planting Guide for Nebraska, 2024",
+    "confidence": 0.93
   },
   {
-    "question": "What are the benefits of growing soybean?",
-    "answer": "Soybean provides multiple benefits for smallholder farmers. It fixes atmospheric nitrogen through root nodules, improving soil fertility for subsequent crops (30-60 kg N/ha residual). Soybean grain is high in protein (36-40 percent) and oil (18-20 percent), providing nutrition and income. It breaks maize pest and disease cycles when used in rotation. Soybean processing creates value-added products like soymilk, tofu, and animal feed. Market demand for soybean in East Africa is growing due to poultry feed industry expansion.",
+    "question": "What is the recommended soybean spacing in Rwanda Eastern Province?",
+    "answer": "50 cm between rows, 5-7 cm between plants (285,000-400,000 plants/ha). Plant 2 seeds every 10 cm, thin after emergence. In drier zones (Bugesera, southern Nyagatare), 60 cm rows can reduce moisture competition. Plant at 3-5 cm depth, not deeper. Inoculate all seed with Bradyrhizobium. Use 80-100 kg seed per hectare.",
     "crop": "soybean",
-    "category": "general",
+    "category": "planting",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "IITA Soybean Promotion Guide",
-    "confidence": 0.90
+    "growth_stage": [
+      "planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Soybean Production Guide, 2023; RAB Eastern Province Extension Brief, 2023",
+    "confidence": 0.91
   },
   {
-    "question": "What soybean varieties are recommended for Rwanda?",
-    "answer": "Recommended soybean varieties for Rwanda include SB24 (medium maturity, good yield, widely adapted), Sequel (early maturity, good for Season B), and Peka 6 (high protein content). For highland areas, choose varieties adapted to cooler temperatures and shorter day lengths. Always use certified seed from approved sources. Inoculate seed with Bradyrhizobium inoculant before planting, especially in fields without recent soybean history. Contact RAB district agronomists for updated variety recommendations for your specific zone.",
+    "question": "What soybean seeding rate should I use in Nebraska?",
+    "answer": "Plant 120,000-140,000 seeds/acre for 30-inch rows, 130,000-150,000 for 15-inch or drilled rows. Target final stands of 100,000-120,000 plants/acre. Higher rates provide minimal yield benefit but increase cost. For late planting (after June 1), increase rate 10-15 percent. For double-crop after wheat, plant 150,000-170,000 in narrow rows. Row spacing of 15 inches or drilled produces 3-7 percent higher yields than 30-inch rows.",
+    "crop": "soybean",
+    "category": "planting",
+    "symptoms": [],
+    "growth_stage": [
+      "planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension EC130 - Soybean Management Guide; Nebraska On-Farm Research, 2024",
+    "confidence": 0.92
+  },
+  {
+    "question": "What soybean varieties are recommended for Rwanda Eastern Province?",
+    "answer": "Need medium to early maturity (90-110 days), pod shattering resistance, high protein, and drought tolerance. Recommended: SB24 (medium maturity, widely adapted, IITA/RAB release), Sequel (early, good for Season B and dry zones), Peka 6 (high protein), SC Saga (promiscuous nodulation). For driest zones, use varieties under 100 days maturity. Always inoculate seed. Buy certified seed from RAB-approved distributors.",
     "crop": "soybean",
     "category": "variety",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "Rwanda",
-    "source": "Rwanda Agriculture Board Soybean Guide",
-    "confidence": 0.87
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB Official Variety Catalogue, 2024; IITA Soybean Variety Trials, 2023",
+    "confidence": 0.88
   },
   {
-    "question": "My soybean plants are stunted and yellow. What could be wrong?",
-    "answer": "Stunted, yellow soybean plants are most commonly caused by poor nodulation (check roots for pink nodules — white or absent nodules mean nitrogen fixation is not happening). Other causes include waterlogging (check if soil is saturated), soil acidity (pH below 5.0 causes aluminum toxicity), phosphorus deficiency, nematode damage (check roots for galls or lesions), and soybean cyst nematode. First action: dig up 2-3 plants and examine roots. If no pink nodules, the issue is likely inoculation failure. Re-inoculate and ensure proper seed-inoculant contact. If roots look damaged or have galls, it may be nematodes — rotate with maize for 2-3 seasons.",
+    "question": "What soybean varieties should I plant in Nebraska?",
+    "answer": "Select maturity group by region: eastern MG 2.8-3.5, central 2.5-3.2, western 2.0-2.8. Key traits: SCN resistance (essential, diversify sources), Phytophthora resistance, SDS tolerance, IDC tolerance (critical for calcareous soils), herbicide system, white mold tolerance, frogeye leaf spot resistance. Use Nebraska Soybean Variety Testing data at cropwatch.unl.edu. Plant 3-4 varieties to diversify risk.",
+    "crop": "soybean",
+    "category": "variety",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension Nebraska Soybean Variety Testing Data, 2024",
+    "confidence": 0.91
+  },
+  {
+    "question": "What are soybean growth stages and why do they matter?",
+    "answer": "Vegetative: VE (emergence), VC (cotyledon), V1-Vn (trifoliolate nodes). Reproductive: R1 (beginning bloom), R2 (full bloom), R3 (beginning pod), R4 (full pod), R5 (beginning seed), R6 (full seed), R7 (beginning maturity, one brown pod), R8 (full maturity, 95 percent brown pods). Timing: herbicide before V3, scout pests R1-R3, fungicide at R3 if needed, harvest at R8 when moisture is 13-15 percent. Same system applies in both regions.",
     "crop": "soybean",
     "category": "general",
-    "symptoms": ["stunted plants", "yellow soybean", "poor growth", "no nodules"],
-    "growth_stage": ["vegetative", "V2-V6"],
-    "region": "East Africa",
-    "source": "IITA Soybean Diagnostic Guide",
+    "symptoms": [],
+    "growth_stage": [
+      "vegetative",
+      "flowering",
+      "pod fill",
+      "maturity"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2264 - Soybean Growth and Development; IITA Soybean Guide, 2023",
+    "confidence": 0.91
+  },
+  {
+    "question": "How do I manage Phytophthora root rot in soybeans?",
+    "answer": "Phytophthora sojae causes damping-off of seedlings and chocolate-brown stem lesions extending up from soil. Most significant in poorly drained, heavy clay soils. In Nebraska, found across soybean-producing counties. Plant varieties with matching Rps resistance genes, use mefenoxam/metalaxyl seed treatments, improve drainage, reduce compaction, avoid wet-field planting, and rotate crops. Check UNL for current predominant pathotypes.",
+    "crop": "soybean",
+    "category": "disease",
+    "symptoms": [
+      "damping off",
+      "brown stem lesions from soil line",
+      "wilting in wet areas",
+      "dead seedlings in patches"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative",
+      "reproductive"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1785 - Phytophthora Root and Stem Rot of Soybean, 2024",
     "confidence": 0.92
   },
   {
-    "question": "How do I manage bacterial blight in soybean?",
-    "answer": "Bacterial blight (caused by Pseudomonas savastanoi pv. glycinea) produces small, angular, water-soaked spots on leaves that turn brown with yellow halos. Infected leaves may tear in the wind, giving a ragged appearance. The disease is favored by cool, wet weather and spreads through rain splash. Management includes planting resistant varieties, using certified disease-free seed, avoiding working in fields when leaves are wet, rotating with non-host crops (maize, cereals) for at least 2 years, and removing crop debris after harvest.",
+    "question": "How do I manage white mold (Sclerotinia) in soybeans?",
+    "answer": "White cottony mycelium on stems at lower nodes, bleached stems, black sclerotia inside stems, premature death. Favored by cool temperatures (below 85F) and high canopy humidity. In Nebraska, most common in northeastern counties and irrigated fields. Plant partially resistant varieties, use wider rows (30 inch), avoid excessive populations, rotate with non-hosts for 2-3 years, apply fungicide at R1-R2 in high-risk fields, and avoid over-irrigation during flowering. Not significant in Rwanda due to warm temperatures.",
     "crop": "soybean",
     "category": "disease",
-    "symptoms": ["angular brown spots", "water-soaked lesions", "yellow halos on spots", "ragged leaf edges"],
-    "growth_stage": ["vegetative", "flowering"],
-    "region": "East Africa",
-    "source": "IITA Soybean Disease Guide",
+    "symptoms": [
+      "white cottony mold on stems",
+      "bleached stems",
+      "black sclerotia",
+      "premature plant death"
+    ],
+    "growth_stage": [
+      "flowering",
+      "pod fill",
+      "R1-R4"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1786 - White Mold of Soybean, 2024",
+    "confidence": 0.91
+  },
+  {
+    "question": "How do I manage frogeye leaf spot in soybeans?",
+    "answer": "Cercospora sojina produces circular gray-centered lesions with dark reddish-brown borders (frog-eye shaped), 3-5 mm diameter. Favored by warm (25-30C) humid conditions. Some strains resistant to strobilurin fungicides in Nebraska, so use triazole or premix fungicides. Plant resistant varieties, rotate with corn, apply fungicide at R3-R4 if present, use certified disease-free seed, and till residue. Occurs in both Nebraska and Rwanda during humid conditions.",
+    "crop": "soybean",
+    "category": "disease",
+    "symptoms": [
+      "circular gray spots with dark borders",
+      "frog-eye-shaped lesions",
+      "premature defoliation"
+    ],
+    "growth_stage": [
+      "flowering",
+      "pod fill",
+      "R3-R6"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2244 - Frogeye Leaf Spot; IITA Soybean Disease Guide, 2023",
+    "confidence": 0.9
+  },
+  {
+    "question": "How do I manage soybean iron deficiency chlorosis in Nebraska?",
+    "answer": "IDC causes interveinal yellowing on newest trifoliolates while veins stay green. In severe cases, leaves turn almost white. Not caused by low soil iron but by inability to extract iron from high-pH soils. Contributing factors: wet cool soils, high salts, high bicarbonate. Plant IDC-tolerant varieties (most important), apply iron chelate (EDDHA) in-furrow, add companion crop (oats at 0.5-1 bu/acre), improve drainage, and avoid excessive early N. Selection of IDC-tolerant varieties saves more money than any other practice.",
+    "crop": "soybean",
+    "category": "nutrient_deficiency",
+    "symptoms": [
+      "interveinal yellowing on new leaves",
+      "veins remain green",
+      "white leaves in severe cases",
+      "stunted plants"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V1-V4"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G2261 - Iron Deficiency Chlorosis in Soybean, 2024",
+    "confidence": 0.93
+  },
+  {
+    "question": "How do I manage soybean aphids in Nebraska?",
+    "answer": "Soybean aphid (Aphis glycines) — small yellow-green insects on leaf undersides. Economic threshold: 250 aphids per plant on 80 percent of plants with populations increasing. Below threshold, natural enemies control populations. Avoid treating below threshold. Use lambda-cyhalothrin, chlorpyrifos, or dimethoate when needed. Aphid-resistant varieties (Rag genes) available. Peak populations late July through August. Scout weekly during this period.",
+    "crop": "soybean",
+    "category": "pest",
+    "symptoms": [
+      "curled leaves",
+      "sticky honeydew",
+      "sooty mold",
+      "stunted plants",
+      "clusters of yellow-green insects"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "flowering",
+      "pod fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G2089 - Soybean Aphid Management, 2024",
+    "confidence": 0.93
+  },
+  {
+    "question": "How do I manage stink bugs on soybeans?",
+    "answer": "Green, brown, and brown marmorated stink bugs puncture pods with needle-like mouthparts. Causes flat, discolored, shriveled seeds and delayed pod maturity. In Nebraska, scout with sweep net or beat sheet. Treat when 5+ stink bugs per 15 sweeps during R3-R6. Use bifenthrin or lambda-cyhalothrin. BMSB expanding westward. In Rwanda Eastern Province, hand-pick on small plots or use approved insecticides when heavy. Harvest promptly to avoid late-season buildup.",
+    "crop": "soybean",
+    "category": "pest",
+    "symptoms": [
+      "flat shriveled seeds",
+      "punctured pods",
+      "stay-green pods",
+      "discolored seeds"
+    ],
+    "growth_stage": [
+      "pod fill",
+      "R4-R7"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2094 - Stink Bug Management; IITA Soybean Pest Guide, 2022",
+    "confidence": 0.9
+  },
+  {
+    "question": "How do I manage bean leaf beetle in soybeans?",
+    "answer": "Small beetles (6mm), variable color with black spots and black triangle behind head. Cause round holes in leaves and pods. Transmit bean pod mottle virus. Treat seedlings if defoliation exceeds 50 percent. Treat during pod fill if defoliation exceeds 20 percent or pod feeding exceeds 10 percent. Use lambda-cyhalothrin or bifenthrin. Early-planted soybeans attract higher populations. Populations vary year-to-year with winter severity in Nebraska.",
+    "crop": "soybean",
+    "category": "pest",
+    "symptoms": [
+      "round holes in leaves",
+      "holes in pods",
+      "defoliation",
+      "pod scarring"
+    ],
+    "growth_stage": [
+      "seedling",
+      "vegetative",
+      "pod fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1655 - Bean Leaf Beetle Management, 2024",
+    "confidence": 0.9
+  },
+  {
+    "question": "How do I know when my maize is ready to harvest?",
+    "answer": "Physiological maturity is indicated by black layer at kernel base, brown dry husks, and grain moisture around 25-30 percent. In Nebraska, most corn is harvested at 15-20 percent moisture and dried artificially. Optimal harvest moisture for minimum field loss is 20-24 percent. In Rwanda Eastern Province, harvest at physiological maturity and field-dry to 13 percent moisture. Delayed harvest increases ear rot, aflatoxin (critical in hot Eastern Province climate), bird damage, and theft. Harvest promptly and dry quickly.",
+    "crop": "maize",
+    "category": "harvest",
+    "symptoms": [],
+    "growth_stage": [
+      "maturity",
+      "harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1850 - Corn Harvest Management; IITA Maize Production Guide, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "How do I store maize grain safely?",
+    "answer": "In Nebraska, dry to 15 percent for short-term or 13 percent for long-term storage. Monitor temperature and moisture with probes. Aerate when outside temp is 10-15 degrees cooler than grain. In Rwanda Eastern Province, dry to 13 percent (bite test: kernel cracks cleanly). Store in hermetic PICS bags, metal silos, or sealed drums. If using traditional bags, treat with Actellic Super Dust. Store off floor on pallets. Check monthly. Never mix new with old grain.",
+    "crop": "maize",
+    "category": "storage",
+    "symptoms": [],
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension G1849 - Grain Storage; IITA Post-Harvest Loss Prevention Guide, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "What is aflatoxin and why is it dangerous?",
+    "answer": "Aflatoxin is a toxic, cancer-causing substance from Aspergillus fungi that infect maize ears and stored grain. Major concern in Rwanda Eastern Province because the warm climate favors Aspergillus. Invisible at low levels but causes liver damage, immune suppression, stunted growth in children, and cancer. Prevention: harvest promptly, dry quickly below 13 percent within 48 hours, do not mix moldy grain with clean grain, store in airtight containers, control ear-boring insects, sort and remove damaged kernels, discard grain with green-gray mold. Biocontrol (Aflasafe) can reduce aflatoxin by 80 percent.",
+    "crop": "maize",
+    "category": "storage",
+    "symptoms": [
+      "green-gray mold on ears",
+      "discolored kernels",
+      "musty smell in stored grain"
+    ],
+    "growth_stage": [
+      "grain fill",
+      "post-harvest",
+      "storage"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Aflatoxin Prevention Guide, 2023; PACA Aflatoxin Country Brief - Rwanda, 2022",
+    "confidence": 0.94
+  },
+  {
+    "question": "How do I know when soybean is ready to harvest?",
+    "answer": "R8 stage: 95 percent of pods brown, leaves dropped, stems dry, seeds rattle in pods. In Nebraska, harvest at 13-14 percent moisture. Adjust combine carefully: reduce cylinder speed, increase concave clearance, use flex or draper header close to ground. Loss exceeding 1 percent (1 bean per sq ft) indicates adjustment needed. In Rwanda Eastern Province, harvest when pods are brown and seeds rattle. Harvest in morning when slightly damp to reduce shattering. Dry to 12 percent for storage.",
+    "crop": "soybean",
+    "category": "harvest",
+    "symptoms": [],
+    "growth_stage": [
+      "maturity",
+      "harvest",
+      "R8"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2048 - Soybean Harvest Management; IITA Soybean Guide, 2023",
+    "confidence": 0.93
+  },
+  {
+    "question": "How do I store soybean grain safely?",
+    "answer": "Dry to 12 percent moisture before storage. Store in clean, dry containers or hermetic bags. Soybean is less susceptible to storage insects than maize but can be damaged by bruchids. Keep storage clean and free of old grain residue. For seed to be planted, store in cool dry conditions and use within one season as soybean seed viability declines quickly in tropical storage. Do not store near chemicals or strong-smelling products.",
+    "crop": "soybean",
+    "category": "storage",
+    "symptoms": [],
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "IITA Soybean Post-Harvest Guide, 2023; UNL Extension Soybean Storage, 2024",
     "confidence": 0.89
   },
   {
-    "question": "What is soybean root rot and how do I manage it?",
-    "answer": "Soybean root rot can be caused by Phytophthora, Fusarium, or Rhizoctonia fungi. Symptoms include wilting despite adequate soil moisture, brown discoloration of roots and lower stems, stunted growth, and plant death in patches. Phytophthora root rot is most severe in poorly drained, heavy clay soils. Management includes improving soil drainage, avoiding waterlogged fields, rotating with non-host crops for 2-3 years, planting varieties with root rot resistance, and avoiding soil compaction. Seed treatment with appropriate fungicides helps protect against seedling root rot.",
+    "question": "What is the best way to dry maize after harvest in Rwanda Eastern Province?",
+    "answer": "Shell within a few days (delaying shelling increases aflatoxin in warm conditions). Spread kernels 5-7 cm deep on clean raised platform or tarpaulin. Never dry on bare soil. Stir regularly. Protect from rain. In Eastern Province sun, drying takes 3-5 days. Grain is ready when it snaps sharply when bitten (13 percent moisture). Construct raised drying platforms with wire mesh floors for better air circulation. The salt test: grain in jar with salt, shake, if salt sticks to grain it is still too wet.",
+    "crop": "maize",
+    "category": "harvest",
+    "symptoms": [],
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Post-Harvest Handling Guide, 2023; RAB Post-Harvest Extension Brief, 2022",
+    "confidence": 0.93
+  },
+  {
+    "question": "How do I manage weeds in maize?",
+    "answer": "Critical weed-free period: first 6-8 weeks. In Nebraska, standard: pre-emergence herbicide (atrazine + S-metolachlor) at planting, then post-emergence (glyphosate for RR, glufosinate for LL) at V4-V6. For resistant weeds (Palmer amaranth, waterhemp, kochia), use multiple sites of action. In Rwanda Eastern Province, hand weed at 2-3 and 5-6 weeks, or use pre-emergence herbicide plus one hand weeding. For Striga, use resistant varieties, crop rotation with soybean, and maintain fertility. Keep weed-free until knee height.",
+    "crop": "maize",
+    "category": "weed",
+    "symptoms": [
+      "stunted growth",
+      "thin stand",
+      "yellow maize near weeds"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V2-V8"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC130 - Weed Management in Corn; IITA Weed Guide, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "How do I manage weeds in soybeans?",
+    "answer": "In Nebraska, integrated management: pre-emergence (sulfentrazone, flumioxazin, metribuzin + S-metolachlor) at planting, then post-emergence at V2-V4. Never rely on single herbicide mode of action. Palmer amaranth and waterhemp are top challenges. In Rwanda Eastern Province, hand weed at 2 and 5 weeks, maintain narrow rows (50 cm) for faster canopy closure. Crop rotation helps break weed cycles. Cover crops before soybeans can suppress early-season weeds in Nebraska.",
     "crop": "soybean",
-    "category": "disease",
-    "symptoms": ["wilting", "brown roots", "stem discoloration", "plant death in patches", "stunted growth"],
-    "growth_stage": ["seedling", "vegetative"],
-    "region": "East Africa",
-    "source": "IITA Soybean Disease Guide",
-    "confidence": 0.90
+    "category": "weed",
+    "symptoms": [
+      "stunted soybean",
+      "thin stand",
+      "weed competition",
+      "poor canopy closure"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "V1-V6"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC130 - Weed Management in Soybeans; IITA Soybean Weed Guide, 2023",
+    "confidence": 0.91
+  },
+  {
+    "question": "What is Striga and how do I control it?",
+    "answer": "Striga (witchweed) is a parasitic weed that attaches to maize roots and steals water and nutrients. Symptoms: stunting, wilting, yellowing, and plant death. Purple or pink flowers appear after damage is already done. Thrives in low-fertility acidic soils. In Rwanda Eastern Province, Striga occurs in some areas. Control: use Imazapyr-resistant maize varieties, intercrop with Desmodium, apply nitrogen and phosphorus fertilizer, rotate with trap crops like soybean, and hand-pull before flowering. Does not occur in Nebraska.",
+    "crop": "maize",
+    "category": "weed",
+    "symptoms": [
+      "stunted plants",
+      "wilting despite adequate moisture",
+      "purple flowers near maize base",
+      "yellowing"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "reproductive"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Striga Control Guide for East Africa, 2023",
+    "confidence": 0.93
   },
   {
     "question": "Why are maize and soybean rotated together?",
-    "answer": "Maize-soybean rotation is one of the most beneficial cropping systems for smallholder farmers. Benefits include: soybean fixes atmospheric nitrogen (30-60 kg N/ha residual benefit for following maize), rotation breaks pest and disease cycles for both crops (fall armyworm, stalk borers, gray leaf spot in maize; soybean cyst nematode in soybean), improved soil structure from soybean root systems, diversified income sources, and reduced weed pressure (different crops compete with different weed species). A typical rotation is maize in Season A followed by soybean in Season B, or alternating maize and soybean each season.",
+    "answer": "Soybean fixes nitrogen (40-60 lb/acre residual for following maize), rotation breaks pest cycles (corn rootworm in Nebraska, stalk borers in Rwanda), different roots improve soil structure, weed management is easier, and income is diversified. In Nebraska, practiced on 80 percent of cropland. First-year corn after soybean yields 10-15 percent more than continuous corn. In Rwanda Eastern Province, strongly promoted by RAB for food security, soil fertility, and income.",
     "crop": "both",
     "category": "general",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "IITA Crop Rotation Guide",
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2260 - Crop Rotation Benefits; IITA Crop Rotation Guide, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "How do I manage drought stress in maize?",
+    "answer": "Most vulnerable during tasseling and silking. Signs: leaf rolling, gray-green color, delayed silking, poor kernel set. In Nebraska, irrigate V12 through early grain fill, select drought-tolerant hybrids, avoid excessive dryland populations (22,000-26,000/acre), use no-till. In Rwanda Eastern Province (800-1000 mm/year), plant at onset of rains, use early-maturing drought-tolerant varieties, practice tied ridging, mulch to reduce evaporation, and avoid excessive plant density. Do not apply nitrogen to drought-stressed plants.",
+    "crop": "maize",
+    "category": "general",
+    "symptoms": [
+      "leaf rolling",
+      "gray-green leaves",
+      "delayed silking",
+      "wilting",
+      "poor kernel set"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "silking"
+    ],
+    "region": "both",
+    "source": "UNL Extension G2233 - Drought and Corn; CIMMYT Drought Management Brief, 2023",
+    "confidence": 0.92
+  },
+  {
+    "question": "My maize plants are falling over. What causes lodging?",
+    "answer": "Caused by weak stalks (stalk rot fungi, potassium deficiency), high plant density, stalk borer damage, strong winds during grain fill, and shallow roots in compacted soils. Prevent with adequate potassium, recommended density, stalk borer control, prompt harvest, and good standability varieties. Root lodging from compacted or waterlogged soils. Test for stalk rot by pinching stalks at lowest internode after R5. Harvest early if more than 10 percent of stalks crush easily.",
+    "crop": "maize",
+    "category": "general",
+    "symptoms": [
+      "plants falling over",
+      "broken stalks",
+      "plants leaning",
+      "root exposure"
+    ],
+    "growth_stage": [
+      "grain fill",
+      "maturity"
+    ],
+    "region": "both",
+    "source": "CIMMYT Maize Agronomy Guide; UNL Extension G1902 - Corn Stalk Rots, 2023",
+    "confidence": 0.9
+  },
+  {
+    "question": "My maize leaves are curling. What is the cause?",
+    "answer": "Most commonly drought stress — leaves roll inward to reduce water loss. Check soil moisture at 10 cm depth. Other causes: heat stress (temporary midday curling that recovers by evening), herbicide damage (curling plus abnormal growth), and virus diseases. If curling persists after adequate rain and is accompanied by unusual leaf patterns, may be viral — consult extension. For drought-induced curling, irrigate if possible or wait for rain. Do not apply fertilizer to drought-stressed plants.",
+    "crop": "maize",
+    "category": "general",
+    "symptoms": [
+      "curled leaves",
+      "rolled leaves",
+      "wilting",
+      "inward folding leaves"
+    ],
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "CIMMYT Maize Stress Management Guide, 2023; UNL Extension, 2024",
+    "confidence": 0.9
+  },
+  {
+    "question": "Why is my maize not producing ears?",
+    "answer": "Barrenness caused by drought during tasseling/silking (most critical period), poor pollination, excessive plant population, severe nitrogen deficiency, or late planting. Prevent: plant at recommended density, ensure adequate N by V8, avoid moisture stress during flowering, and plant on time so flowering coincides with reliable rainfall. In Rwanda Eastern Province, late planting is the most common cause because rains end before pollination completes.",
+    "crop": "maize",
+    "category": "general",
+    "symptoms": [
+      "no ears",
+      "barren plants",
+      "small cobs",
+      "poor kernel set"
+    ],
+    "growth_stage": [
+      "tasseling",
+      "silking",
+      "grain fill"
+    ],
+    "region": "both",
+    "source": "CIMMYT Maize Agronomy Guide; UNL Extension Corn Production, 2023",
     "confidence": 0.91
   },
   {
     "question": "How do I intercrop maize and soybean?",
-    "answer": "Maize-soybean intercropping maximizes land use for smallholder farmers. Plant maize at normal spacing (75 x 25 cm). Between every two maize rows, plant one or two rows of soybean at 10-15 cm spacing within the row. Plant soybean at the same time as maize or within 2 weeks. Use a short-duration soybean variety that matures before the maize canopy closes. The maize provides a framework while soybean fixes nitrogen. Yield of each crop will be lower than sole cropping, but total productivity per unit area is higher. Apply fertilizer to the maize rows; the soybean benefits from residual nutrients.",
+    "answer": "Plant maize at normal spacing (75 x 25 cm). Between every two maize rows, plant 1-2 rows of soybean at 10-15 cm spacing. Plant soybean same time or within 2 weeks of maize. Use short-duration soybean that matures before maize canopy closes. Maize provides framework while soybean fixes nitrogen. Each crop yields less than sole cropping but total productivity per unit area is higher. Apply fertilizer to maize rows. Popular in Rwanda Eastern Province for food security.",
     "crop": "both",
     "category": "planting",
     "symptoms": [],
-    "growth_stage": ["planting"],
-    "region": "East Africa",
-    "source": "IITA Intercropping Guide",
+    "growth_stage": [
+      "planting"
+    ],
+    "region": "both",
+    "source": "IITA Intercropping Guide for East Africa, 2023",
     "confidence": 0.88
   },
   {
-    "question": "What causes maize leaf blight?",
-    "answer": "Maize leaf blight can refer to several diseases. Northern leaf blight (Exserohilum turcicum) causes long, cigar-shaped, gray-green lesions. Southern leaf blight (Bipolaris maydis) causes smaller, tan, rectangular lesions with darker borders. Both diseases start on lower leaves and move upward. They are favored by warm, humid conditions and survive in crop debris. Management for both includes planting resistant varieties, crop rotation with non-host crops, burying or removing crop residues, and fungicide application during severe outbreaks (apply before or at tasseling for best results).",
-    "crop": "maize",
-    "category": "disease",
-    "symptoms": ["long lesions on leaves", "cigar-shaped spots", "gray-green lesions", "tan rectangular spots", "lower leaves affected"],
-    "growth_stage": ["vegetative", "tasseling", "grain fill"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Pathology Handbook",
-    "confidence": 0.92
+    "question": "How do I handle pesticides safely?",
+    "answer": "Read the label completely. Wear long sleeves, pants, chemical-resistant gloves, shoes, and eye protection. Never eat, drink, or smoke while handling. Mix outdoors. Spray downwind. Keep children and animals away. Wash hands and skin after. Wash contaminated clothes separately. Observe re-entry and pre-harvest intervals. Store in original containers, locked, away from food. In Rwanda, use only REMA-registered pesticides. In Nebraska, follow EPA label requirements and maintain records.",
+    "crop": "both",
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [],
+    "region": "both",
+    "source": "UNL Extension EC2507 - Pesticide Safety; FAO Pesticide Management Guidelines, 2022",
+    "confidence": 0.91
   },
   {
-    "question": "How do I manage aphids on my crops?",
-    "answer": "Aphids are small, soft-bodied insects that cluster on new growth, leaf undersides, and tassels. They suck plant sap, causing leaf curling, stunting, and honeydew deposits that attract sooty mold. In maize, corn leaf aphids cluster in the whorl and on tassels. In soybean, soybean aphids colonize leaf undersides. Natural enemies (ladybugs, lacewings, parasitic wasps) often control aphid populations naturally. Avoid broad-spectrum insecticides that kill natural enemies. If populations are very high and causing visible damage, use targeted insecticides. Strong rain often washes aphids off plants.",
+    "question": "How do I contact extension services in Rwanda Eastern Province?",
+    "answer": "RAB coordinates extension through district agronomists. Contact: Kayonza, Ngoma (Kibungo), Kirehe, Nyagatare, Bugesera (Nyamata), Gatsibo, Rwamagana district offices. Each sector has community extension workers and Farmer Field School facilitators. Farmer cooperatives and Twigire Muhinzi promoters are also channels. For emergencies like pest outbreaks, contact RAB toll-free line or district agriculture officer. Private agrodealers provide basic advisory.",
     "crop": "both",
-    "category": "pest",
-    "symptoms": ["curled new leaves", "sticky honeydew", "sooty mold", "clusters of small insects", "stunted tips"],
-    "growth_stage": ["vegetative", "tasseling", "flowering"],
-    "region": "East Africa",
-    "source": "IITA Pest Management Guide",
-    "confidence": 0.88
-  },
-  {
-    "question": "What are termites and how do they damage crops?",
-    "answer": "Termites can damage maize and soybean by feeding on roots, lower stems, and stored grain. Above-ground symptoms include wilting, plant death, and plants that pull up easily (because roots are eaten). Termites are most problematic in dry conditions when they seek moisture from plant roots. Management includes destroying termite mounds near fields, applying approved insecticides around mounds, maintaining adequate soil moisture (irrigation helps), and removing dead plant material that attracts termites. In storage, keep grain off the ground and away from walls. Some farmers use wood ash around plants as a deterrent.",
-    "crop": "both",
-    "category": "pest",
-    "symptoms": ["wilting plants", "dead plants in patches", "plants pull up easily", "eaten roots", "mud tubes on stems"],
-    "growth_stage": ["vegetative", "reproductive"],
-    "region": "East Africa",
-    "source": "IITA Termite Management Brief",
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [],
+    "region": "Rwanda Eastern Province",
+    "source": "RAB District Extension Directory, 2024; MINAGRI Extension Strategy, 2022",
     "confidence": 0.87
   },
   {
-    "question": "How do I prepare my land for planting maize?",
-    "answer": "Good land preparation improves germination, root development, and water infiltration. Start by clearing previous crop residues (incorporate rather than burn). Plough or dig to 20-25 cm depth to break the hardpan and improve root penetration. On slopes, prepare land along contours to reduce erosion. Make furrows or ridges at 75 cm spacing for maize. Apply lime if soil pH is below 5.5 (at least 2-4 weeks before planting). Apply basal fertilizer (DAP) at planting. In areas with erosion risk, maintain grass strips along contours and use terraces. Avoid land preparation when soil is too wet as this causes compaction.",
-    "crop": "maize",
-    "category": "planting",
+    "question": "How do I contact extension services in Nebraska?",
+    "answer": "UNL Extension has offices in all 93 counties. Find yours at extensionoffice.unl.edu or call 402-472-2966. Additional resources: CropWatch (cropwatch.unl.edu) for weekly updates, UNL Plant and Pest Diagnostic Lab for disease ID (plantdisease.unl.edu), NebGuide publications (free at extensionpubs.unl.edu), and Nebraska On-Farm Research Network. Private CCAs and agronomists also provide field-level advisory.",
+    "crop": "both",
+    "category": "general",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Land Preparation Guide",
-    "confidence": 0.90
+    "growth_stage": [],
+    "region": "Nebraska",
+    "source": "University of Nebraska-Lincoln Extension Service Directory, 2024",
+    "confidence": 0.9
   },
   {
-    "question": "What is the importance of soil testing?",
-    "answer": "Soil testing tells you the nutrient levels (nitrogen, phosphorus, potassium, micronutrients), pH, and organic matter content of your soil. This information allows you to apply the right type and amount of fertilizer, saving money and improving yields. Without soil testing, farmers often under-apply or over-apply fertilizers. In Rwanda, soil testing services are available through RAB district offices and some agrodealers. Collect soil samples from 15-20 spots across the field at 0-20 cm depth, mix them into one composite sample, and submit to a testing laboratory. Test every 2-3 years or when changing crops.",
+    "question": "What is the impact of climate change on farming in Rwanda Eastern Province?",
+    "answer": "More variable rainfall, longer dry spells during critical growth stages, increasing temperatures extending range of pests (fall armyworm, stalk borers), and more intense storms causing erosion. Adapt: plant drought-tolerant and early-maturing varieties, diversify crops, adopt water conservation (tied ridging, mulching, rainwater harvesting), adjust planting to actual rainfall onset, use weather information services, build soil organic matter, consider supplemental irrigation, and join farmer insurance schemes.",
     "crop": "both",
-    "category": "soil",
+    "category": "general",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "Rwanda",
-    "source": "Rwanda Agriculture Board Soil Testing Guide",
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "Rwanda Green Fund Climate Adaptation Strategy, 2023; CIMMYT Climate-Smart Agriculture Brief, 2023",
     "confidence": 0.89
   },
   {
-    "question": "How do I make compost for my farm?",
-    "answer": "Composting converts crop residues, animal manure, and kitchen waste into nutrient-rich organic fertilizer. To make compost: choose a shaded spot, layer green materials (fresh plant waste, manure) with brown materials (dry leaves, straw, maize stalks) in alternating 10-15 cm layers. Add a thin layer of soil between layers to introduce decomposing organisms. Keep the pile moist (like a wrung-out sponge) but not waterlogged. Turn the pile every 2-3 weeks to aerate it. Compost is ready in 2-3 months when it is dark brown, crumbly, and has an earthy smell. Apply 5-10 tons per hectare before planting.",
-    "crop": "both",
-    "category": "soil",
+    "question": "What are the benefits of growing soybean?",
+    "answer": "High protein (36-40 percent) and oil (18-20 percent) for nutrition and income. Fixes nitrogen (45-70 kg N/ha residual for following crop). Breaks pest and disease cycles in rotation. Growing market demand in East Africa (poultry feed, school feeding). Value addition: soymilk, tofu, soy flour, animal feed, cooking oil. In Nebraska, soybeans are the second most valuable crop. In Rwanda, soybean demand is growing rapidly.",
+    "crop": "soybean",
+    "category": "general",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "IITA Organic Farming Guide",
-    "confidence": 0.88
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension Soybean Economics; IITA Soybean Promotion Guide, 2023",
+    "confidence": 0.91
   },
   {
-    "question": "What causes waterlogging and how does it affect crops?",
-    "answer": "Waterlogging occurs when soil is saturated with water for extended periods, usually due to poor drainage, heavy clay soils, or excessive rainfall. Both maize and soybean are sensitive to waterlogging. Symptoms include yellowing leaves, wilting (paradoxically, because roots cannot absorb water without oxygen), stunted growth, root rot, and plant death. Maize can tolerate brief flooding but suffers if waterlogged for more than 48 hours. Soybean is even more sensitive. Manage by improving field drainage (dig channels to remove standing water), planting on raised beds or ridges, choosing well-drained field positions, and avoiding low-lying areas for sensitive crops.",
-    "crop": "both",
-    "category": "soil",
-    "symptoms": ["yellow leaves", "wilting", "stunted growth", "standing water", "root rot"],
-    "growth_stage": ["seedling", "vegetative", "flowering"],
-    "region": "East Africa",
-    "source": "IITA Water Management Guide",
-    "confidence": 0.90
-  },
-  {
-    "question": "How do I control cutworms in maize?",
-    "answer": "Cutworms are moth larvae that cut young maize seedlings at or just below the soil surface, usually at night. Damage appears as rows of missing or toppled seedlings. To check for cutworms, dig around damaged plants in the morning — larvae curl up in the soil during the day. Control methods include seed treatment with insecticide before planting, applying insecticide bait (bran mixed with insecticide) in the evening along rows, early morning hand collection of larvae near damaged plants, keeping the field clean of weeds before planting (weedy fields attract egg-laying moths), and replanting damaged areas if less than 25 percent of seedlings are affected.",
+    "question": "How do I irrigate corn efficiently in Nebraska?",
+    "answer": "Peak water use: 0.30-0.35 inches/day during tasseling/silking. Schedule based on soil moisture monitoring (probes, feel method), not calendar. Maintain 50-60 percent depletion as trigger during V12-R3. Use ET-based scheduling (CropWatch ET reports). Apply 0.75-1.0 inch per pivot pass. Switch to low-pressure drop nozzles (LEPA/MESA) to reduce evaporation 10-15 percent. Consider variable-rate irrigation on variable soils. Most critical period: V12 through R3. Stress during silking reduces yields 3-8 percent per day.",
     "crop": "maize",
-    "category": "pest",
-    "symptoms": ["cut seedlings at soil level", "missing plants in rows", "toppled seedlings", "larvae in soil near plants"],
-    "growth_stage": ["emergence", "seedling", "V1-V4"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Pest Guide",
-    "confidence": 0.90
-  },
-  {
-    "question": "What is the best way to dry maize after harvest?",
-    "answer": "Proper drying prevents mold growth and aflatoxin contamination. Shell maize off the cob within a few days of harvest. Spread kernels in thin layers (5-7 cm deep) on a clean, raised drying platform or tarpaulin in direct sunlight. Stir grain regularly throughout the day for even drying. Protect grain from rain and dew by covering at night or moving indoors. Drying takes 3-7 days depending on weather. Grain is dry enough for storage when it cracks cleanly when bitten (approximately 13 percent moisture). If you have access to a moisture meter, use it. Avoid drying directly on bare soil as it introduces contaminants and moisture re-absorption.",
-    "crop": "maize",
-    "category": "harvest",
+    "category": "general",
     "symptoms": [],
-    "growth_stage": ["post-harvest"],
-    "region": "East Africa",
-    "source": "IITA Post-Harvest Handling Guide",
+    "growth_stage": [
+      "vegetative",
+      "tasseling",
+      "silking",
+      "grain fill"
+    ],
+    "region": "Nebraska",
+    "source": "UNL Extension G1850 - Irrigation Management for Corn; Nebraska Water Center, 2024",
     "confidence": 0.93
   },
   {
-    "question": "What is aflatoxin and why is it dangerous in maize?",
-    "answer": "Aflatoxin is a toxic substance produced by Aspergillus fungi that infect maize ears and grain, especially under warm, humid conditions. Aflatoxin contamination is invisible at low levels but causes liver damage, immune suppression, and cancer with chronic exposure. Children are especially vulnerable. To prevent aflatoxin: harvest maize promptly at maturity, dry grain quickly to below 13 percent moisture, do not mix moldy grain with clean grain, store in airtight containers, control ear-boring insects that create entry points for fungi, and discard visibly moldy or discolored grain. Biocontrol products (Aflasafe) are available in some areas and can reduce aflatoxin by up to 80 percent.",
-    "crop": "maize",
-    "category": "storage",
-    "symptoms": ["green-gray mold on ears", "discolored kernels", "musty smell in stored grain"],
-    "growth_stage": ["grain fill", "post-harvest", "storage"],
-    "region": "East Africa",
-    "source": "IITA Aflatoxin Prevention Guide",
-    "confidence": 0.94
-  },
-  {
-    "question": "How do I manage iron deficiency in soybean?",
-    "answer": "Iron deficiency chlorosis (IDC) in soybean causes interveinal yellowing on the newest (top) leaves while veins remain green. In severe cases, leaves turn almost white and plants are stunted. IDC is common in calcareous (high-pH) soils, waterlogged conditions, and soils with high bicarbonate levels. Management includes planting IDC-tolerant varieties (most important strategy), improving soil drainage, applying iron chelate as a foliar spray for immediate relief, acidifying the soil with sulfur amendments over time, and avoiding excessive phosphorus application which can worsen iron availability in high-pH soils.",
-    "crop": "soybean",
-    "category": "nutrient_deficiency",
-    "symptoms": ["interveinal yellowing on new leaves", "veins remain green", "white leaves in severe cases", "stunted plants"],
-    "growth_stage": ["vegetative", "V2-V4"],
-    "region": "East Africa",
-    "source": "IITA Soybean Nutrition Guide",
-    "confidence": 0.88
-  },
-  {
-    "question": "What is magnesium deficiency in maize?",
-    "answer": "Magnesium deficiency in maize causes interveinal chlorosis (yellowing between veins) on older leaves, because magnesium is mobile and moves to new growth when deficient. The leaves may develop a striped appearance with green veins and yellow tissue between them. In severe cases, leaf edges may turn reddish-purple. Magnesium deficiency is common in acidic, sandy soils or after heavy potassium application (which competes with magnesium uptake). Correct with dolomitic lime (which provides both calcium and magnesium) or magnesium sulfate (Epsom salt) as a foliar spray or soil amendment.",
-    "crop": "maize",
-    "category": "nutrient_deficiency",
-    "symptoms": ["interveinal yellowing on lower leaves", "striped leaf appearance", "reddish-purple leaf edges", "older leaves affected"],
-    "growth_stage": ["vegetative", "grain fill"],
-    "region": "East Africa",
-    "source": "IITA Soil Fertility Management",
-    "confidence": 0.87
-  },
-  {
-    "question": "How do I manage soybean mosaic virus?",
-    "answer": "Soybean mosaic virus (SMV) causes light and dark green mosaic patterns on leaves, leaf curling, reduced plant size, and fewer pods with smaller seeds. The virus is primarily seed-transmitted and also spread by aphids. There is no cure for infected plants. Management includes using certified virus-free seed (most important), planting resistant varieties where available, controlling aphid vectors, removing severely infected plants to reduce spread, and rotating with non-host crops. Do not save seed from infected fields for replanting.",
-    "crop": "soybean",
-    "category": "disease",
-    "symptoms": ["mosaic leaf pattern", "leaf curling", "stunted plants", "fewer pods", "mottled leaves"],
-    "growth_stage": ["vegetative", "flowering"],
-    "region": "East Africa",
-    "source": "IITA Soybean Disease Guide",
-    "confidence": 0.88
-  },
-  {
-    "question": "How do I manage weeds in soybean?",
-    "answer": "Soybean is a poor competitor with weeds during its first 4-6 weeks. Weed management options include hand weeding at 2 and 5 weeks after planting, pre-emergence herbicide applied to moist soil at planting, post-emergence herbicide for broadleaf weeds, and maintaining narrow row spacing (40-50 cm) which helps the canopy close faster and suppress late-season weeds. In intercropping systems, maize shading helps suppress weeds between soybean rows. Avoid cultivating when soil is wet as this spreads weed seeds and damages soybean roots. Crop rotation with maize helps break weed cycles.",
-    "crop": "soybean",
-    "category": "weed",
-    "symptoms": ["stunted soybean", "thin stand", "weed competition"],
-    "growth_stage": ["vegetative", "V1-V6"],
-    "region": "East Africa",
-    "source": "IITA Soybean Weed Management",
-    "confidence": 0.89
-  },
-  {
-    "question": "What is maize cob rot?",
-    "answer": "Maize cob rot is caused by fungi that infect developing ears, particularly through silk channels or insect damage. Fusarium ear rot produces pink to reddish mold scattered across the ear. Diplodia ear rot starts as white mold from the base of the ear. Aspergillus ear rot produces gray-green mold and dangerous aflatoxins. Gibberella ear rot starts from the ear tip with reddish-pink mold. Management includes planting resistant varieties, controlling ear-boring insects, harvesting at physiological maturity (do not delay), drying grain rapidly, and removing moldy ears before storage.",
-    "crop": "maize",
-    "category": "disease",
-    "symptoms": ["pink mold on ear", "white mold from ear base", "gray-green mold", "reddish mold from ear tip", "rotting kernels"],
-    "growth_stage": ["grain fill", "maturity"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Disease Guide",
-    "confidence": 0.91
-  },
-  {
-    "question": "My maize tassels but the silks are not appearing. What is happening?",
-    "answer": "A gap between tassel emergence and silk emergence (called the anthesis-silking interval or ASI) is usually caused by drought stress. When maize is water-stressed during flowering, silk emergence is delayed while the tassel continues to shed pollen. By the time silks appear, there may be no viable pollen left, resulting in poor kernel set or barren ears. This is the single most yield-limiting stress event in maize. Prevention includes ensuring adequate moisture during the 2-week period around tasseling (the critical window), planting drought-tolerant varieties, maintaining adequate plant nutrition, and avoiding excessive plant density.",
-    "crop": "maize",
-    "category": "general",
-    "symptoms": ["tassels but no silks", "delayed silk emergence", "barren ears", "poor kernel set"],
-    "growth_stage": ["tasseling", "silking"],
-    "region": "East Africa",
-    "source": "CIMMYT Maize Physiology Guide",
-    "confidence": 0.92
-  },
-  {
-    "question": "How do I manage soil erosion on my farm?",
-    "answer": "Soil erosion removes the nutrient-rich topsoil layer and reduces long-term productivity. In hilly areas of East Africa, erosion is a major threat. Management includes constructing terraces on slopes (progressive terraces reduce slope length), planting along contours rather than up-and-down slopes, maintaining grass strips (vetiver grass or Napier grass) along contour lines, mulching bare soil with crop residues, practicing minimum tillage, planting cover crops during fallow periods, and building water channels to safely direct runoff away from cropped areas. In Rwanda, radical terraces are promoted on steep slopes above 40 percent gradient.",
-    "crop": "both",
-    "category": "soil",
-    "symptoms": ["gullies in field", "exposed subsoil", "nutrient-poor topsoil", "declining yields over time"],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "Rwanda Agriculture Board Soil Conservation Guide",
-    "confidence": 0.91
-  },
-  {
-    "question": "What is the difference between organic and inorganic fertilizer?",
-    "answer": "Organic fertilizers (compost, farmyard manure, green manure) release nutrients slowly over months, improve soil structure, increase water-holding capacity, and feed soil organisms. They are lower in concentrated nutrients but provide long-term soil health benefits. Inorganic (mineral) fertilizers (DAP, urea, NPK, CAN) provide nutrients immediately in concentrated form, are easier to apply precisely, but do not improve soil structure and can acidify soil over time. The best approach for smallholder farmers is integrated soil fertility management (ISFM): combine organic matter for long-term soil health with targeted inorganic fertilizer for immediate crop needs.",
-    "crop": "both",
-    "category": "fertilizer",
-    "symptoms": [],
-    "growth_stage": ["pre-planting", "planting"],
-    "region": "East Africa",
-    "source": "IITA Integrated Soil Fertility Management",
-    "confidence": 0.90
-  },
-  {
-    "question": "How do I identify and manage white grubs in maize?",
-    "answer": "White grubs are C-shaped larvae of scarab beetles that feed on maize roots underground. Damage symptoms include patches of wilting or dead seedlings, plants that pull up easily (because roots are eaten), and uneven plant stands. To check for grubs, dig 15-20 cm deep near affected plants. Control includes deep ploughing before planting to expose grubs to birds and sun, applying soil insecticides at planting in fields with known grub history, crop rotation with non-host crops, flooding fields where possible (grubs cannot survive waterlogged soil), and removing volunteer plants and weeds that host adult beetles.",
-    "crop": "maize",
-    "category": "pest",
-    "symptoms": ["wilting seedling patches", "plants pull up easily", "eaten roots", "C-shaped larvae in soil", "uneven stand"],
-    "growth_stage": ["seedling", "vegetative"],
-    "region": "East Africa",
-    "source": "CIMMYT Soil Pest Management Guide",
-    "confidence": 0.88
-  },
-  {
-    "question": "What is the impact of climate change on maize farming in East Africa?",
-    "answer": "Climate change is affecting maize farming through more variable rainfall patterns, longer dry spells during critical growth periods, increasing temperatures that shift optimal growing zones to higher altitudes, emergence of new pests and diseases in areas that were previously too cool for them, and more frequent extreme weather events. Adaptation strategies include planting drought-tolerant and heat-adapted varieties, diversifying crops (including more legumes like soybean), adjusting planting dates to match shifting rainfall patterns, improving water harvesting and conservation, and using weather information services for planting decisions.",
+    "question": "What is precision agriculture and can I use it?",
+    "answer": "Precision ag uses technology to manage field variability. In Nebraska: GPS auto-steer, yield monitors, grid soil sampling, variable-rate fertilizer and seeding, drone/satellite imagery for scouting, soil moisture sensors for irrigation, and remote sensing crop models. Start with yield mapping and auto-steer for clear ROI. Variable-rate requires quality soil data. UNL Extension offers workshops. Not yet widely applicable in Rwanda Eastern Province, but mobile-based advisory services and soil testing are steps toward precision approaches.",
     "crop": "both",
     "category": "general",
     "symptoms": [],
-    "growth_stage": ["pre-planting"],
-    "region": "East Africa",
-    "source": "CIMMYT Climate Adaptation Brief",
+    "growth_stage": [],
+    "region": "both",
+    "source": "UNL Extension - Precision Agriculture Resources, 2024",
     "confidence": 0.88
   },
   {
-    "question": "How do I manage leafhoppers in maize?",
-    "answer": "Leafhoppers are small, wedge-shaped insects that suck plant sap and transmit maize streak virus (MSV). They are most active during warm, dry conditions and are attracted to young maize plants. Damage includes stippling (tiny pale dots) on leaves, and more importantly, transmission of MSV which causes characteristic yellow streaks along veins. Control by planting MSV-resistant varieties (most effective), using systemic seed treatments, removing alternate host grasses around field margins, avoiding late planting when leafhopper populations peak, and applying targeted insecticide sprays only when populations are very high.",
+    "question": "How do I manage my maize field after harvest?",
+    "answer": "After harvest, manage crop residue: in Nebraska, consider leaving residue for erosion protection (no-till or strip-till for next season's soybeans), or shred and incorporate if planting corn-on-corn to reduce disease inoculum and European corn borer overwintering. Take soil samples for next season's fertilizer plan. Plant cover crops if within the planting window (cereal rye before October 15 in eastern Nebraska). In Rwanda Eastern Province, collect and compost residues (do not burn), prepare fields for the next planting season, and store grain properly. Remove old crop roots to reduce soil-borne disease carryover. Plan crop rotation for the next season.",
     "crop": "maize",
-    "category": "pest",
-    "symptoms": ["stippled leaves", "yellow streaks", "small jumping insects", "virus transmission"],
-    "growth_stage": ["seedling", "vegetative"],
-    "region": "East Africa",
-    "source": "IITA Maize Pest Guide",
-    "confidence": 0.89
-  },
-  {
-    "question": "What is seed inoculation and why is it important for soybean?",
-    "answer": "Seed inoculation is the process of coating soybean seeds with Bradyrhizobium bacteria before planting. These bacteria colonize soybean roots and form nodules where they convert atmospheric nitrogen gas into a form the plant can use (biological nitrogen fixation). Inoculation is essential because the right Bradyrhizobium species for soybean is often not naturally present in East African soils. A well-inoculated soybean crop can fix 60-100 kg of nitrogen per hectare, eliminating the need for nitrogen fertilizer and leaving residual nitrogen for the following crop. To inoculate: mix the inoculant powder with a small amount of water or sugar solution to make a slurry, coat seeds evenly, dry in shade, and plant within 24 hours.",
-    "crop": "soybean",
-    "category": "soil",
+    "category": "general",
     "symptoms": [],
-    "growth_stage": ["planting"],
-    "region": "East Africa",
-    "source": "IITA Soybean Inoculation Guide",
-    "confidence": 0.94
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Post-Harvest Crop Management; RAB Extension Brief, 2023",
+    "confidence": 0.88
   },
   {
-    "question": "How do I manage red spider mites on soybean?",
-    "answer": "Red spider mites (Tetranychus spp.) are tiny arachnids that feed on the underside of soybean leaves, causing yellow stippling, bronzing, and eventually leaf drop. They thrive in hot, dry conditions and populations can explode rapidly. Check for mites by looking at leaf undersides with a hand lens — you will see tiny red or yellow moving dots and fine webbing. Control by maintaining adequate soil moisture (mites thrive under drought stress), preserving natural enemies (predatory mites, ladybugs), washing mites off with strong water spray if irrigation is available, and applying approved miticides only if populations are severe. Avoid broad-spectrum insecticides that kill predatory mites.",
+    "question": "How do I manage my soybean field after harvest?",
+    "answer": "After soybean harvest, the nitrogen-fixing nodules on roots decompose and release nitrogen for the next crop. In Nebraska, if planting corn next season, credit 40-50 lb N/acre from soybean residue. Scout for SCN by taking soil samples for egg counts. Plant cover crops if desired. Consider fall tillage if white mold or Phytophthora were problems (burying sclerotia reduces inoculum). In Rwanda Eastern Province, incorporate soybean residues into soil (they are nitrogen-rich). Plan the next season's maize crop to benefit from the nitrogen fixed by soybean. Clear the field of weeds before they set seed.",
     "crop": "soybean",
-    "category": "pest",
-    "symptoms": ["yellow stippling on leaves", "bronzing", "fine webbing on leaf underside", "leaf drop", "tiny red or yellow dots"],
-    "growth_stage": ["vegetative", "flowering", "pod fill"],
-    "region": "East Africa",
-    "source": "IITA Soybean Pest Management",
-    "confidence": 0.87
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "both",
+    "source": "UNL Extension - Post-Harvest Soybean Management; IITA Crop Rotation Guide, 2023",
+    "confidence": 0.88
+  },
+  {
+    "question": "What value can I add to soybean after harvest?",
+    "answer": "Soybean can be processed into: soymilk (soak, grind, boil, strain — nutritious drink for children), tofu (coagulate soymilk with nigari or lemon juice), soy flour (roast and grind — mix with maize flour for fortified porridge), animal feed (roasted whole beans or pressed cake after oil extraction), cooking oil (requires mechanical press or oil extraction equipment), and fermented products (tempeh, soy sauce). In Rwanda Eastern Province, soybean processing cooperatives are growing, especially for school feeding programs and poultry feed production. Value addition significantly increases income compared to selling raw grain. Contact RAB or local cooperative for training on soybean processing.",
+    "crop": "soybean",
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [
+      "post-harvest"
+    ],
+    "region": "Rwanda Eastern Province",
+    "source": "IITA Soybean Utilization and Processing Guide, 2023; RAB Value Addition Brief, 2022",
+    "confidence": 0.88
+  },
+  {
+    "question": "How do I budget and plan my farm expenses?",
+    "answer": "Track costs: seed, fertilizer, pesticides, labor (or machinery), transportation, and storage. Track revenue: grain yield x price. Calculate profit per hectare or per acre. In Nebraska, UNL Extension provides crop budget worksheets at cropwatch.unl.edu. Track input costs per acre and compare to county yield averages. In Rwanda Eastern Province, keep a simple notebook recording every expense and income per field per season. RAB and NAEB provide training on farm record keeping. Knowing your costs helps decide which inputs give the best return. Priority investments: good seed first, then fertilizer, then crop protection. Join a farmer cooperative for better input prices and market access.",
+    "crop": "both",
+    "category": "general",
+    "symptoms": [],
+    "growth_stage": [
+      "pre-planting"
+    ],
+    "region": "both",
+    "source": "UNL Extension EC872 - Nebraska Crop Budgets; RAB Farm Business Training Guide, 2023",
+    "confidence": 0.86
   }
 ]
