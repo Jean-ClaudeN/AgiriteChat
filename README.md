@@ -1,269 +1,188 @@
-# 🌾 AgiriteChat v2.0 — Agent-Based AI Crop Support
+# AgiriteChat
 
-An agent-based AI assistant for maize and soybean farmers, built on LangGraph,
-Gemini, semantic retrieval, and local image analysis.
+**Agent-Based AI Decision Support for Sustainable Agriculture**
 
-This is **not** a simple chatbot. It follows a structured agent workflow:
+A LangGraph-powered crop advisory system for smallholder maize and soybean farmers — grounded in knowledge, personalized to the farm, available in 4 languages.
 
-```
-classify → retrieve → check_confidence → (clarify | refuse | synthesize) → END
-```
-
-Every answer is grounded in a curated knowledge base. Low-confidence questions
-trigger clarifying follow-ups or explicit escalation to local extension, instead
-of guessing.
+**Live prototype:** [agiritechat.streamlit.app](https://agiritechat.streamlit.app)
 
 ---
 
-## ✨ What's new in v2.0
+## Problem
 
-Compared to the original prototype:
+Small-scale farmers in sub-Saharan Africa and across the global Corn Belt often lack timely access to expert advice for diagnosing crop threats. Extension officers are overstretched — one officer may serve 3,000+ farmers. By the time advice arrives, crops may already be lost. Existing AI tools function as general-purpose chatbots and may generate responses that are not grounded in domain-specific knowledge, raising concerns about reliability when applied to real farming conditions.
 
-| Aspect | v1.0 | v2.0 |
-| --- | --- | --- |
-| Retrieval | Keyword bag-of-words scoring | Semantic search (sentence-transformers + ChromaDB) |
-| Reasoning | Linear pipeline | LangGraph agent with conditional routing |
-| Confidence | None (always answered) | Confidence gate: clarify / refuse / answer |
-| Image analysis | **Not implemented** (only description used) | Quality check + local PlantVillage model + Gemini Vision fallback |
-| LLM | OpenAI (with a broken SDK call) | Google Gemini 2.0 Flash (free tier) |
-| Grounding | Prompt instruction only | Structured sources, cited in UI, fallback rules |
-| Feedback | None | SQLite logging + thumbs up/down per answer |
-| KB structure | Flat Q&A | Enriched schema: crop, category, symptoms, growth stage, confidence |
+## Solution
 
----
+AgiriteChat is an agent-based AI assistant that provides structured, context-aware guidance on crop problems through a multi-step agentic workflow. Instead of generating unchecked responses, the system classifies every question, retrieves from a curated knowledge base using semantic search, checks its own confidence before answering, and refuses to guess when uncertain.
 
-## 📁 Project structure
+**Core philosophy:** An agent is defined by knowing when not to act.
+
+## Architecture
+
+### LangGraph State Machine (7 Nodes)
+
+```
+User Input
+    │
+    ▼
+┌─────────┐
+│ Classify │──── greeting/off-topic ──→ [Greet] → friendly response
+└────┬────┘
+     │ agricultural question
+     ▼
+┌──────────┐
+│ Retrieve │ semantic search (sentence-transformers + cosine similarity)
+└────┬─────┘
+     │ top-4 KB matches with scores
+     ▼
+┌──────────────────┐
+│ Check Confidence │
+└──┬────┬────┬─────┘
+   │    │    │
+   │    │    └── score < 0.35 ──→ [Refuse] → "I don't know, consult extension"
+   │    └── crop name only ──→ [Clarify] → "What symptoms are you seeing?"
+   └── score ≥ 0.35 ──→ [Synthesize] → grounded 5-section advisory
+```
+
+### Confidence Gating
+
+| Score | Route | Behavior |
+|-------|-------|----------|
+| ≥ 0.55 | Synthesize | Full advisory with high confidence |
+| 0.35–0.55 | Synthesize | Advisory with medium confidence + escalation note |
+| < 0.35 | Refuse | Honest refusal, directs to extension officer |
+| N/A | Clarify | Asks for symptoms when input is just a crop name |
+
+### Source Separation
+
+Every advisory response clearly labels what came from the verified knowledge base vs. what the LLM added:
+
+- **"From knowledge base"** (green badge) — grounded in curated, source-attributed entries
+- **"Additional AI guidance"** (amber badge) — LLM-generated context, explicitly labeled as unverified
+
+## Features
+
+- **Agent-based reasoning** — LangGraph state machine with 7 nodes, not a single prompt
+- **Semantic retrieval** — sentence-transformers (all-MiniLM-L6-v2) + NumPy cosine similarity
+- **Confidence gating** — explicit thresholds (0.55/0.35) with refusal path
+- **Photo diagnosis** — Groq Vision (Llama 4 Scout 17B) extracts symptoms, KB provides diagnosis
+- **Voice input** — Groq Whisper transcription for low-literacy users
+- **Weather display** — Open-Meteo integration showing current conditions and 3-day forecast
+- **4 languages** — English, Kiswahili, Français, Kinyarwanda (beta)
+- **Farmer profiles** — session-based personalization (region, crops, farm size, planting date)
+- **101-entry knowledge base** — curated for Nebraska and Rwanda Eastern Province with source attribution
+- **Feedback logging** — SQLite with thumbs up/down for continuous improvement
+- **Greeting detection** — non-agricultural inputs get conversational responses, not fake advisories
+- **Structured answers** — 5-section format: Likely Issue, Why, What to Check, Action, When to Seek Support
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Text reasoning | Llama 3.3 70B via Groq |
+| Vision analysis | Llama 4 Scout 17B via Groq |
+| Voice transcription | Whisper Large v3 Turbo via Groq |
+| Embeddings | all-MiniLM-L6-v2 (sentence-transformers, local) |
+| Agent framework | LangGraph (langgraph + langchain-core) |
+| Retrieval | NumPy cosine similarity |
+| Weather | Open-Meteo API (free, no key) |
+| Knowledge base | 101 curated JSON entries |
+| Feedback | SQLite |
+| UI | Streamlit |
+| Hosting | Streamlit Cloud (free tier) |
+| Version control | GitHub |
+
+## File Structure
 
 ```
 AgiriteChat/
-├── app.py                    # Streamlit UI (styled, wired to agent)
-├── agent.py                  # LangGraph state machine
-├── retrieval.py              # ChromaDB + sentence-transformers
-├── vision.py                 # Image quality + local model + Gemini Vision
-├── llm.py                    # Gemini wrapper (google-genai)
-├── feedback.py               # SQLite interaction + feedback logging
-├── knowledge_base.json       # 40+ enriched KB entries
-├── requirements.txt          # Python dependencies
-├── secrets.toml.example      # Template for Streamlit secrets
-├── .gitignore
-└── README.md                 # This file
+├── app.py              # Streamlit UI (2,100 lines) — landing page, tabs, rendering
+├── agent.py            # LangGraph state machine (620 lines) — 7-node pipeline
+├── llm.py              # Groq SDK wrapper — text, vision, Whisper
+├── retrieval.py        # Semantic search — sentence-transformers + NumPy
+├── vision.py           # Photo analysis — OpenCV quality check + Groq Vision
+├── weather.py          # Open-Meteo weather display
+├── feedback.py         # SQLite interaction logging
+├── knowledge_base.json # 101 curated entries with source attribution
+├── requirements.txt    # Python dependencies
+└── README.md           # This file
 ```
 
----
+## Knowledge Base
 
-## 🚀 Quick start (local)
+101 entries covering maize and soybean production for **Nebraska** and **Rwanda Eastern Province** (Kayonza, Ngoma, Kirehe, Nyagatare, Bugesera).
 
-### 1. Install dependencies
+**Categories:** pests (18), diseases (19), nutrient deficiencies (9), soil/water (9), planting/agronomy (11), fertilizer (3), harvest (3), storage (3), weeds (3), varieties (4), general (19)
 
+**Sources:** 98 unique sources including UNL Extension publications (EC and G-series), CIMMYT, IITA, Rwanda Agriculture Board (RAB), FAO, ICIPE, and MINAGRI.
+
+## Responsible AI
+
+AgiriteChat is designed with safety guardrails for agricultural advisory:
+
+- **Never invents information** — synthesis is constrained to retrieved KB entries
+- **Never provides pesticide or fertilizer doses** — always refers to local extension
+- **Refuses when uncertain** — low-confidence queries trigger honest "I don't know" responses
+- **Separates verified from generated** — source badges distinguish KB content from AI guidance
+- **Recommends extension** — every advisory includes "When to seek local support"
+- **Vision describes, doesn't diagnose** — photo analysis extracts symptoms only; KB provides diagnosis
+- **Transparent confidence** — every answer shows its retrieval confidence score
+
+## Regional Focus
+
+### Nebraska
+- Corn Belt production practices (UNL Extension recommendations)
+- Nebraska-specific pests: western corn rootworm, European corn borer, corn earworm
+- Nebraska-specific diseases: Goss's wilt, bacterial leaf streak
+- Precision agriculture, irrigation management, cover cropping
+- UNL diagnostic lab and extension office referrals
+
+### Rwanda Eastern Province
+- Semi-arid conditions (800-1000 mm/year rainfall)
+- District-specific guidance for Kayonza, Ngoma, Kirehe, Nyagatare, Bugesera
+- Season A (September-October) and Season B (February-March) planting calendars
+- RAB variety recommendations and fertilizer guidelines
+- Aflatoxin prevention (critical in warm climate)
+- Extension service contact points and farmer cooperatives
+
+## Setup
+
+### Prerequisites
+- Python 3.11+
+- Groq API key (free at [console.groq.com](https://console.groq.com))
+
+### Local Development
 ```bash
-python3 -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-First install takes a while — `torch`, `transformers`, `sentence-transformers`,
-and `chromadb` are all substantial.
-
-### 2. Get a free Gemini API key
-
-Go to https://aistudio.google.com/app/apikey and create a key. Free tier gives
-you 15 requests/minute on Gemini 2.0 Flash — plenty for a prototype.
-
-### 3. Set the key
-
-**Local development** — create `.streamlit/secrets.toml`:
-
-```toml
-GEMINI_API_KEY = "your-key-here"
-```
-
-Or export it as an environment variable:
-
-```bash
-export GEMINI_API_KEY="your-key-here"   # macOS/Linux
-set GEMINI_API_KEY=your-key-here        # Windows
-```
-
-### 4. Run it
-
-```bash
+echo 'GROQ_API_KEY = "gsk_..."' > .streamlit/secrets.toml
 streamlit run app.py
 ```
 
-First launch will download the sentence-transformers model (~90 MB) and, on
-first photo upload, the PlantVillage model (~15 MB). Subsequent starts are fast.
+### Deployment (Streamlit Cloud)
+1. Fork this repository
+2. Connect to Streamlit Cloud
+3. Add `GROQ_API_KEY` in Streamlit Cloud Secrets
+4. Deploy
 
----
+## Future Work
 
-## ☁️ Deploy to Streamlit Cloud
+- Expand knowledge base from 101 to 300+ entries
+- Voice input optimization for low-bandwidth environments
+- Weather-aware recommendations (adjust advice based on forecast)
+- React Native mobile app with offline caching
+- Fine-tuned crop disease classifier on real farmer photos
+- Real farmer testing with extension officers
+- Partnership with agricultural NGOs
 
-1. Push the repo to GitHub (make sure `.streamlit/secrets.toml` is NOT committed).
-2. Go to https://share.streamlit.io and create a new app from your repo.
-3. Main file path: `app.py`
-4. After it starts deploying, open **Settings → Secrets** and paste:
-   ```toml
-   GEMINI_API_KEY = "your-key-here"
-   ```
-5. The app will auto-reload.
+## Course
 
-### First deploy expectations
+AGST 492: Agentic AI for Workflow Automation — University of Nebraska-Lincoln
 
-- **Cold start: 1–3 minutes.** Streamlit Cloud has to download `torch`,
-  `transformers`, `sentence-transformers`, and `chromadb`, then build the
-  embedding index. After the first start, subsequent reloads are fast.
-- **Memory: tight.** The free Streamlit Cloud tier has ~1 GB RAM. This project
-  fits but leaves little headroom. If you hit out-of-memory errors, the first
-  thing to drop is the local PlantVillage model in `vision.py` — the app will
-  still work with Gemini Vision only.
+## Author
 
-### Verifying the agent is actually running
+Jean-Claude Niyomugabo
 
-After deploy, ask a question and expand the **"Agent trace (debug)"** section
-under the answer. You should see:
+## License
 
-```
-Path: classify → retrieve → check_confidence → synthesize
-Classified crop: maize
-Top retrieval score: 0.72
-```
-
-If you see `Path: classify → retrieve → check_confidence → refuse`, the
-retrieval confidence was too low — try a more specific question. If you see
-the path but no classified crop, `GEMINI_API_KEY` may not be loading from
-secrets.
-
----
-
-## 🧠 How the agent works
-
-### Classify node
-Uses Gemini to extract: which crop, which category, is the question clear
-enough to answer? If vague (no crop, no symptoms), returns a clarification
-question rather than embedding a hopeless query.
-
-### Retrieve node
-Embeds the question (plus any image symptoms) using
-`sentence-transformers/all-MiniLM-L6-v2`, searches ChromaDB, filters by crop
-metadata. Returns top 4 matches with similarity scores.
-
-### Confidence gate
-Three routes:
-- **≥ 0.55** — high confidence, go to `synthesize`
-- **0.35 – 0.55** — answer but flag for escalation
-- **< 0.35** — refuse honestly and escalate to local extension
-
-### Synthesize node
-Gemini generates a structured 5-section response (Likely issue, Why, What to
-check next, Suggested action, When to seek local support) using **only** the
-retrieved sources. Hard rules in the system prompt: never invent information,
-never give pesticide doses, always match the farmer's crop.
-
-If the LLM call fails or returns malformed JSON, falls back to the top match
-verbatim — the system never hangs.
-
-### Image analysis (separate pipeline)
-1. OpenCV Laplacian variance check for blur, mean brightness for exposure.
-   Reject bad images with a specific farmer-friendly message ("too blurry —
-   please retake").
-2. For **maize**: run the local PlantVillage MobileNetV2 model. If confidence
-   ≥ 0.60, use its prediction.
-3. Otherwise (soybean, or uncertain maize): call Gemini Vision with a
-   **describe, don't diagnose** prompt. It returns a list of visible symptoms.
-4. The symptoms are injected into the agent's text query, so diagnosis always
-   happens through retrieval — never vision alone. This keeps vision and
-   knowledge grounded separately and auditable.
-
----
-
-## 📊 Feedback loop
-
-Every interaction is logged to `agiritechat_feedback.db` (SQLite) with:
-- The question, crop hint, classified crop
-- Retrieved matches and scores
-- Final response
-- Full agent trace
-- Thumbs up/down when the farmer clicks
-
-Use this to build your evaluation set. A farmer's 👎 is the most valuable
-signal you have for improving the knowledge base.
-
-> **Note on Streamlit Cloud:** the SQLite file is on ephemeral storage and
-> will be wiped on redeploy. For production, point `feedback.py` at a
-> persistent database (Postgres on Neon, Supabase, etc.) or dump the SQLite
-> file periodically.
-
----
-
-## 🗂 Knowledge base schema
-
-Each entry in `knowledge_base.json`:
-
-```json
-{
-  "id": "maize_yellow_leaves",
-  "crop": "maize",
-  "category": "nutrient_deficiency",
-  "symptoms": ["yellow leaves", "chlorosis", "lower leaves yellow"],
-  "growth_stage": ["V3", "V6", "V8"],
-  "question": "Why are my maize leaves turning yellow?",
-  "answer": "Yellow maize leaves may be caused by...",
-  "confidence": "high",
-  "source": "general_agronomy"
-}
-```
-
-Fields:
-- `crop`: `"maize"`, `"soybean"`, or `"both"`
-- `category`: `pest`, `disease`, `nutrient_deficiency`, `soil`, `weeds`, `drought`, `fertilizer`, `agronomy`, `harvest`, `nodulation`, `water`, `general`
-- `symptoms`: helps the retriever match on symptom descriptions
-- `growth_stage`: V/R stages where this applies (optional filter)
-- `confidence`: your own editorial confidence in the entry
-- `source`: for traceability — where the knowledge came from
-
-To add entries: append to the JSON file and push. The ChromaDB index rebuilds
-on startup, so no migration step needed.
-
----
-
-## 🐛 Troubleshooting
-
-**"GEMINI_API_KEY not found"**
-Set it in `.streamlit/secrets.toml` locally, or in Streamlit Cloud → Settings → Secrets.
-
-**"Low confidence" on every question**
-The knowledge base is small (40 entries). Questions that don't closely match
-something in the KB will score low. Expand the KB, or relax `LOW_CONFIDENCE`
-in `agent.py` if you want the system to attempt more answers.
-
-**Photo Review says "too blurry" on a photo that looks fine**
-Adjust `BLUR_THRESHOLD` in `vision.py`. 80 is conservative for phone photos —
-if you want to loosen it, try 40.
-
-**First deploy hangs for several minutes**
-Expected. `torch` + `transformers` install is slow on cold start. Wait it out.
-
-**The app works but "AI reasoning: Offline"**
-Gemini key is missing or invalid. Check your secrets. The app falls back to
-rule-based classification and top-match retrieval, which still works but is
-noticeably worse.
-
----
-
-## 📈 Next steps
-
-- **Expand the KB** to 200+ entries with regional varieties and local pest pressure
-- **Add conversation memory** (beyond the current session) with a farm profile
-- **Multi-language support** — Gemini handles Swahili, Hausa, Yoruba, Amharic reasonably
-- **Voice input/output** via `gTTS` and `whisper` for low-literacy users
-- **Move feedback DB to Postgres** for persistent logging across redeploys
-- **Build a proper eval set** from thumbs-down interactions and measure before/after changes
-
----
-
-## 📜 License
-
-Open source for educational and commercial use.
-
----
-
-**Built for farmers. By developers. For the world.** 🌾
+This project is for educational purposes as part of AGST 492 at the University of Nebraska-Lincoln.
