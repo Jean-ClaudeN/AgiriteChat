@@ -189,17 +189,17 @@ This project is for educational purposes as part of AGST 492 at the University o
 ## Final Submission Materials
 
 ### 📄 Documents
-- Final Report (PDF): [AgiriteChat_Final_Report .pdf](./AgiriteChat_Final_Report%20.pdf)
+- Final Report (PDF): [AgiriteChat_Final_Report .pdf](./AgiriteChat_Final_Report%20.pdf)  
 - Presentation: [AgiriteChat_Presentation Document .pdf](./AgiriteChat_Presentation%20Document%20.pdf)  
 
 ### 🎥 Demo Video
 This video demonstrates the system architecture, AI workflow, retrieval process, and a real agricultural use case.
 
-Watch here:  
-https://uofnebraska-my.sharepoint.com/:v:/r/personal/39808684_nebraska_edu/Documents/AgiriteChat_Presentation%20%20Video%20.mp4  
+- Watch here:  
+  https://uofnebraska-my.sharepoint.com/:v:/r/personal/39808684_nebraska_edu/Documents/AgiriteChat_Presentation%20%20Video%20.mp4  
 
-### 📁 Video Link File
-- AgiriteChat_Video_Link.txt  
+- Video link file:  
+  [AgiriteChat_Video_Link.txt](./AgiriteChat_Video_Link.txt)  
 
 ### 🌐 Live Application
 https://agiritechat.streamlit.app
