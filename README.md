@@ -184,5 +184,22 @@ AGST 492: Agentic AI for Workflow Automation — University of Nebraska-Lincoln
 Jean-Claude Niyomugabo
 
 ## License
-
+---
 This project is for educational purposes as part of AGST 492 at the University of Nebraska-Lincoln.
+## Final Submission Materials
+
+### 📄 Documents
+- - Final Report (PDF): [AgiriteChat_Final_Report.pdf](./AgiriteChat_Final_Report.pdf)
+- Presentation: [AgiriteChat_Presentation Document .pdf](./AgiriteChat_Presentation%20Document%20.pdf)  
+
+### 🎥 Demo Video
+This video demonstrates the system architecture, AI workflow, retrieval process, and a real agricultural use case.
+
+Watch here:  
+https://uofnebraska-my.sharepoint.com/:v:/r/personal/39808684_nebraska_edu/Documents/AgiriteChat_Presentation%20%20Video%20.mp4  
+
+### 📁 Video Link File
+- AgiriteChat_Video_Link.txt  
+
+### 🌐 Live Application
+https://agiritechat.streamlit.app
