@@ -189,7 +189,7 @@ This project is for educational purposes as part of AGST 492 at the University o
 ## Final Submission Materials
 
 ### 📄 Documents
-- - Final Report (PDF): [AgiriteChat_Final_Report.pdf](./AgiriteChat_Final_Report.pdf)
+- Final Report (PDF): [AgiriteChat_Final_Report .pdf](./AgiriteChat_Final_Report%20.pdf)
 - Presentation: [AgiriteChat_Presentation Document .pdf](./AgiriteChat_Presentation%20Document%20.pdf)  
 
 ### 🎥 Demo Video
