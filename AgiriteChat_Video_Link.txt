@@ -1,0 +1,6 @@
+AgiriteChat Demo Video
+
+This video demonstrates the full functionality of AgiriteChat, including system architecture, AI workflow, retrieval system, weather integration, and a real agricultural use case.
+
+Watch the video here:
+https://uofnebraska-my.sharepoint.com/:v:/r/personal/39808684_nebraska_edu/Documents/AgiriteChat_Presentation%20%20Video%20.mp4
